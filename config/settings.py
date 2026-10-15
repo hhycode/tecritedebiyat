@@ -186,5 +186,7 @@ EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'False').lower() == 'true'
 EMAIL_USE_SSL = os.environ.get('EMAIL_USE_SSL', 'False').lower() == 'true'
 EMAIL_TIMEOUT = int(os.environ.get('EMAIL_TIMEOUT', '20'))
 
-DATA_UPLOAD_MAX_MEMORY_SIZE = 78643200
-FILE_UPLOAD_MAX_MEMORY_SIZE = 78643200
+# Dosya disindaki form verisi icin ust sinir (yuklenen dosyalar buna dahil degil)
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024
+# 5 MB'tan buyuk yuklemeler RAM yerine gecici dosyaya yazilir (200 MB'lik video yuklemeleri icin)
+FILE_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024

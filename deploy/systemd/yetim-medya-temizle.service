@@ -1,0 +1,9 @@
+[Unit]
+Description=Tecrit Edebiyat: yetim medya temizligi
+
+[Service]
+Type=oneshot
+User=hhycode
+Group=hhycode
+WorkingDirectory=/home/hhycode/yayinevim
+ExecStart=/home/hhycode/yayinevim/venv/bin/python manage.py yetim_medya_temizle
