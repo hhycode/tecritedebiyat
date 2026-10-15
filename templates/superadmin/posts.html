@@ -16,7 +16,7 @@
                 </select>
             </div>
             <div class="col-12 col-md-2">
-                <button class="btn btn-primary rounded-pill w-100" type="submit">Filtrele</button>
+                <button class="sa-btn sa-btn--primary w-100" type="submit">Filtrele</button>
             </div>
         </form>
 
@@ -43,21 +43,21 @@
                         <td><span class="badge text-bg-light">{{ yazi.get_durum_display }}</span></td>
                         <td>
                             <div class="d-flex gap-2 flex-wrap">
-                                <a class="btn btn-sm btn-outline-dark rounded-pill" href="{% url 'superadmin_yazi_detay' yazi.pk %}">İncele</a>
+                                <a class="sa-btn sa-btn--secondary sa-btn--sm" href="{% url 'superadmin_yazi_detay' yazi.pk %}">İncele</a>
                                 <form method="post" action="{% url 'superadmin_yazi_durum_guncelle' yazi.pk %}">
                                     {% csrf_token %}
                                     <input type="hidden" name="durum" value="yayinda">
-                                    <button class="btn btn-sm btn-primary rounded-pill" type="submit">Yayına Al</button>
+                                    <button class="sa-btn sa-btn--primary sa-btn--sm" type="submit">Yayına Al</button>
                                 </form>
                                 <form method="post" data-onay="Bu yazı incelemeye alınacak. Yayındaysa siteden kaldırılır. Devam edilsin mi?" action="{% url 'superadmin_yazi_durum_guncelle' yazi.pk %}">
                                     {% csrf_token %}
                                     <input type="hidden" name="durum" value="incelemede">
-                                    <button class="btn btn-sm btn-outline-secondary rounded-pill" type="submit">İncelemede</button>
+                                    <button class="sa-btn sa-btn--secondary sa-btn--sm" type="submit">İncelemede</button>
                                 </form>
                                 <form method="post" data-onay="Bu yazı reddedilecek. Yayındaysa siteden kaldırılır. Devam edilsin mi?" action="{% url 'superadmin_yazi_durum_guncelle' yazi.pk %}">
                                     {% csrf_token %}
                                     <input type="hidden" name="durum" value="reddedildi">
-                                    <button class="btn btn-sm btn-outline-danger rounded-pill" type="submit">Reddet</button>
+                                    <button class="sa-btn sa-btn--danger-outline sa-btn--sm" type="submit">Reddet</button>
                                 </form>
                             </div>
                         </td>

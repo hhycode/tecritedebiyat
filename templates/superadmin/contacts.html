@@ -15,7 +15,7 @@
                 </select>
             </div>
             <div class="col-12 col-md-2">
-                <button class="btn btn-primary rounded-pill w-100" type="submit">Filtrele</button>
+                <button class="sa-btn sa-btn--primary w-100" type="submit">Filtrele</button>
             </div>
         </form>
 
@@ -47,8 +47,8 @@
                             {% endif %}
                         </td>
                         <td>
-                            <a class="btn btn-sm btn-primary rounded-pill mb-2" href="{% url 'superadmin_iletisim_detay' basvuru.pk %}">Detay</a>
-                            <a class="btn btn-sm rounded-pill mb-2" href="{% url 'superadmin_iletisim_sil' basvuru.pk %}" style="color:#b91c1c; border:1px solid #fecaca; background:#fff;">Sil</a>
+                            <a class="sa-btn sa-btn--primary sa-btn--sm mb-2" href="{% url 'superadmin_iletisim_detay' basvuru.pk %}">Detay</a>
+                            <a class="sa-btn sa-btn--danger-outline sa-btn--sm mb-2" href="{% url 'superadmin_iletisim_sil' basvuru.pk %}">Sil</a>
                         </td>
                     </tr>
                     {% empty %}

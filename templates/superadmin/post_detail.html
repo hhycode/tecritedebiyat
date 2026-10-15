@@ -16,7 +16,7 @@
                     </div>
                     <div class="d-flex flex-wrap gap-2 align-items-start">
                         <span class="badge text-bg-light">{{ yazi.get_durum_display }}</span>
-                        <a class="btn btn-outline-dark rounded-pill" href="{% url 'superadmin_yazilar' %}">Listeye Dön</a>
+                        <a class="sa-btn sa-btn--secondary" href="{% url 'superadmin_yazilar' %}">Listeye Dön</a>
                     </div>
                 </div>
 
@@ -24,17 +24,17 @@
                     <form method="post" action="{% url 'superadmin_yazi_durum_guncelle' yazi.pk %}">
                         {% csrf_token %}
                         <input type="hidden" name="durum" value="yayinda">
-                        <button class="btn btn-primary rounded-pill" type="submit">Yayına Al</button>
+                        <button class="sa-btn sa-btn--primary" type="submit">Yayına Al</button>
                     </form>
                     <form method="post" data-onay="Bu yazı incelemeye alınacak. Yayındaysa siteden kaldırılır. Devam edilsin mi?" action="{% url 'superadmin_yazi_durum_guncelle' yazi.pk %}">
                         {% csrf_token %}
                         <input type="hidden" name="durum" value="incelemede">
-                        <button class="btn btn-outline-secondary rounded-pill" type="submit">İncelemede</button>
+                        <button class="sa-btn sa-btn--secondary" type="submit">İncelemede</button>
                     </form>
                     <form method="post" data-onay="Bu yazı reddedilecek. Yayındaysa siteden kaldırılır. Devam edilsin mi?" action="{% url 'superadmin_yazi_durum_guncelle' yazi.pk %}">
                         {% csrf_token %}
                         <input type="hidden" name="durum" value="reddedildi">
-                        <button class="btn btn-outline-danger rounded-pill" type="submit">Reddet</button>
+                        <button class="sa-btn sa-btn--danger-outline" type="submit">Reddet</button>
                     </form>
                 </div>
 

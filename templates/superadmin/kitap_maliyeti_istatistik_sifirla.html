@@ -9,8 +9,8 @@
 
         <form method="post" class="d-flex flex-wrap gap-3">
             {% csrf_token %}
-            <button class="btn rounded-pill px-4" type="submit" style="background:#b91c1c; color:#fff;">Evet, Sıfırla</button>
-            <a class="btn btn-outline-dark rounded-pill px-4" href="{{ cancel_url }}">Vazgeç</a>
+            <button class="sa-btn sa-btn--danger" type="submit">Evet, Sıfırla</button>
+            <a class="sa-btn sa-btn--secondary" href="{{ cancel_url }}">Vazgeç</a>
         </form>
     </div>
 </div>

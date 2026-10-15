@@ -17,8 +17,8 @@
                         {% else %}
                         <span class="badge text-bg-warning">Bekliyor</span>
                         {% endif %}
-                        <a class="btn rounded-pill" href="{% url 'superadmin_iletisim_sil' basvuru.pk %}" style="color:#b91c1c; border:1px solid #fecaca; background:#fff;">Sil</a>
-                        <a class="btn btn-outline-dark rounded-pill" href="{% url 'superadmin_iletisim' %}">Listeye Dön</a>
+                        <a class="sa-btn sa-btn--danger-outline" href="{% url 'superadmin_iletisim_sil' basvuru.pk %}">Sil</a>
+                        <a class="sa-btn sa-btn--secondary" href="{% url 'superadmin_iletisim' %}">Listeye Dön</a>
                     </div>
                 </div>
 
@@ -40,7 +40,7 @@
                 {% if basvuru.dosya %}
                 <div class="border rounded-4 p-4 mb-4">
                     <div class="sa-muted small mb-2">Ekli Dosya</div>
-                    <a class="btn btn-outline-dark rounded-pill" href="{{ basvuru.dosya.url }}" target="_blank" rel="noopener">Dosyayı İndir</a>
+                    <a class="sa-btn sa-btn--secondary" href="{{ basvuru.dosya.url }}" target="_blank" rel="noopener">Dosyayı İndir</a>
                 </div>
                 {% endif %}
 

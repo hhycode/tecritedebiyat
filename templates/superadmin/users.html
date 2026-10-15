@@ -8,7 +8,7 @@
         <p class="sa-muted mb-0">Site personelini ve girişlerini bu ekrandan yönetebilirsin. Şifre değişimi ve yetki düzenlemesi için eski Django admin ekranına gitmene gerek yok.</p>
     </div>
     <div class="d-flex gap-2 flex-wrap">
-        <a class="sa-chip" href="{% url 'superadmin_kullanici_yeni' %}">Yeni Kullanıcı</a>
+        <a class="sa-btn sa-btn--secondary" href="{% url 'superadmin_kullanici_yeni' %}">Yeni Kullanıcı</a>
     </div>
 </div>
 
@@ -46,8 +46,8 @@
                         <td class="px-4 py-3 sa-muted small">{{ kullanici.last_login|date:"d.m.Y H:i"|default:"Hiç giriş yapmadı" }}</td>
                         <td class="px-4 py-3 text-end">
                             <div class="d-inline-flex gap-2 flex-wrap justify-content-end">
-                                <a class="btn btn-sm btn-outline-dark rounded-pill" href="{% url 'superadmin_kullanici_duzenle' kullanici.pk %}">Düzenle</a>
-                                <a class="btn btn-sm btn-outline-dark rounded-pill" href="{% url 'superadmin_kullanici_sifre' kullanici.pk %}">Şifre Belirle</a>
+                                <a class="sa-btn sa-btn--secondary sa-btn--sm" href="{% url 'superadmin_kullanici_duzenle' kullanici.pk %}">Düzenle</a>
+                                <a class="sa-btn sa-btn--secondary sa-btn--sm" href="{% url 'superadmin_kullanici_sifre' kullanici.pk %}">Şifre Belirle</a>
                             </div>
                         </td>
                     </tr>

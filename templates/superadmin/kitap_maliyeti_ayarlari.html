@@ -3,71 +3,17 @@
 {% block extra_css %}
 <style>
 .sa-panel-card {
-    border: 1px solid var(--sa-border);
-    border-radius: 26px;
-    box-shadow: 0 12px 24px rgba(20,20,20,.04);
-    background: #fff;
-    overflow: hidden;
     max-width: 640px;
-}
-
-.sa-panel-card__header {
-    padding: 24px 28px;
-    border-bottom: 1px solid var(--sa-border);
-    background: #faf8f3;
-}
-
-.sa-panel-card__body {
-    padding: 28px;
 }
 
 .sa-field {
     margin-bottom: 18px;
 }
 
-.sa-field label {
-    display: block;
-    margin-bottom: 8px;
-    font-size: .95rem;
-    font-weight: 600;
-}
-
-.sa-field input {
-    width: 100%;
-    min-height: 52px;
-    padding: 14px 16px;
-    border-radius: 16px;
-    border: 1px solid var(--sa-border);
-    background: #fff;
-    color: var(--sa-text);
-}
-
-.sa-help {
-    display: block;
-    margin-top: 8px;
-    color: var(--sa-muted);
-    font-size: .88rem;
-}
-
-.sa-errors {
-    margin: 8px 0 0;
-    color: #991b1b;
-    font-size: .88rem;
-    font-weight: 600;
-}
-
-.sa-form-actions {
-    display: flex;
-    justify-content: space-between;
-    gap: 12px;
-    margin-top: 24px;
-    flex-wrap: wrap;
-}
-
 .sa-formula-preview {
     margin-bottom: 24px;
     padding: 18px 20px;
-    border-radius: 16px;
+    border-radius: var(--sa-radius-sm);
     background: #faf8f3;
     border: 1px solid var(--sa-border);
     font-size: .95rem;
@@ -108,7 +54,7 @@
             {% endif %}
         </div>
         <div class="mt-3">
-            <a class="btn btn-outline-danger rounded-pill px-4" href="{% url 'superadmin_kitap_maliyeti_istatistik_sifirla' %}">Kullanım İstatistiğini Sıfırla</a>
+            <a class="sa-btn sa-btn--danger-outline" href="{% url 'superadmin_kitap_maliyeti_istatistik_sifirla' %}">Kullanım İstatistiğini Sıfırla</a>
         </div>
     </div>
 </div>
@@ -153,8 +99,8 @@
             </div>
             {% endfor %}
             <div class="sa-form-actions">
-                <a class="btn btn-outline-dark rounded-pill px-4" href="{% url 'superadmin_dashboard' %}">Vazgeç</a>
-                <button class="btn btn-dark rounded-pill px-4" type="submit">{{ submit_label }}</button>
+                <a class="sa-btn sa-btn--secondary" href="{% url 'superadmin_dashboard' %}">Vazgeç</a>
+                <button class="sa-btn sa-btn--primary" type="submit">{{ submit_label }}</button>
             </div>
         </form>
     </div>
@@ -166,7 +112,7 @@
         <p class="sa-muted mb-0">Roman, şiir gibi türlerin hesaplama yöntemini (kelime veya sayfa sayısına göre) ve sayfa başı kelime sayısını burada yönetebilirsin.</p>
     </div>
     <div class="sa-panel-card__body">
-        <a class="btn btn-dark rounded-pill px-4" href="{% url 'superadmin_icerik_model_liste' 'kitapmaliyetturu' %}">Türleri Yönet</a>
+        <a class="sa-btn sa-btn--primary" href="{% url 'superadmin_icerik_model_liste' 'kitapmaliyetturu' %}">Türleri Yönet</a>
     </div>
 </div>
 {% endblock %}

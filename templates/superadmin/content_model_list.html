@@ -8,8 +8,8 @@
         <p class="sa-muted mb-0">Bu içerik türünü eski Django admin ekranına gitmeden burada listeleyebilir, düzenleyebilir ve yeni kayıt ekleyebilirsin.</p>
     </div>
     <div class="d-flex gap-2 flex-wrap">
-        <a class="sa-chip" href="{% url 'superadmin_icerik_yonetimi' %}">Tüm İçerikler</a>
-        <a class="sa-chip" href="{{ add_url }}">Yeni {{ content_config.singular }}</a>
+        <a class="sa-btn sa-btn--secondary" href="{% url 'superadmin_icerik_yonetimi' %}">Tüm İçerikler</a>
+        <a class="sa-btn sa-btn--secondary" href="{{ add_url }}">Yeni {{ content_config.singular }}</a>
     </div>
 </div>
 
@@ -33,8 +33,8 @@
                         {% endfor %}
                         <td class="px-4 py-3 text-end">
                             <div class="d-inline-flex gap-2 flex-wrap justify-content-end">
-                                <a class="btn btn-sm btn-outline-dark rounded-pill" href="{{ row.edit_url }}">Düzenle</a>
-                                <a class="btn btn-sm btn-outline-danger rounded-pill" href="{{ row.delete_url }}">Sil</a>
+                                <a class="sa-btn sa-btn--secondary sa-btn--sm" href="{{ row.edit_url }}">Düzenle</a>
+                                <a class="sa-btn sa-btn--danger-outline sa-btn--sm" href="{{ row.delete_url }}">Sil</a>
                             </div>
                         </td>
                     </tr>
