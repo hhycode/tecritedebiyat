@@ -299,8 +299,6 @@ class Alinti(models.Model):
         YAYINDA = "yayinda", "Yayında"
         REDDEDILDI = "reddedildi", "Reddedildi"
 
-    # Eski alan: yalnizca katalog kitaplari. Veri kaynak'a tasindi; son adimda kaldirilacak.
-    kitap = models.ForeignKey(Kitap, on_delete=models.CASCADE, related_name="alintilar", null=True, blank=True)
     kaynak = models.ForeignKey(
         KaynakKitap, on_delete=models.PROTECT, related_name="alintilar", null=True, blank=True, verbose_name="Kitap",
     )
@@ -324,8 +322,6 @@ class Alinti(models.Model):
         User, on_delete=models.SET_NULL, null=True, blank=True, related_name="onaylanan_alintilar",
     )
     one_cikan = models.BooleanField(default=False)
-    # Eski alan: durum'a tasindi; son adimda kaldirilacak.
-    yayinda = models.BooleanField(default=True)
     yayin_tarihi = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
