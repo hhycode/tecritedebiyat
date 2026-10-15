@@ -22,7 +22,7 @@
         <div class="card sa-card h-100">
             <div class="card-body p-3 sa-metric">
                 <div>
-                    <div class="sa-metric__label">Mesaj</div>
+                    <div class="sa-metric__label">Okunmamış Mesaj</div>
                     <div class="sa-metric__value">{{ admin_unread_contact_count }}</div>
                 </div>
                 <a class="sa-btn sa-btn--secondary sa-btn--sm" href="{% url 'superadmin_iletisim' %}">Aç</a>
@@ -99,7 +99,7 @@
                                 <form method="post" action="{% url 'superadmin_yazi_durum_guncelle' yazi.pk %}">
                                     {% csrf_token %}
                                     <input type="hidden" name="durum" value="yayinda">
-                                    <button class="sa-btn sa-btn--primary sa-btn--sm" type="submit">Yayınla</button>
+                                    <button class="sa-btn sa-btn--primary sa-btn--sm" type="submit">Yayına Al</button>
                                 </form>
                                 <form method="post" data-onay="Bu yazı reddedilecek. Yayındaysa siteden kaldırılır. Devam edilsin mi?" action="{% url 'superadmin_yazi_durum_guncelle' yazi.pk %}">
                                     {% csrf_token %}

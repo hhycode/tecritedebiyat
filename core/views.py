@@ -99,7 +99,7 @@ CONTENT_MODEL_CONFIG = {
         "form_class": SuperadminAlintiKategoriForm,
         "title": "Alıntı Kategorileri",
         "singular": "Alıntı kategorisi",
-        "list_headers": ["Ad", "Slug"],
+        "list_headers": ["Ad", "Kısa ad"],
         "list_values": lambda obj: [obj.ad, obj.slug or "-"],
         "full_width_fields": {"ad", "slug"},
         "search_fields": ["ad", "slug"],
@@ -130,7 +130,7 @@ CONTENT_MODEL_CONFIG = {
         "form_class": SuperadminBlogKategoriForm,
         "title": "Blog Kategorileri",
         "singular": "Blog kategorisi",
-        "list_headers": ["Ad", "Slug"],
+        "list_headers": ["Ad", "Kısa ad"],
         "list_values": lambda obj: [obj.ad, obj.slug or "-"],
         "full_width_fields": {"ad", "slug"},
         "search_fields": ["ad", "slug"],
@@ -178,7 +178,7 @@ CONTENT_MODEL_CONFIG = {
         "form_class": SuperadminKitapTurForm,
         "title": "Kitap Kategorileri",
         "singular": "Kitap kategorisi",
-        "list_headers": ["Ad", "Slug"],
+        "list_headers": ["Ad", "Kısa ad"],
         "list_values": lambda obj: [obj.ad, obj.slug or "-"],
         "full_width_fields": {"ad", "slug", "aciklama"},
         "search_fields": ["ad", "slug"],
@@ -720,7 +720,7 @@ def superadmin_icerik_model_yeni(request, model_key):
             nesne.save()
             if hasattr(form, "save_m2m"):
                 form.save_m2m()
-            messages.success(request, f"{config['singular'].capitalize()} oluşturuldu.")
+            messages.success(request, f"{config['singular']} oluşturuldu.")
             return redirect("superadmin_icerik_model_duzenle", model_key=model_key, pk=nesne.pk)
     else:
         form = form_class(**form_kwargs)
@@ -728,11 +728,11 @@ def superadmin_icerik_model_yeni(request, model_key):
     context = build_superadmin_context(request)
     context.update(
         {
-            "page_title": f"{config['singular'].capitalize()} ekle",
+            "page_title": f"{config['singular']} ekle",
             "content_config": config,
             "model_key": model_key,
             "form": form,
-            "form_title": f"{config['singular'].capitalize()} ekle",
+            "form_title": f"{config['singular']} ekle",
             "submit_label": "Kaydet",
             "back_url": reverse("superadmin_icerik_model_liste", args=[model_key]),
             "full_width_fields": config.get("full_width_fields", set()),
@@ -765,7 +765,7 @@ def superadmin_icerik_model_duzenle(request, model_key, pk):
             nesne.save()
             if hasattr(form, "save_m2m"):
                 form.save_m2m()
-            messages.success(request, f"{config['singular'].capitalize()} güncellendi.")
+            messages.success(request, f"{config['singular']} güncellendi.")
             return redirect("superadmin_icerik_model_duzenle", model_key=model_key, pk=nesne.pk)
     else:
         form = form_class(instance=nesne, **form_kwargs)
@@ -773,12 +773,12 @@ def superadmin_icerik_model_duzenle(request, model_key, pk):
     context = build_superadmin_context(request)
     context.update(
         {
-            "page_title": f"{config['singular'].capitalize()} düzenle",
+            "page_title": f"{config['singular']} düzenle",
             "content_config": config,
             "model_key": model_key,
             "object": nesne,
             "form": form,
-            "form_title": f"{config['singular'].capitalize()} düzenle",
+            "form_title": f"{config['singular']} düzenle",
             "submit_label": "Değişiklikleri Kaydet",
             "back_url": reverse("superadmin_icerik_model_liste", args=[model_key]),
             "full_width_fields": config.get("full_width_fields", set()),
@@ -801,7 +801,7 @@ def superadmin_icerik_model_sil(request, model_key, pk):
         nesne_etiketi = str(nesne)
         try:
             nesne.delete()
-            messages.success(request, f"{config['singular'].capitalize()} silindi: {nesne_etiketi}")
+            messages.success(request, f"{config['singular']} silindi: {nesne_etiketi}")
             return redirect(back_url)
         except ProtectedError:
             messages.error(request, "Bu kayıt başka içeriklerle bağlantılı olduğu için silinemiyor.")
@@ -812,7 +812,7 @@ def superadmin_icerik_model_sil(request, model_key, pk):
     context = build_superadmin_context(request)
     context.update(
         {
-            "page_title": f"{config['singular'].capitalize()} sil",
+            "page_title": f"{config['singular']} sil",
             "onay_ust_etiket": "İçerik Yönetimi",
             "confirm_message": f"'{nesne}' kaydını kalıcı olarak silmek üzeresin. Bu işlem geri alınamaz. Silmeden önce içeriğin başka alanlarda kullanılmadığından emin ol.",
             "onay_detaylari": [("İçerik türü", config["title"]), ("Kayıt", str(nesne)), ("Kimlik", f"#{nesne.pk}")],
@@ -865,7 +865,7 @@ def superadmin_kullanici_yeni(request):
         {
             "page_title": "Kullanıcı ekle",
             "form": form,
-            "form_title": "Yeni kullanıcı",
+            "form_title": "Kullanıcı ekle",
             "submit_label": "Kaydet ve şifre belirle",
             "back_url": reverse("superadmin_kullanicilar"),
             "full_width_fields": KULLANICI_FORM_TAM_GENISLIK,

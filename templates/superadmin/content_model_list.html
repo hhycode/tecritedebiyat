@@ -2,10 +2,10 @@
 
 {% block sayfa_ust_etiket %}İçerik Yönetimi{% endblock %}
 {% block sayfa_basligi %}{{ content_config.title }}{% endblock %}
-{% block sayfa_aciklamasi %}Bu içerik türünü eski Django admin ekranına gitmeden burada listeleyebilir, düzenleyebilir ve yeni kayıt ekleyebilirsin.{% endblock %}
+{% block sayfa_aciklamasi %}Kayıtları ara, düzenle veya yeni kayıt ekle.{% endblock %}
 {% block sayfa_aksiyonlari %}
     <a class="sa-btn sa-btn--secondary" href="{% url 'superadmin_icerik_yonetimi' %}">Tüm İçerikler</a>
-    <a class="sa-btn sa-btn--secondary" href="{{ add_url }}">Yeni {{ content_config.singular }}</a>
+    <a class="sa-btn sa-btn--secondary" href="{{ add_url }}">{{ content_config.singular }} ekle</a>
 {% endblock %}
 
 {% block superadmin_content %}

@@ -25,7 +25,7 @@ def unique_slugify(instance, value, slug_field_name="slug"):
 class YazarProfil(models.Model):
     class RolSecenekleri(models.TextChoices):
         YAZAR = "yazar", "Yazar"
-        SUPERADMIN = "superadmin", "Superadmin"
+        SUPERADMIN = "superadmin", "Süper admin"
 
     user = models.OneToOneField(
         User,
@@ -250,8 +250,8 @@ class BlogKategori(models.Model):
 class BlogYazisi(models.Model):
     class DurumSecenekleri(models.TextChoices):
         TASLAK = "taslak", "Taslak"
-        INCELEMEDE = "incelemede", "Incelemede"
-        YAYINDA = "yayinda", "Yayinda"
+        INCELEMEDE = "incelemede", "İncelemede"
+        YAYINDA = "yayinda", "Yayında"
         REDDEDILDI = "reddedildi", "Reddedildi"
 
     yazar = models.ForeignKey(YazarProfil, on_delete=models.CASCADE, related_name="blog_yazilari")

@@ -1,8 +1,8 @@
 {% extends "superadmin/base.html" %}
 
-{% block sayfa_ust_etiket %}Kimlik Doğrulama{% endblock %}
+{% block sayfa_ust_etiket %}Kullanıcılar{% endblock %}
 {% block sayfa_basligi %}{{ form_title }}{% endblock %}
-{% block sayfa_aciklamasi %}Kullanıcı bilgilerini ve yetkilerini bu ekrandan düzenleyebilirsin.{% if object %} Kayıt #{{ object.pk }}.{% endif %}{% endblock %}
+{% block sayfa_aciklamasi %}Kullanıcı bilgileri ve yetkileri{% if object %} · Kayıt #{{ object.pk }}{% endif %}{% endblock %}
 {% block sayfa_aksiyonlari %}
     <a class="sa-btn sa-btn--secondary" href="{{ back_url }}">Listeye Dön</a>
     {% if object %}

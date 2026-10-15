@@ -24,7 +24,7 @@
                         <td><strong>{{ yazar.ad_soyad }}</strong></td>
                         <td>{{ yazar.user.username|default:"-" }}</td>
                         <td>{{ yazar.get_rol_display }}</td>
-                        <td>{% if yazar.onayli %}<span class="badge text-bg-success">Aktif</span>{% else %}<span class="badge text-bg-secondary">Pasif</span>{% endif %}</td>
+                        <td>{% if yazar.onayli %}<span class="sa-pill sa-pill--success">Onaylı</span>{% else %}<span class="sa-pill sa-pill--warning">Onay bekliyor</span>{% endif %}</td>
                         <td class="sa-muted small">
                             {% if yazar.instagram %}Instagram {% endif %}
                             {% if yazar.x_hesabi %}X {% endif %}

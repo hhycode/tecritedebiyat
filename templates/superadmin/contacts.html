@@ -29,13 +29,13 @@
                         <td>{{ basvuru.mesaj|truncatechars:120 }}</td>
                         <td>
                             {% if basvuru.incelendi %}
-                            <span class="badge text-bg-success">İncelendi</span>
+                            <span class="sa-pill sa-pill--success">İncelendi</span>
                             {% else %}
-                            <span class="badge text-bg-warning">Bekliyor</span>
+                            <span class="sa-pill sa-pill--warning">Bekliyor</span>
                             {% endif %}
                         </td>
                         <td>
-                            <a class="sa-btn sa-btn--primary sa-btn--sm mb-2" href="{% url 'superadmin_iletisim_detay' basvuru.pk %}">Detay</a>
+                            <a class="sa-btn sa-btn--primary sa-btn--sm mb-2" href="{% url 'superadmin_iletisim_detay' basvuru.pk %}">İncele</a>
                             <a class="sa-btn sa-btn--danger-outline sa-btn--sm mb-2" href="{% url 'superadmin_iletisim_sil' basvuru.pk %}">Sil</a>
                         </td>
                     </tr>

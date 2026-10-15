@@ -1,8 +1,8 @@
 {% extends "superadmin/base.html" %}
 
-{% block sayfa_ust_etiket %}Kimlik Doğrulama{% endblock %}
+{% block sayfa_ust_etiket %}Kullanıcılar{% endblock %}
 {% block sayfa_basligi %}Kullanıcılar{% endblock %}
-{% block sayfa_aciklamasi %}Site personelini ve girişlerini bu ekrandan yönetebilirsin. Şifre değişimi ve yetki düzenlemesi için eski Django admin ekranına gitmene gerek yok.{% endblock %}
+{% block sayfa_aciklamasi %}Panel kullanıcılarını, yetkilerini ve şifrelerini yönet.{% endblock %}
 {% block sayfa_aksiyonlari %}
     <a class="sa-btn sa-btn--secondary" href="{% url 'superadmin_kullanici_yeni' %}">Yeni Kullanıcı</a>
 {% endblock %}
@@ -33,13 +33,13 @@
                         <td class="px-4 py-3">{{ kullanici.get_full_name|default:"-" }}</td>
                         <td class="px-4 py-3">{{ kullanici.email|default:"-" }}</td>
                         <td class="px-4 py-3">
-                            {% if kullanici.is_staff %}<span class="badge text-bg-success">Evet</span>{% else %}<span class="badge text-bg-secondary">Hayır</span>{% endif %}
+                            {% if kullanici.is_staff %}<span class="sa-pill sa-pill--success">Evet</span>{% else %}<span class="sa-pill">Hayır</span>{% endif %}
                         </td>
                         <td class="px-4 py-3">
-                            {% if kullanici.is_superuser %}<span class="badge text-bg-success">Evet</span>{% else %}<span class="badge text-bg-secondary">Hayır</span>{% endif %}
+                            {% if kullanici.is_superuser %}<span class="sa-pill sa-pill--success">Evet</span>{% else %}<span class="sa-pill">Hayır</span>{% endif %}
                         </td>
                         <td class="px-4 py-3">
-                            {% if kullanici.is_active %}<span class="badge text-bg-success">Aktif</span>{% else %}<span class="badge text-bg-danger">Pasif</span>{% endif %}
+                            {% if kullanici.is_active %}<span class="sa-pill sa-pill--success">Aktif</span>{% else %}<span class="sa-pill sa-pill--warning">Pasif</span>{% endif %}
                         </td>
                         <td class="px-4 py-3 sa-muted small">{{ kullanici.last_login|date:"d.m.Y H:i"|default:"Hiç giriş yapmadı" }}</td>
                         <td class="px-4 py-3 text-end">

@@ -6,7 +6,7 @@
 
 {% block sayfa_ust_etiket %}İçerik Yönetimi{% endblock %}
 {% block sayfa_basligi %}{{ form_title }}{% endblock %}
-{% block sayfa_aciklamasi %}{{ content_config.title }} için modern içerik formu. Eski admin ekranına gitmeden bu panelden işlem yapabilirsin.{% if object %} Kayıt #{{ object.pk }}.{% endif %}{% endblock %}
+{% block sayfa_aciklamasi %}{{ content_config.title }}{% if object %} · Kayıt #{{ object.pk }}{% endif %}{% endblock %}
 {% block sayfa_aksiyonlari %}
     <a class="sa-btn sa-btn--secondary" href="{{ back_url }}">Listeye Dön</a>
     <a class="sa-btn sa-btn--secondary" href="{% url 'superadmin_icerik_yonetimi' %}">Tüm İçerikler</a>

@@ -23,7 +23,7 @@
                         <td><strong>{{ kitap.ad }}</strong></td>
                         <td>{{ kitap.yazar_adi }}</td>
                         <td>{{ kitap.yayin_tarihi|date:"d.m.Y"|default:"-" }}</td>
-                        <td>{% if kitap.yayinda %}<span class="badge text-bg-success">Yayında</span>{% else %}<span class="badge text-bg-secondary">Pasif</span>{% endif %}</td>
+                        <td>{% if kitap.yayinda %}<span class="sa-pill sa-pill--success">Yayında</span>{% else %}<span class="sa-pill">Yayında değil</span>{% endif %}</td>
                     </tr>
                     {% empty %}
                     <tr><td colspan="4" class="sa-muted text-center py-5">Kitap bulunamadı.</td></tr>

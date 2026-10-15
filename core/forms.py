@@ -1,4 +1,5 @@
 from django import forms
+from django.utils.text import capfirst
 from django.forms import DateInput
 from django.contrib.auth.forms import PasswordChangeForm, PasswordResetForm, SetPasswordForm
 from django.contrib.auth.models import User
@@ -228,6 +229,7 @@ class PanelBlogYazisiForm(forms.ModelForm):
 
     def __init__(self, *args, is_superadmin=False, **kwargs):
         super().__init__(*args, **kwargs)
+        turkce_etiketleri_uygula(self)
         self.is_superadmin = is_superadmin
         self.fields["kategoriler"].queryset = self.fields["kategoriler"].queryset.order_by("ad")
         self.fields["kategoriler"].required = False
@@ -235,7 +237,7 @@ class PanelBlogYazisiForm(forms.ModelForm):
         self.fields["kategoriler"].widget.attrs.update(
             {
                 "class": "panel-multiselect",
-                "data-placeholder": "Kategori sec",
+                "data-placeholder": "Kategori seç",
             }
         )
         self.fields["meta_title"].label = "SEO başlığı"
@@ -283,12 +285,56 @@ class PanelBlogYazisiForm(forms.ModelForm):
         return yazi
 
 
+# Modelde verbose_name verilmemis alanlarin Turkce etiketleri (ozel etiketi olan alanlara dokunulmaz)
+ALAN_ETIKETLERI = {
+    "aciklama": "Açıklama",
+    "baslik": "Başlık",
+    "dogum_tarihi": "Doğum tarihi",
+    "etiket_bir": "Etiket 1",
+    "etiket_iki": "Etiket 2",
+    "etiket_uc": "Etiket 3",
+    "fotograf": "Fotoğraf",
+    "gorsel": "Görsel",
+    "icerik": "İçerik",
+    "indirimli_fiyat": "İndirimli fiyat",
+    "isim": "İsim",
+    "kitapyurdu_link": "Kitapyurdu Linki",
+    "link": "Bağlantı",
+    "masaustu_gorsel": "Masaüstü görseli",
+    "meta_description": "SEO açıklaması",
+    "meta_title": "SEO başlığı",
+    "mobil_gorsel": "Mobil görsel",
+    "onayli": "Onaylı",
+    "one_cikan": "Öne çıkan",
+    "one_cikar": "Öne çıkar",
+    "ozet": "Özet",
+    "resim": "Görsel",
+    "satis_linki": "Satış linki",
+    "sayfa_no": "Sayfa numarası",
+    "sira": "Sıra",
+    "slug": "Kısa ad (URL)",
+    "turler": "Türler",
+    "user": "Kullanıcı hesabı",
+    "websitesi": "Web sitesi",
+    "x_hesabi": "X hesabı",
+    "yayin_tarihi": "Yayın tarihi",
+    "yayinda": "Yayında",
+}
+
+
+def turkce_etiketleri_uygula(form):
+    for name, field in form.fields.items():
+        if name in ALAN_ETIKETLERI and field.label == capfirst(name.replace("_", " ")):
+            field.label = ALAN_ETIKETLERI[name]
+
+
 class SuperadminStyledModelForm(forms.ModelForm):
     textarea_rows = 5
     multi_select_size = 6
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        turkce_etiketleri_uygula(self)
         for name, field in self.fields.items():
             widget = field.widget
             if isinstance(widget, forms.HiddenInput):

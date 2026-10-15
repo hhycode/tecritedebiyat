@@ -27,7 +27,7 @@
                         </td>
                         <td>{{ yazi.yazar.ad_soyad }}</td>
                         <td>{{ yazi.kategori.ad|default:"-" }}</td>
-                        <td><span class="badge text-bg-light">{{ yazi.get_durum_display }}</span></td>
+                        <td><span class="sa-pill{% if yazi.durum == 'yayinda' %} sa-pill--success{% elif yazi.durum == 'incelemede' %} sa-pill--warning{% endif %}">{{ yazi.get_durum_display }}</span></td>
                         <td>
                             <div class="d-flex gap-2 flex-wrap">
                                 <a class="sa-btn sa-btn--secondary sa-btn--sm" href="{% url 'superadmin_yazi_detay' yazi.pk %}">İncele</a>
