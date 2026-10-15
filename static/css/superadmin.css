@@ -236,6 +236,34 @@ body {
     display: none;
 }
 
+/* Liste arama ve sayfalama */
+.sa-filter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+.sa-filter .form-control,
+.sa-filter .form-select {
+    flex: 1 1 220px;
+    max-width: 360px;
+    min-height: 42px;
+    border-color: var(--sa-border);
+}
+.sa-pagination {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 16px;
+}
+.sa-pagination__nav {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
 /* Onay sayfasi */
 .sa-confirm {
     max-width: 760px;

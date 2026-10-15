@@ -1,0 +1,20 @@
+{% comment %}
+Sayfalama: kayit sayisi ve onceki/sonraki. Arama ve filtre parametreleri korunur.
+Kullanim: {% include "superadmin/_components/pagination.html" with page_obj=page_obj sayfa_sorgusu=sayfa_sorgusu %}
+{% endcomment %}
+<nav class="sa-pagination" aria-label="Sayfalama">
+    <span class="sa-muted small">
+        {% if page_obj.paginator.count %}{{ page_obj.start_index }}–{{ page_obj.end_index }} / {{ page_obj.paginator.count }} kayıt{% else %}0 kayıt{% endif %}
+    </span>
+    {% if page_obj.paginator.num_pages > 1 %}
+    <div class="sa-pagination__nav">
+        {% if page_obj.has_previous %}
+        <a class="sa-btn sa-btn--secondary sa-btn--sm" href="?{% if sayfa_sorgusu %}{{ sayfa_sorgusu }}&amp;{% endif %}page={{ page_obj.previous_page_number }}">← Önceki</a>
+        {% endif %}
+        <span class="sa-pill">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+        <a class="sa-btn sa-btn--secondary sa-btn--sm" href="?{% if sayfa_sorgusu %}{{ sayfa_sorgusu }}&amp;{% endif %}page={{ page_obj.next_page_number }}">Sonraki →</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</nav>

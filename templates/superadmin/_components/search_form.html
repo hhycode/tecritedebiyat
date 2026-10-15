@@ -1,0 +1,20 @@
+{% comment %}
+Liste arama/filtre formu. Kullanim:
+  {% include "superadmin/_components/search_form.html" with arama=arama placeholder="..." %}
+  Durum filtresi icin: durum_secenekleri=[(deger, etiket)] secili_durum=... durum_bos_etiketi="..."
+{% endcomment %}
+<form class="sa-filter" method="get" role="search">
+    <input class="form-control" type="search" name="q" value="{{ arama }}" placeholder="{{ placeholder|default:'Ara' }}" aria-label="{{ placeholder|default:'Ara' }}">
+    {% if durum_secenekleri %}
+    <select class="form-select" name="durum" aria-label="Durum">
+        <option value="">{{ durum_bos_etiketi|default:"Tümü" }}</option>
+        {% for value, label in durum_secenekleri %}
+        <option value="{{ value }}"{% if secili_durum == value %} selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+    </select>
+    {% endif %}
+    <button class="sa-btn sa-btn--primary" type="submit">{% if durum_secenekleri %}Filtrele{% else %}Ara{% endif %}</button>
+    {% if arama or secili_durum %}
+    <a class="sa-btn sa-btn--secondary" href="{{ request.path }}">Temizle</a>
+    {% endif %}
+</form>

@@ -92,6 +92,7 @@ CONTENT_MODEL_CONFIG = {
         "list_headers": ["Başlık", "Aktif", "Sıra", "Bağlantı"],
         "list_values": lambda obj: [obj.baslik, "Evet" if obj.aktif else "Hayır", obj.sira, obj.link or "-"],
         "full_width_fields": {"baslik", "link", "mobil_gorsel", "masaustu_gorsel"},
+        "search_fields": ["baslik"],
     },
     "alintikategori": {
         "model": AlintiKategori,
@@ -101,6 +102,7 @@ CONTENT_MODEL_CONFIG = {
         "list_headers": ["Ad", "Slug"],
         "list_values": lambda obj: [obj.ad, obj.slug or "-"],
         "full_width_fields": {"ad", "slug"},
+        "search_fields": ["ad", "slug"],
     },
     "sss": {
         "model": SSS,
@@ -110,6 +112,7 @@ CONTENT_MODEL_CONFIG = {
         "list_headers": ["Soru", "Sıra", "Aktif"],
         "list_values": lambda obj: [obj.soru, obj.sira, "Evet" if obj.aktif else "Hayır"],
         "full_width_fields": {"soru", "cevap"},
+        "search_fields": ["soru", "cevap"],
     },
     "alinti": {
         "model": Alinti,
@@ -119,6 +122,8 @@ CONTENT_MODEL_CONFIG = {
         "list_headers": ["Kitap", "Kategori", "Sayfa", "Yayında"],
         "list_values": lambda obj: [obj.kitap.ad, obj.kategori.ad if obj.kategori else "-", obj.sayfa_no or "-", "Evet" if obj.yayinda else "Hayır"],
         "full_width_fields": {"metin", "etiketler_input"},
+        "search_fields": ["metin", "kitap__ad"],
+        "select_related": ["kitap", "kategori"],
     },
     "blogkategori": {
         "model": BlogKategori,
@@ -128,6 +133,7 @@ CONTENT_MODEL_CONFIG = {
         "list_headers": ["Ad", "Slug"],
         "list_values": lambda obj: [obj.ad, obj.slug or "-"],
         "full_width_fields": {"ad", "slug"},
+        "search_fields": ["ad", "slug"],
     },
     "blogreklam": {
         "model": BlogReklam,
@@ -137,6 +143,7 @@ CONTENT_MODEL_CONFIG = {
         "list_headers": ["İsim", "Sponsor Etiketi", "Aktif", "Sıra"],
         "list_values": lambda obj: [obj.isim, obj.sponsor_etiketi, "Evet" if obj.aktif else "Hayır", obj.sira],
         "full_width_fields": {"isim", "sponsor_etiketi", "link", "resim"},
+        "search_fields": ["isim", "sponsor_etiketi"],
     },
     "blogurun": {
         "model": BlogUrun,
@@ -152,6 +159,7 @@ CONTENT_MODEL_CONFIG = {
             obj.sira,
         ],
         "full_width_fields": {"isim", "satis_linki", "resim"},
+        "search_fields": ["isim"],
     },
     "blogyazisi": {
         "model": BlogYazisi,
@@ -162,6 +170,8 @@ CONTENT_MODEL_CONFIG = {
         "list_values": lambda obj: [obj.baslik, obj.yazar.ad_soyad, obj.get_durum_display(), obj.yayin_tarihi.strftime("%d.%m.%Y") if obj.yayin_tarihi else "-"],
         "full_width_fields": {"baslik", "ozet", "icerik", "gorsel", "meta_title", "meta_description", "seo_keywords"},
         "form_kwargs": lambda request: {"is_superadmin": True},
+        "search_fields": ["baslik", "yazar__ad_soyad"],
+        "select_related": ["yazar"],
     },
     "kitaptur": {
         "model": KitapTur,
@@ -171,6 +181,7 @@ CONTENT_MODEL_CONFIG = {
         "list_headers": ["Ad", "Slug"],
         "list_values": lambda obj: [obj.ad, obj.slug or "-"],
         "full_width_fields": {"ad", "slug", "aciklama"},
+        "search_fields": ["ad", "slug"],
     },
     "kitapmaliyetturu": {
         "model": KitapMaliyetTuru,
@@ -185,6 +196,7 @@ CONTENT_MODEL_CONFIG = {
             obj.sira,
         ],
         "full_width_fields": set(),
+        "search_fields": ["ad"],
     },
     "kitap": {
         "model": Kitap,
@@ -194,6 +206,8 @@ CONTENT_MODEL_CONFIG = {
         "list_headers": ["Ad", "Yazar", "Yayın Tarihi", "Yayında"],
         "list_values": lambda obj: [obj.ad, obj.yazar_adi, obj.yayin_tarihi.strftime("%d.%m.%Y") if obj.yayin_tarihi else "-", "Evet" if obj.yayinda else "Hayır"],
         "full_width_fields": {"ad", "slug", "aciklama", "kapak_resmi", "meta_title", "meta_description", "kitapyurdu_link", "dr_link", "trendyol_link", "shopier_link", "etiketler_input"},
+        "search_fields": ["ad", "yazar__ad_soyad", "ikinci_yazar__ad_soyad"],
+        "select_related": ["yazar", "ikinci_yazar"],
     },
     "slider": {
         "model": Slider,
@@ -203,6 +217,7 @@ CONTENT_MODEL_CONFIG = {
         "list_headers": ["Başlık", "Sıra", "Aktif", "Link"],
         "list_values": lambda obj: [obj.baslik, obj.sira, "Evet" if obj.aktif else "Hayır", obj.link or "-"],
         "full_width_fields": {"baslik", "aciklama", "gorsel", "link"},
+        "search_fields": ["baslik"],
     },
     "yazarprofil": {
         "model": YazarProfil,
@@ -212,6 +227,8 @@ CONTENT_MODEL_CONFIG = {
         "list_headers": ["Ad Soyad", "Rol", "Onaylı", "Kullanıcı"],
         "list_values": lambda obj: [obj.ad_soyad, obj.get_rol_display(), "Evet" if obj.onayli else "Hayır", obj.user.username if obj.user else "-"],
         "full_width_fields": {"ad_soyad", "slug", "biyografi", "fotograf", "instagram", "x_hesabi", "websitesi"},
+        "search_fields": ["ad_soyad", "user__username"],
+        "select_related": ["user"],
     },
 }
 
@@ -351,11 +368,14 @@ def superadmin_yazilar(request):
         yazilar = yazilar.filter(durum=durum)
     if arama:
         yazilar = yazilar.filter(Q(baslik__icontains=arama) | Q(yazar__ad_soyad__icontains=arama))
+    page_obj, sayfa_sorgusu = sayfala(request, yazilar)
     context = build_superadmin_context(request)
     context.update(
         {
             "page_title": "Yazılar",
-            "yazilar": yazilar[:50],
+            "yazilar": page_obj.object_list,
+            "page_obj": page_obj,
+            "sayfa_sorgusu": sayfa_sorgusu,
             "secili_durum": durum,
             "arama": arama,
             "durumler": BlogYazisi.DurumSecenekleri.choices,
@@ -418,11 +438,15 @@ def superadmin_iletisim(request):
             | Q(email__icontains=arama)
             | Q(mesaj__icontains=arama)
         )
+    page_obj, sayfa_sorgusu = sayfala(request, basvurular)
     context = build_superadmin_context(request)
     context.update(
         {
             "page_title": "İletişim Başvuruları",
-            "basvurular": basvurular[:50],
+            "basvurular": page_obj.object_list,
+            "page_obj": page_obj,
+            "sayfa_sorgusu": sayfa_sorgusu,
+            "durum_secenekleri": [("okunmamis", "Okunmamış"), ("okunmus", "Okunmuş")],
             "secili_durum": durum,
             "arama": arama,
         }
@@ -485,17 +509,41 @@ def superadmin_iletisim_durum_guncelle(request, pk):
 
 @superadmin_required
 def superadmin_yazarlar(request):
+    arama = request.GET.get("q", "").strip()
     yazarlar = YazarProfil.objects.select_related("user").order_by("ad_soyad")
+    if arama:
+        yazarlar = yazarlar.filter(arama_filtresi(["ad_soyad", "user__username"], arama))
+    page_obj, sayfa_sorgusu = sayfala(request, yazarlar)
     context = build_superadmin_context(request)
-    context.update({"page_title": "Yazarlar", "yazarlar": yazarlar[:50]})
+    context.update(
+        {
+            "page_title": "Yazarlar",
+            "yazarlar": page_obj.object_list,
+            "page_obj": page_obj,
+            "sayfa_sorgusu": sayfa_sorgusu,
+            "arama": arama,
+        }
+    )
     return render(request, "superadmin/authors.html", context)
 
 
 @superadmin_required
 def superadmin_kitaplar(request):
-    kitaplar = Kitap.objects.select_related("yazar").order_by("-created_at")
+    arama = request.GET.get("q", "").strip()
+    kitaplar = Kitap.objects.select_related("yazar", "ikinci_yazar").order_by("-created_at")
+    if arama:
+        kitaplar = kitaplar.filter(arama_filtresi(["ad", "yazar__ad_soyad", "ikinci_yazar__ad_soyad"], arama))
+    page_obj, sayfa_sorgusu = sayfala(request, kitaplar)
     context = build_superadmin_context(request)
-    context.update({"page_title": "Kitaplar", "kitaplar": kitaplar[:50]})
+    context.update(
+        {
+            "page_title": "Kitaplar",
+            "kitaplar": page_obj.object_list,
+            "page_obj": page_obj,
+            "sayfa_sorgusu": sayfa_sorgusu,
+            "arama": arama,
+        }
+    )
     return render(request, "superadmin/books.html", context)
 
 
@@ -591,6 +639,24 @@ def build_content_form_kwargs(request, config):
     return extra(request) if callable(extra) else {}
 
 
+ADMIN_SAYFA_BOYUTU = 25
+
+
+def sayfala(request, queryset, adet=ADMIN_SAYFA_BOYUTU):
+    """Admin listeleri icin sayfa nesnesi ve sayfa linklerinde korunacak sorgu parametreleri."""
+    page_obj = Paginator(queryset, adet).get_page(request.GET.get("page"))
+    sorgu = request.GET.copy()
+    sorgu.pop("page", None)
+    return page_obj, sorgu.urlencode()
+
+
+def arama_filtresi(alanlar, arama):
+    filtre = Q()
+    for alan in alanlar:
+        filtre |= Q(**{f"{alan}__icontains": arama})
+    return filtre
+
+
 def build_content_rows(objects, config):
     rows = []
     for obj in objects:
@@ -613,14 +679,21 @@ def superadmin_icerik_model_liste(request, model_key):
         messages.error(request, "Bu içerik türü için özel panel görünümü bulunamadı.")
         return redirect("superadmin_icerik_yonetimi")
 
-    queryset = config["model"].objects.all().order_by("-pk")
+    arama = request.GET.get("q", "").strip()
+    queryset = config["model"].objects.select_related(*config.get("select_related", [])).order_by("-pk")
+    if arama:
+        queryset = queryset.filter(arama_filtresi(config["search_fields"], arama)).distinct()
+    page_obj, sayfa_sorgusu = sayfala(request, queryset)
     context = build_superadmin_context(request)
     context.update(
         {
             "page_title": config["title"],
             "content_config": config,
             "content_headers": config["list_headers"],
-            "content_rows": build_content_rows(queryset[:100], config),
+            "content_rows": build_content_rows(page_obj.object_list, config),
+            "page_obj": page_obj,
+            "sayfa_sorgusu": sayfa_sorgusu,
+            "arama": arama,
             "add_url": reverse("superadmin_icerik_model_yeni", args=[model_key]),
         }
     )
@@ -756,11 +829,19 @@ KULLANICI_FORM_TAM_GENISLIK = {"is_active", "is_staff", "is_superuser"}
 
 @superadmin_required
 def superadmin_kullanicilar(request):
+    arama = request.GET.get("q", "").strip()
+    kullanicilar = User.objects.order_by("username")
+    if arama:
+        kullanicilar = kullanicilar.filter(arama_filtresi(["username", "first_name", "last_name", "email"], arama))
+    page_obj, sayfa_sorgusu = sayfala(request, kullanicilar)
     context = build_superadmin_context(request)
     context.update(
         {
             "page_title": "Kullanıcılar",
-            "kullanicilar": User.objects.order_by("username"),
+            "kullanicilar": page_obj.object_list,
+            "page_obj": page_obj,
+            "sayfa_sorgusu": sayfa_sorgusu,
+            "arama": arama,
         }
     )
     return render(request, "superadmin/users.html", context)

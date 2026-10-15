@@ -3,6 +3,8 @@
 {% block sayfa_ust_etiket %}Kitaplar{% endblock %}
 
 {% block superadmin_content %}
+{% include "superadmin/_components/search_form.html" with arama=arama placeholder="Kitap veya yazar ara" %}
+
 <div class="card sa-card sa-table-card">
     <div class="card-body p-4">
         <div class="table-responsive">
@@ -31,4 +33,5 @@
         </div>
     </div>
 </div>
+{% include "superadmin/_components/pagination.html" with page_obj=page_obj sayfa_sorgusu=sayfa_sorgusu %}
 {% endblock %}

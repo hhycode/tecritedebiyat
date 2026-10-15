@@ -3,25 +3,10 @@
 {% block sayfa_ust_etiket %}İçerik{% endblock %}
 
 {% block superadmin_content %}
+{% include "superadmin/_components/search_form.html" with arama=arama placeholder="Başlık veya yazar ara" durum_secenekleri=durumler secili_durum=secili_durum durum_bos_etiketi="Tüm durumlar" %}
+
 <div class="card sa-card sa-table-card">
     <div class="card-body p-4">
-        <form class="row g-3 mb-4" method="get">
-            <div class="col-12 col-md-4">
-                <input class="form-control rounded-4" type="search" name="q" value="{{ arama }}" placeholder="Başlık veya yazar ara">
-            </div>
-            <div class="col-12 col-md-3">
-                <select class="form-select rounded-4" name="durum">
-                    <option value="">Tüm durumlar</option>
-                    {% for value, label in durumler %}
-                    <option value="{{ value }}" {% if secili_durum == value %}selected{% endif %}>{{ label }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="col-12 col-md-2">
-                <button class="sa-btn sa-btn--primary w-100" type="submit">Filtrele</button>
-            </div>
-        </form>
-
         <div class="table-responsive">
             <table class="table align-middle">
                 <thead>
@@ -72,4 +57,5 @@
         </div>
     </div>
 </div>
+{% include "superadmin/_components/pagination.html" with page_obj=page_obj sayfa_sorgusu=sayfa_sorgusu %}
 {% endblock %}
