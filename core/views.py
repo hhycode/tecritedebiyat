@@ -847,10 +847,18 @@ def superadmin_kullanicilar(request):
     return render(request, "superadmin/users.html", context)
 
 
+def super_kullanici_korumasi(request, kullanici):
+    """Super kullanici olmayan panel yoneticisinin super kullanici hesabini degistirmesini engeller."""
+    if kullanici.is_superuser and not request.user.is_superuser:
+        messages.error(request, "Süper kullanıcı hesaplarını sadece süper kullanıcılar düzenleyebilir.")
+        return redirect("superadmin_kullanicilar")
+    return None
+
+
 @superadmin_required
 def superadmin_kullanici_yeni(request):
     if request.method == "POST":
-        form = SuperadminKullaniciForm(request.POST)
+        form = SuperadminKullaniciForm(request.POST, duzenleyen=request.user)
         if form.is_valid():
             kullanici = form.save(commit=False)
             kullanici.set_unusable_password()
@@ -858,7 +866,7 @@ def superadmin_kullanici_yeni(request):
             messages.success(request, "Kullanıcı oluşturuldu. Şimdi şifresini belirle.")
             return redirect("superadmin_kullanici_sifre", pk=kullanici.pk)
     else:
-        form = SuperadminKullaniciForm()
+        form = SuperadminKullaniciForm(duzenleyen=request.user)
 
     context = build_superadmin_context(request)
     context.update(
@@ -877,19 +885,29 @@ def superadmin_kullanici_yeni(request):
 @superadmin_required
 def superadmin_kullanici_duzenle(request, pk):
     kullanici = get_object_or_404(User, pk=pk)
+    engel = super_kullanici_korumasi(request, kullanici)
+    if engel:
+        return engel
     if request.method == "POST":
-        form = SuperadminKullaniciForm(request.POST, instance=kullanici)
+        # is_valid() formdaki degerleri nesneye yazar; kontrol icin onceki yetkiyi sakla
+        super_kullaniciydi = kullanici.is_superuser
+        form = SuperadminKullaniciForm(request.POST, instance=kullanici, duzenleyen=request.user)
         if form.is_valid():
             kendi_hesabi = kullanici.pk == request.user.pk
-            erisim_kisitlaniyor = not form.cleaned_data["is_active"] or not form.cleaned_data["is_staff"]
+            erisim_kisitlaniyor = (
+                not form.cleaned_data["is_active"]
+                or not form.cleaned_data["is_staff"]
+                or (super_kullaniciydi and not form.cleaned_data.get("is_superuser", True))
+            )
             if kendi_hesabi and erisim_kisitlaniyor:
-                messages.error(request, "Kendi hesabının erişimini bu ekrandan kısıtlayamazsın.")
+                # Formu sifirlamadan hatayi goster
+                form.add_error(None, "Kendi hesabının erişimini bu ekrandan kısıtlayamazsın.")
             else:
                 form.save()
                 messages.success(request, "Kullanıcı güncellendi.")
-            return redirect("superadmin_kullanici_duzenle", pk=pk)
+                return redirect("superadmin_kullanici_duzenle", pk=pk)
     else:
-        form = SuperadminKullaniciForm(instance=kullanici)
+        form = SuperadminKullaniciForm(instance=kullanici, duzenleyen=request.user)
 
     context = build_superadmin_context(request)
     context.update(
@@ -909,6 +927,9 @@ def superadmin_kullanici_duzenle(request, pk):
 @superadmin_required
 def superadmin_kullanici_sifre(request, pk):
     kullanici = get_object_or_404(User, pk=pk)
+    engel = super_kullanici_korumasi(request, kullanici)
+    if engel:
+        return engel
     if request.method == "POST":
         form = SuperadminKullaniciSifreForm(request.POST)
         if form.is_valid():

@@ -133,7 +133,75 @@ class ContactForm(forms.Form):
         return cleaned_data
 
 
-class SuperadminAnaSayfaYayinKartiForm(forms.ModelForm):
+# Modelde verbose_name verilmemis alanlarin Turkce etiketleri (ozel etiketi olan alanlara dokunulmaz)
+ALAN_ETIKETLERI = {
+    "aciklama": "Açıklama",
+    "baslik": "Başlık",
+    "dogum_tarihi": "Doğum tarihi",
+    "etiket_bir": "Etiket 1",
+    "etiket_iki": "Etiket 2",
+    "etiket_uc": "Etiket 3",
+    "fotograf": "Fotoğraf",
+    "gorsel": "Görsel",
+    "icerik": "İçerik",
+    "indirimli_fiyat": "İndirimli fiyat",
+    "isim": "İsim",
+    "kitapyurdu_link": "Kitapyurdu Linki",
+    "link": "Bağlantı",
+    "masaustu_gorsel": "Masaüstü görseli",
+    "meta_description": "SEO açıklaması",
+    "meta_title": "SEO başlığı",
+    "mobil_gorsel": "Mobil görsel",
+    "onayli": "Onaylı",
+    "one_cikan": "Öne çıkan",
+    "one_cikar": "Öne çıkar",
+    "ozet": "Özet",
+    "resim": "Görsel",
+    "satis_linki": "Satış linki",
+    "sayfa_no": "Sayfa numarası",
+    "sira": "Sıra",
+    "slug": "Kısa ad (URL)",
+    "turler": "Türler",
+    "user": "Kullanıcı hesabı",
+    "websitesi": "Web sitesi",
+    "x_hesabi": "X hesabı",
+    "yayin_tarihi": "Yayın tarihi",
+    "yayinda": "Yayında",
+}
+
+
+def turkce_etiketleri_uygula(form):
+    for name, field in form.fields.items():
+        if name in ALAN_ETIKETLERI and field.label == capfirst(name.replace("_", " ")):
+            field.label = ALAN_ETIKETLERI[name]
+
+
+class SuperadminStyledModelForm(forms.ModelForm):
+    textarea_rows = 5
+    multi_select_size = 6
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        turkce_etiketleri_uygula(self)
+        for name, field in self.fields.items():
+            widget = field.widget
+            if isinstance(widget, forms.HiddenInput):
+                continue
+            if isinstance(widget, forms.Textarea):
+                widget.attrs.setdefault("rows", self.textarea_rows)
+                widget.attrs.setdefault("placeholder", field.label)
+            elif isinstance(widget, forms.DateInput):
+                widget.input_type = "date"
+            elif isinstance(widget, forms.SelectMultiple):
+                widget.attrs.setdefault("size", self.multi_select_size)
+                widget.attrs["class"] = "panel-multiselect"
+            elif isinstance(widget, forms.ClearableFileInput):
+                widget.attrs.setdefault("class", "panel-file-input")
+            elif not isinstance(widget, forms.CheckboxInput):
+                widget.attrs.setdefault("placeholder", field.label)
+
+
+class SuperadminAnaSayfaYayinKartiForm(SuperadminStyledModelForm):
     class Meta:
         model = AnaSayfaYayinKarti
         fields = "__all__"
@@ -283,74 +351,6 @@ class PanelBlogYazisiForm(forms.ModelForm):
             yazi.save()
             self.save_m2m()
         return yazi
-
-
-# Modelde verbose_name verilmemis alanlarin Turkce etiketleri (ozel etiketi olan alanlara dokunulmaz)
-ALAN_ETIKETLERI = {
-    "aciklama": "Açıklama",
-    "baslik": "Başlık",
-    "dogum_tarihi": "Doğum tarihi",
-    "etiket_bir": "Etiket 1",
-    "etiket_iki": "Etiket 2",
-    "etiket_uc": "Etiket 3",
-    "fotograf": "Fotoğraf",
-    "gorsel": "Görsel",
-    "icerik": "İçerik",
-    "indirimli_fiyat": "İndirimli fiyat",
-    "isim": "İsim",
-    "kitapyurdu_link": "Kitapyurdu Linki",
-    "link": "Bağlantı",
-    "masaustu_gorsel": "Masaüstü görseli",
-    "meta_description": "SEO açıklaması",
-    "meta_title": "SEO başlığı",
-    "mobil_gorsel": "Mobil görsel",
-    "onayli": "Onaylı",
-    "one_cikan": "Öne çıkan",
-    "one_cikar": "Öne çıkar",
-    "ozet": "Özet",
-    "resim": "Görsel",
-    "satis_linki": "Satış linki",
-    "sayfa_no": "Sayfa numarası",
-    "sira": "Sıra",
-    "slug": "Kısa ad (URL)",
-    "turler": "Türler",
-    "user": "Kullanıcı hesabı",
-    "websitesi": "Web sitesi",
-    "x_hesabi": "X hesabı",
-    "yayin_tarihi": "Yayın tarihi",
-    "yayinda": "Yayında",
-}
-
-
-def turkce_etiketleri_uygula(form):
-    for name, field in form.fields.items():
-        if name in ALAN_ETIKETLERI and field.label == capfirst(name.replace("_", " ")):
-            field.label = ALAN_ETIKETLERI[name]
-
-
-class SuperadminStyledModelForm(forms.ModelForm):
-    textarea_rows = 5
-    multi_select_size = 6
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        turkce_etiketleri_uygula(self)
-        for name, field in self.fields.items():
-            widget = field.widget
-            if isinstance(widget, forms.HiddenInput):
-                continue
-            if isinstance(widget, forms.Textarea):
-                widget.attrs.setdefault("rows", self.textarea_rows)
-                widget.attrs.setdefault("placeholder", field.label)
-            elif isinstance(widget, forms.DateInput):
-                widget.input_type = "date"
-            elif isinstance(widget, forms.SelectMultiple):
-                widget.attrs.setdefault("size", self.multi_select_size)
-                widget.attrs["class"] = "panel-multiselect"
-            elif isinstance(widget, forms.ClearableFileInput):
-                widget.attrs.setdefault("class", "panel-file-input")
-            elif not isinstance(widget, forms.CheckboxInput):
-                widget.attrs.setdefault("placeholder", field.label)
 
 
 class SuperadminAlintiKategoriForm(SuperadminStyledModelForm):
@@ -542,6 +542,12 @@ class SuperadminKullaniciForm(SuperadminStyledModelForm):
             "is_staff": "Personel (admin girişi yapabilir)",
             "is_superuser": "Süper kullanıcı (tüm yetkiler)",
         }
+
+    def __init__(self, *args, duzenleyen=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Super kullanici yetkisini sadece super kullanicilar verebilir/alabilir
+        if duzenleyen is not None and not duzenleyen.is_superuser:
+            self.fields.pop("is_superuser")
 
 
 class SuperadminKullaniciSifreForm(forms.Form):
