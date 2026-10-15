@@ -1645,3 +1645,71 @@ a.sa-card .h3 {
     font-size: .98rem;
     font-weight: 600;
 }
+
+/* ---------- Alinti moderasyonu (templates/superadmin/quotes.html) ---------- */
+.sa-alinti-liste {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+.sa-alinti {
+    padding: 18px 22px;
+}
+.sa-alinti + .sa-alinti {
+    border-top: 1px solid var(--sa-border);
+}
+.sa-alinti__ust {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+}
+.sa-alinti__metin {
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.55;
+}
+.sa-alinti__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 16px;
+    margin-top: 8px;
+    color: var(--sa-muted);
+    font-size: .82rem;
+}
+.sa-alinti__meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+.sa-alinti__meta a {
+    color: var(--sa-text);
+}
+.sa-alinti__yorum {
+    margin: 8px 0 0;
+    font-size: .86rem;
+}
+.sa-alinti__islem {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 8px;
+    margin-top: 12px;
+}
+.sa-alinti__islem form {
+    margin: 0;
+}
+.sa-alinti__not {
+    flex-basis: 100%;
+}
+.sa-alinti__not > summary {
+    list-style: none;
+}
+.sa-alinti__not > summary::-webkit-details-marker {
+    display: none;
+}
+.sa-alinti__not textarea {
+    min-height: 64px;
+}
+

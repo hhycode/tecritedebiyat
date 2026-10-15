@@ -23,6 +23,10 @@
             <i class="ph ph-article" aria-hidden="true"></i><span class="sa-nav-label">Yazılar</span>
             {% if admin_pending_post_count %}<span class="sa-badge" aria-label="{{ admin_pending_post_count }} onay bekliyor">{{ admin_pending_post_count }}</span>{% endif %}
         </a>
+        <a class="sa-nav-link{% if aktif_menu == 'alintilar' %} active{% endif %}" href="{% url 'superadmin_alintilar' %}" title="Alıntılar"{% if aktif_menu == 'alintilar' %} aria-current="page"{% endif %}>
+            <i class="ph ph-quotes" aria-hidden="true"></i><span class="sa-nav-label">Alıntılar</span>
+            {% if admin_pending_quote_count %}<span class="sa-badge" aria-label="{{ admin_pending_quote_count }} onay bekliyor">{{ admin_pending_quote_count }}</span>{% endif %}
+        </a>
         <a class="sa-nav-link{% if aktif_menu == 'icerik' %} active{% endif %}" href="{% url 'superadmin_icerik_yonetimi' %}" title="İçerik Yönetimi"{% if aktif_menu == 'icerik' %} aria-current="page"{% endif %}>
             <i class="ph ph-stack" aria-hidden="true"></i><span class="sa-nav-label">İçerik Yönetimi</span>
         </a>

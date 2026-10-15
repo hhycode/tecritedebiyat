@@ -6,6 +6,9 @@
 {% block sayfa_aksiyonlari %}
     <a class="sa-btn sa-btn--secondary" href="{% url 'superadmin_icerik_yonetimi' %}">Tüm İçerikler</a>
     <a class="sa-btn sa-btn--secondary" href="{{ add_url }}">{{ content_config.singular }} ekle</a>
+    {% if model_key == "kaynakkitap" %}<a class="sa-btn sa-btn--primary" href="{% url 'superadmin_kaynak_kitap_birlestir' %}">Birleştir</a>{% endif %}
+    {% if model_key == "kaynakyazar" %}<a class="sa-btn sa-btn--primary" href="{% url 'superadmin_kaynak_yazar_birlestir' %}">Birleştir</a>{% endif %}
+    {% if model_key == "alinti" %}<a class="sa-btn sa-btn--primary" href="{% url 'superadmin_alintilar' %}">Moderasyon</a>{% endif %}
 {% endblock %}
 
 {% block superadmin_content %}

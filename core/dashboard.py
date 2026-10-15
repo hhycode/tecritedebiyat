@@ -72,6 +72,7 @@ def ozet_kartlari():
         onceki=Count("id", filter=Q(created_at__gte=onceki_30, created_at__lt=son_30)),
     )
     alinti = Alinti.objects.aggregate(
+        incelemede=Count("id", filter=Q(durum=INCELEMEDE)),
         yeni=Count("id", filter=Q(created_at__gte=son_30)),
         onceki=Count("id", filter=Q(created_at__gte=onceki_30, created_at__lt=son_30)),
     )
@@ -82,7 +83,8 @@ def ozet_kartlari():
     return {
         "yazi": yazi,
         "yazar": yazar,
-        "bekleyen_toplam": yazi["incelemede"] + okunmamis_mesaj + yazar["onay_bekleyen"],
+        "alinti": alinti,
+        "bekleyen_toplam": yazi["incelemede"] + alinti["incelemede"] + okunmamis_mesaj + yazar["onay_bekleyen"],
         "okunmamis_mesaj": okunmamis_mesaj,
         "yeni_icerik": yeni_icerik,
         "yeni_icerik_dagilim": {"yazi": yazi["yeni"], "kitap": kitap["yeni"], "alinti": alinti["yeni"]},
@@ -102,6 +104,8 @@ def bekleyen_isler(ozet):
         "gruplar": [
             {"ad": "Onay bekleyen yazılar", "ikon": "ph-article", "sayi": ozet["yazi"]["incelemede"],
              "url": f"{yazilar_url}?durum={INCELEMEDE}"},
+            {"ad": "Onay bekleyen alıntılar", "ikon": "ph-quotes", "sayi": ozet["alinti"]["incelemede"],
+             "url": f"{reverse('superadmin_alintilar')}?durum={INCELEMEDE}"},
             {"ad": "Okunmamış mesajlar", "ikon": "ph-envelope-simple", "sayi": ozet["okunmamis_mesaj"],
              "url": f"{iletisim_url}?durum=okunmamis"},
             {"ad": "Onay bekleyen yazarlar", "ikon": "ph-pen-nib", "sayi": ozet["yazar"]["onay_bekleyen"],

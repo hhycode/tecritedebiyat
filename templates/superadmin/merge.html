@@ -1,0 +1,72 @@
+{% extends "superadmin/base.html" %}
+
+{% block sayfa_ust_etiket %}Alıntılar{% endblock %}
+{% block sayfa_aciklamasi %}Aynı {% if tur == "kitap" %}kitabın{% else %}yazarın{% endif %} iki kaydı varsa birleştirin: silinecek kayıttaki alıntılar kalacak kayda taşınır, kalacak kayıttaki boş künye bilgileri diğerinden tamamlanır.{% endblock %}
+{% block sayfa_aksiyonlari %}
+{% if tur == "kitap" %}
+<a class="sa-btn sa-btn--secondary" href="{% url 'superadmin_kaynak_yazar_birlestir' %}">Yazarları birleştir</a>
+<a class="sa-btn sa-btn--secondary" href="{% url 'superadmin_icerik_model_liste' 'kaynakkitap' %}">Kaynak kitaplar</a>
+{% else %}
+<a class="sa-btn sa-btn--secondary" href="{% url 'superadmin_kaynak_kitap_birlestir' %}">Kitapları birleştir</a>
+<a class="sa-btn sa-btn--secondary" href="{% url 'superadmin_icerik_model_liste' 'kaynakyazar' %}">Kaynak yazarlar</a>
+{% endif %}
+<a class="sa-btn sa-btn--secondary" href="{% url 'superadmin_alintilar' %}">Alıntılar</a>
+{% endblock %}
+
+{% block superadmin_content %}
+<div class="row g-4">
+    <div class="col-12 col-xl-7">
+        <form method="post" class="sa-panel-card" data-onay="Silinecek kayıt kalıcı olarak silinecek ve alıntıları kalacak kayda taşınacak. Devam edilsin mi?">
+            {% csrf_token %}
+            <div class="sa-panel-card__body">
+                <div class="sa-form-grid sa-form-grid--single">
+                    <div class="sa-field">
+                        <label for="kalan">Kalacak kayıt</label>
+                        <select id="kalan" name="kalan" required>
+                            <option value="">Seçin…</option>
+                            {% for k in kayitlar %}<option value="{{ k.pk }}"{% if secili_kalan == k.pk|stringformat:"d" %} selected{% endif %}>{% if tur == "kitap" %}{{ k.ad }} — {{ k.yazar.ad }}{% if k.basim_yili %} ({{ k.basim_yili }}){% endif %}{% else %}{{ k.ad }}{% endif %} · {{ k.n }} alıntı</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div class="sa-field">
+                        <label for="giden">Silinecek (birleştirilecek) kayıt</label>
+                        <select id="giden" name="giden" required>
+                            <option value="">Seçin…</option>
+                            {% for k in kayitlar %}<option value="{{ k.pk }}"{% if secili_giden == k.pk|stringformat:"d" %} selected{% endif %}>{% if tur == "kitap" %}{{ k.ad }} — {{ k.yazar.ad }}{% if k.basim_yili %} ({{ k.basim_yili }}){% endif %}{% else %}{{ k.ad }}{% endif %} · {{ k.n }} alıntı</option>{% endfor %}
+                        </select>
+                        {% if tur == "yazar" %}<span class="sa-help">Silinecek yazarın kitapları kalacak yazara bağlanır; aynı adlı kitap varsa o iki kitap da birleştirilir.</span>{% endif %}
+                    </div>
+                </div>
+                <div class="sa-form-actions">
+                    <button class="sa-btn sa-btn--primary" type="submit">Birleştir</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="col-12 col-xl-5">
+        <div class="sa-panel-card">
+            <div class="sa-panel-card__header"><h3 class="h6 mb-0">Olası tekrarlar</h3></div>
+            <div class="sa-panel-card__body">
+                {% if olasi %}
+                <p class="sa-muted small">{% if tur == "kitap" %}Adı aynı olan kitaplar{% else %}Soyadı aynı olan yazarlar{% endif %}. Birini seçince forma aktarılır.</p>
+                <ul class="list-unstyled mb-0 d-grid gap-2">
+                    {% for k in olasi %}
+                    <li><button type="button" class="sa-btn sa-btn--secondary sa-btn--sm" data-birlestir-sec="{{ k.pk }}">{% if tur == "kitap" %}{{ k.ad }} — {{ k.yazar.ad }}{% else %}{{ k.ad }}{% endif %}</button></li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="sa-muted mb-0">Şu an olası bir tekrar görünmüyor.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+// Olasi tekrar dugmesi: once "kalacak", sonra "silinecek" alanini doldurur
+document.querySelectorAll("[data-birlestir-sec]").forEach(function (d) {
+    d.addEventListener("click", function () {
+        var kalan = document.getElementById("kalan"), giden = document.getElementById("giden");
+        (kalan.value && kalan.value !== d.dataset.birlestirSec ? giden : kalan).value = d.dataset.birlestirSec;
+    });
+});
+</script>
+{% endblock %}

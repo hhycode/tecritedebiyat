@@ -351,6 +351,10 @@ MENU_URL_ESLESMESI = {
     "superadmin_dashboard": "panel",
     "superadmin_ara": "panel",
     "superadmin_yazilar": "yazilar",
+    "superadmin_alintilar": "alintilar",
+    "superadmin_alinti_durum_guncelle": "alintilar",
+    "superadmin_kaynak_kitap_birlestir": "alintilar",
+    "superadmin_kaynak_yazar_birlestir": "alintilar",
     "superadmin_yazi_detay": "yazilar",
     "superadmin_icerik_yonetimi": "icerik",
     "superadmin_kitaplar": "kitaplar",
@@ -366,7 +370,7 @@ MENU_URL_ESLESMESI = {
     "superadmin_iletisim_sil": "mesajlar",
 }
 # Icerik yonetimi altindaki bazi modellerin kendi menu ogesi var
-MENU_MODEL_ESLESMESI = {"blogyazisi": "yazilar", "kitap": "kitaplar", "kitapmaliyetturu": "maliyet", "yazarprofil": "yazarlar"}
+MENU_MODEL_ESLESMESI = {"alinti": "alintilar", "kaynakkitap": "alintilar", "kaynakyazar": "alintilar", "blogyazisi": "yazilar", "kitap": "kitaplar", "kitapmaliyetturu": "maliyet", "yazarprofil": "yazarlar"}
 
 
 def aktif_menu(request):
@@ -382,13 +386,15 @@ def aktif_menu(request):
 def build_superadmin_context(request):
     """Tum admin sayfalarinda gereken baglam: menu durumu ve menu rozetleri."""
     pending_post_count = BlogYazisi.objects.filter(durum=BlogYazisi.DurumSecenekleri.INCELEMEDE).count()
+    pending_quote_count = Alinti.objects.filter(durum=Alinti.DurumSecenekleri.INCELEMEDE).count()
     unread_contact_count = IletisimBasvurusu.objects.filter(incelendi=False).count()
     return {
         "profil": request.superadmin_profil,
         "aktif_menu": aktif_menu(request),
         "admin_pending_post_count": pending_post_count,
+        "admin_pending_quote_count": pending_quote_count,
         "admin_unread_contact_count": unread_contact_count,
-        "admin_notification_count": pending_post_count + unread_contact_count,
+        "admin_notification_count": pending_post_count + pending_quote_count + unread_contact_count,
     }
 
 
@@ -551,6 +557,172 @@ def superadmin_yazi_durum_guncelle(request, pk):
         if request.POST.get("sonra") == "detay":
             return redirect("superadmin_yazi_detay", pk=yazi.pk)
     return redirect("superadmin_yazilar")
+
+
+@superadmin_required
+def superadmin_alintilar(request):
+    durum = request.GET.get("durum", "").strip()
+    arama = request.GET.get("q", "").strip()
+    alintilar = Alinti.objects.select_related("kaynak__yazar", "paylasan__profil", "kategori").order_by(
+        F("updated_at").desc(nulls_last=True), "-id"
+    )
+    if durum:
+        alintilar = alintilar.filter(durum=durum)
+    if arama:
+        alintilar = alintilar.filter(arama_filtresi(["metin", "kaynak__ad", "kaynak__yazar__ad", "paylasan__username"], arama))
+    page_obj, sayfa_sorgusu = sayfala(request, alintilar)
+    context = build_superadmin_context(request)
+    context.update(
+        {
+            "page_title": "Alıntılar",
+            "alintilar": page_obj.object_list,
+            "page_obj": page_obj,
+            "sayfa_sorgusu": sayfa_sorgusu,
+            "secili_durum": durum,
+            "arama": arama,
+            "durumler": Alinti.DurumSecenekleri.choices,
+            "geri_adres": request.get_full_path(),
+        }
+    )
+    return render(request, "superadmin/quotes.html", context)
+
+
+@superadmin_required
+@require_POST
+def superadmin_alinti_durum_guncelle(request, pk):
+    alinti = get_object_or_404(Alinti, pk=pk)
+    yeni_durum = request.POST.get("durum")
+    not_degisti = False
+    if "admin_notu" in request.POST:
+        yeni_not = request.POST["admin_notu"].strip()[:2000]
+        not_degisti = yeni_not != alinti.admin_notu
+        alinti.admin_notu = yeni_not
+    if yeni_durum in dict(Alinti.DurumSecenekleri.choices):
+        durum_degisti = yeni_durum != alinti.durum
+        alinti.durum = yeni_durum
+        alinti.onaylayan = request.user if yeni_durum in (Alinti.DurumSecenekleri.YAYINDA, Alinti.DurumSecenekleri.REDDEDILDI, Alinti.DurumSecenekleri.DUZELTME) else None
+        alinti.save()
+        if durum_degisti:
+            islem_kaydet(request, alinti, CHANGE, f"Durum: {alinti.get_durum_display()}")
+            messages.success(request, f"Alıntının durumu güncellendi: {alinti.get_durum_display()}.")
+        elif not_degisti:
+            islem_kaydet(request, alinti, CHANGE, "Yazara not güncellendi")
+            messages.success(request, "Yazara not kaydedildi.")
+    geri = request.POST.get("sonra", "")
+    if geri.startswith("/") and not geri.startswith("//") and url_has_allowed_host_and_scheme(geri, allowed_hosts={request.get_host()}):
+        return redirect(geri)
+    return redirect("superadmin_alintilar")
+
+
+def kaynak_kitaplari_birlestir(kalan, giden):
+    """giden kitabin alintilarini kalan'a tasir, kalan'daki bos kunye alanlarini giden'den doldurur, giden'i siler."""
+    tasinan = Alinti.objects.filter(kaynak=giden).update(kaynak=kalan)
+    silinecek_kapak = None
+    # Benzersiz/tekil alanlar once giden'den bosaltilir ki kalan'a aktarilabilsin
+    isbn, katalog, kapak = giden.isbn, giden.katalog_kitabi_id, giden.kapak.name if giden.kapak else ""
+    giden.isbn, giden.katalog_kitabi = "", None
+    giden.kapak = ""
+    giden.save()
+    if not kalan.yayinevi and giden.yayinevi:
+        kalan.yayinevi = giden.yayinevi
+    if not kalan.basim_yili and giden.basim_yili:
+        kalan.basim_yili = giden.basim_yili
+    if not kalan.isbn and isbn:
+        kalan.isbn = isbn
+    if not kalan.katalog_kitabi_id and katalog:
+        kalan.katalog_kitabi_id = katalog
+    if kapak:
+        if kalan.kapak:
+            silinecek_kapak = kapak
+        else:
+            kalan.kapak = kapak
+    kalan.onayli = kalan.onayli or giden.onayli
+    kalan.save()
+    giden.delete()
+    if silinecek_kapak:
+        depo = kalan.kapak.storage if kalan.kapak else KaynakKitap._meta.get_field("kapak").storage
+        transaction.on_commit(lambda: depo.delete(silinecek_kapak))
+    return tasinan
+
+
+def kaynak_yazarlari_birlestir(kalan, giden):
+    """giden yazarin kitaplarini kalan'a baglar; ayni adli kitap varsa iki kitap birlestirilir."""
+    tasinan = 0
+    for kitap in list(giden.kitaplar.all()):
+        eslesen = kalan.kitaplar.filter(ad_normal=kitap.ad_normal).first()
+        if eslesen:
+            tasinan += kaynak_kitaplari_birlestir(eslesen, kitap)
+        else:
+            tasinan += kitap.alintilar.count()
+            kitap.yazar = kalan
+            kitap.save()
+    profil = giden.yazar_profili_id
+    giden_ad = giden.ad
+    giden.delete()
+    if not kalan.yazar_profili_id and profil:
+        kalan.yazar_profili_id = profil
+        kalan.save()
+    return tasinan, giden_ad
+
+
+def superadmin_kaynak_birlestir(request, tur):
+    model = KaynakKitap if tur == "kitap" else KaynakYazar
+    if tur == "kitap":
+        kayitlar = KaynakKitap.objects.select_related("yazar").annotate(n=Count("alintilar")).order_by("ad", "yazar__ad")
+        tekrarlar = (
+            KaynakKitap.objects.values("ad_normal").annotate(n=Count("id")).filter(n__gt=1).values_list("ad_normal", flat=True)
+        )
+        olasi = list(KaynakKitap.objects.select_related("yazar").filter(ad_normal__in=list(tekrarlar)).order_by("ad_normal", "id"))
+    else:
+        kayitlar = KaynakYazar.objects.annotate(n=Count("kitaplar__alintilar")).order_by("ad")
+        # Soyadi ayni yazarlar (ornegin "S. Ali" / "Sabahattin Ali") olasi tekrar olarak listelenir
+        gruplar = {}
+        for y in KaynakYazar.objects.all():
+            gruplar.setdefault(y.ad_normal.split(" ")[-1], []).append(y)
+        olasi = [y for grup in gruplar.values() if len(grup) > 1 for y in grup]
+
+    if request.method == "POST":
+        try:
+            kalan = model.objects.get(pk=int(request.POST.get("kalan", 0)))
+            giden = model.objects.get(pk=int(request.POST.get("giden", 0)))
+        except (ValueError, model.DoesNotExist):
+            messages.error(request, "Birleştirilecek iki kaydı da seçin.")
+            return redirect(request.path)
+        if kalan.pk == giden.pk:
+            messages.error(request, "Aynı kaydı kendisiyle birleştiremezsiniz.")
+            return redirect(request.path)
+        with transaction.atomic():
+            if tur == "kitap":
+                giden_ad = str(giden)
+                tasinan = kaynak_kitaplari_birlestir(kalan, giden)
+            else:
+                tasinan, giden_ad = kaynak_yazarlari_birlestir(kalan, giden)
+            islem_kaydet(request, kalan, CHANGE, f"Birleştirildi: “{giden_ad}” bu kayda katıldı ({tasinan} alıntı taşındı)")
+        messages.success(request, f"“{giden_ad}” kaydı “{kalan}” ile birleştirildi; {tasinan} alıntı taşındı.")
+        return redirect(request.path)
+
+    context = build_superadmin_context(request)
+    context.update(
+        {
+            "page_title": "Kitapları birleştir" if tur == "kitap" else "Yazarları birleştir",
+            "tur": tur,
+            "kayitlar": kayitlar,
+            "olasi": olasi,
+            "secili_kalan": request.GET.get("kalan", ""),
+            "secili_giden": request.GET.get("giden", ""),
+        }
+    )
+    return render(request, "superadmin/merge.html", context)
+
+
+@superadmin_required
+def superadmin_kaynak_kitap_birlestir(request):
+    return superadmin_kaynak_birlestir(request, "kitap")
+
+
+@superadmin_required
+def superadmin_kaynak_yazar_birlestir(request):
+    return superadmin_kaynak_birlestir(request, "yazar")
 
 
 @superadmin_required
@@ -835,6 +1007,7 @@ def superadmin_icerik_model_liste(request, model_key):
             "sayfa_sorgusu": sayfa_sorgusu,
             "arama": arama,
             "add_url": reverse("superadmin_icerik_model_yeni", args=[model_key]),
+            "model_key": model_key,
         }
     )
     return render(request, "superadmin/content_model_list.html", context)

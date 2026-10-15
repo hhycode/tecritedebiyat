@@ -1,0 +1,69 @@
+{% extends "superadmin/base.html" %}
+
+{% block sayfa_ust_etiket %}İçerik{% endblock %}
+{% block sayfa_aciklamasi %}Yazarların paylaştığı alıntıları inceleyin; yayına alın, düzeltme isteyin ya da reddedin.{% endblock %}
+{% block sayfa_aksiyonlari %}
+<a class="sa-btn sa-btn--secondary" href="{% url 'superadmin_icerik_model_liste' 'kaynakkitap' %}">Kaynak kitaplar</a>
+<a class="sa-btn sa-btn--secondary" href="{% url 'superadmin_kaynak_kitap_birlestir' %}">Kitapları birleştir</a>
+<a class="sa-btn sa-btn--primary" href="{% url 'superadmin_icerik_model_yeni' 'alinti' %}">Alıntı ekle</a>
+{% endblock %}
+
+{% block superadmin_content %}
+{% include "superadmin/_components/search_form.html" with arama=arama placeholder="Alıntı, kitap, yazar ya da paylaşan ara" durum_secenekleri=durumler secili_durum=secili_durum durum_bos_etiketi="Tüm durumlar" %}
+
+<div class="card sa-card sa-table-card">
+    <div class="card-body p-0">
+        {% if alintilar %}
+        <ul class="sa-alinti-liste">
+            {% for alinti in alintilar %}
+            <li class="sa-alinti">
+                <div class="sa-alinti__ust">
+                    <blockquote class="sa-alinti__metin">“{{ alinti.metin|linebreaksbr }}”</blockquote>
+                    <span class="sa-pill{% if alinti.durum == 'yayinda' %} sa-pill--success{% elif alinti.durum == 'incelemede' %} sa-pill--warning{% elif alinti.durum == 'duzeltme' or alinti.durum == 'reddedildi' %} sa-pill--danger{% endif %}">{{ alinti.get_durum_display }}</span>
+                </div>
+                <div class="sa-alinti__meta">
+                    {% if alinti.kaynak %}
+                    <span><i class="ph ph-book-open" aria-hidden="true"></i><a href="{% url 'superadmin_icerik_model_duzenle' 'kaynakkitap' alinti.kaynak.pk %}">{{ alinti.kaynak.ad }}</a> — {{ alinti.kaynak.yazar.ad }}{% if alinti.sayfa_no %}, s. {{ alinti.sayfa_no }}{% endif %}</span>
+                    {% if not alinti.kaynak.onayli %}<span class="sa-pill sa-pill--warning">Yeni kitap · ilk onayla görünür olur</span>{% endif %}
+                    {% else %}<span class="sa-muted">Kaynaksız</span>{% endif %}
+                    <span><i class="ph ph-user" aria-hidden="true"></i>{% if alinti.paylasan %}{{ alinti.paylasan.profil.ad_soyad|default:alinti.paylasan.get_username }}{% else %}Yönetim{% endif %}</span>
+                    <span><i class="ph ph-clock" aria-hidden="true"></i>{{ alinti.updated_at|default:alinti.created_at|date:"d.m.Y H:i" }}</span>
+                </div>
+                {% if alinti.yorum %}<p class="sa-alinti__yorum"><b>Paylaşanın notu:</b> {{ alinti.yorum }}</p>{% endif %}
+                <div class="sa-alinti__islem">
+                    {% if alinti.durum != 'yayinda' %}
+                    <form method="post" action="{% url 'superadmin_alinti_durum_guncelle' alinti.pk %}">
+                        {% csrf_token %}<input type="hidden" name="sonra" value="{{ geri_adres }}"><input type="hidden" name="durum" value="yayinda">
+                        <button class="sa-btn sa-btn--primary sa-btn--sm" type="submit">Yayına al</button>
+                    </form>
+                    {% else %}
+                    <form method="post" action="{% url 'superadmin_alinti_durum_guncelle' alinti.pk %}" data-onay="Alıntı yayından kaldırılıp incelemeye alınacak. Devam edilsin mi?">
+                        {% csrf_token %}<input type="hidden" name="sonra" value="{{ geri_adres }}"><input type="hidden" name="durum" value="incelemede">
+                        <button class="sa-btn sa-btn--secondary sa-btn--sm" type="submit">Yayından kaldır</button>
+                    </form>
+                    {% endif %}
+                    <a class="sa-btn sa-btn--secondary sa-btn--sm" href="{% url 'superadmin_icerik_model_duzenle' 'alinti' alinti.pk %}">Düzenle</a>
+                    <details class="sa-alinti__not"{% if alinti.admin_notu %} open{% endif %}>
+                        <summary class="sa-btn sa-btn--secondary sa-btn--sm">Yazara geri bildirim</summary>
+                        <form method="post" action="{% url 'superadmin_alinti_durum_guncelle' alinti.pk %}" class="sa-field mt-2">
+                            {% csrf_token %}<input type="hidden" name="sonra" value="{{ geri_adres }}">
+                            <label class="visually-hidden" for="not-{{ alinti.pk }}">Yazara not</label>
+                            <textarea id="not-{{ alinti.pk }}" name="admin_notu" rows="2" maxlength="2000" placeholder="Örn. Sayfa numarasını ve yayınevini ekleyebilir misiniz?">{{ alinti.admin_notu }}</textarea>
+                            <div class="d-flex flex-wrap gap-2 mt-2">
+                                <button class="sa-btn sa-btn--secondary sa-btn--sm" type="submit" name="durum" value="duzeltme">Düzeltme iste</button>
+                                <button class="sa-btn sa-btn--danger-outline sa-btn--sm" type="submit" name="durum" value="reddedildi">Reddet</button>
+                                <button class="sa-btn sa-btn--secondary sa-btn--sm" type="submit" name="durum" value="{{ alinti.durum }}">Yalnızca notu kaydet</button>
+                            </div>
+                        </form>
+                    </details>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        {% include "superadmin/_components/bos_durum.html" with ikon="ph-quotes" baslik="Gösterilecek alıntı yok" metin="Filtreyi temizleyip yeniden deneyin." %}
+        {% endif %}
+    </div>
+</div>
+{% include "superadmin/_components/pagination.html" with page_obj=page_obj sayfa_sorgusu=sayfa_sorgusu %}
+{% endblock %}
