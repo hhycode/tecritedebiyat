@@ -10,7 +10,7 @@ from django.conf import settings
 from django.core.mail import EmailMessage
 from django.core.paginator import Paginator
 from django.db import transaction
-from django.db.models import Count, F, Q, Sum
+from django.db.models import Count, F, Prefetch, Q, Sum
 from django.db.models.deletion import ProtectedError
 from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -1400,7 +1400,15 @@ def okunma_sayilmali_mi(request):
 
 def blog_detay(request, slug):
     yazi = get_object_or_404(
-        BlogYazisi.objects.select_related("yazar__user", "kategori").prefetch_related("kategoriler", "medyalar"),
+        BlogYazisi.objects.select_related("yazar__user", "kategori").prefetch_related(
+            "kategoriler",
+            "medyalar",
+            Prefetch(
+                "alintilar",
+                queryset=Alinti.objects.filter(durum=Alinti.DurumSecenekleri.YAYINDA, kaynak__isnull=False).select_related("kaynak__yazar", "paylasan__profil"),
+                to_attr="yayindaki_alintilar",
+            ),
+        ),
         slug=slug,
         durum=BlogYazisi.DurumSecenekleri.YAYINDA,
     )
@@ -2410,6 +2418,28 @@ def yazi_medyasini_kaydet(yazi, secili):
             kaldirilan.delete()
 
 
+YAZI_BASINA_ALINTI = 10
+
+
+def yazi_alinti_secimi(request, yazi):
+    """Formda isaretlenen alintilar: yalnizca kullanicinin kendi alintilari (+ yazida zaten bulunanlar)."""
+    kimlikler = {int(d) for d in request.POST.getlist("alintilar") if d.isdigit()}
+    uygun = Q(paylasan=request.user)
+    if yazi is not None and yazi.pk:
+        uygun |= Q(yazilar=yazi)
+    return list(Alinti.objects.filter(uygun, pk__in=kimlikler).distinct())
+
+
+def yazar_alinti_secenekleri(request, yazi):
+    """Yazi formunda iliştirilebilecek alintilar: kullanicinin reddedilmemis alintilari ve yazida bulunanlar."""
+    uygun = Q(paylasan=request.user) & ~Q(durum=Alinti.DurumSecenekleri.REDDEDILDI)
+    if yazi is not None and yazi.pk:
+        uygun |= Q(yazilar=yazi)
+    return list(
+        Alinti.objects.filter(uygun).select_related("kaynak__yazar").distinct().order_by(F("updated_at").desc(nulls_last=True), "-id")[:60]
+    )
+
+
 def yazar_yazi_formu(request, profil, yazi=None):
     """Yeni yazi ve duzenleme ortak akisi.
 
@@ -2433,7 +2463,11 @@ def yazar_yazi_formu(request, profil, yazi=None):
 
         form = PanelBlogYazisiForm(post_data, request.FILES, instance=yazi, is_superadmin=is_superadmin, panel_gorunumu=True)
         medya_listesi = yazi_medya_secimi(request, yazi)
+        alinti_listesi = yazi_alinti_secimi(request, yazi)
         gecerli = form.is_valid()
+        if len(alinti_listesi) > YAZI_BASINA_ALINTI:
+            form.add_error(None, f"Bir yazıya en fazla {YAZI_BASINA_ALINTI} alıntı ekleyebilirsiniz.")
+            gecerli = False
         if len(medya_listesi) > medya_kurallari.YAZI_BASINA_MEDYA:
             form.add_error(None, f"Bir yazıya en fazla {medya_kurallari.YAZI_BASINA_MEDYA} ses ya da video ekleyebilirsiniz.")
             gecerli = False
@@ -2456,6 +2490,7 @@ def yazar_yazi_formu(request, profil, yazi=None):
             yazi.save()
             form.save_m2m()
             yazi_medyasini_kaydet(yazi, medya_listesi)
+            yazi.alintilar.set(alinti_listesi)
             islem_kaydet(
                 request,
                 yazi,
@@ -2478,6 +2513,7 @@ def yazar_yazi_formu(request, profil, yazi=None):
     else:
         form = PanelBlogYazisiForm(instance=yazi, is_superadmin=is_superadmin, panel_gorunumu=True)
         medya_listesi = list(yazi.medyalar.all()) if yazi else []
+        alinti_listesi = list(yazi.alintilar.all()) if yazi else []
 
     if yazi is not None and request.method == "POST":
         # Gecersiz gonderimde form, nesneyi kaydedilmemis degerlerle doldurur; sayfada kayitli hali gosterilir
@@ -2496,6 +2532,9 @@ def yazar_yazi_formu(request, profil, yazi=None):
             is_superadmin=is_superadmin,
             medya_listesi=medya_listesi,
             medya_kurallari=medya_kurallari,
+            alinti_secenekleri=yazar_alinti_secenekleri(request, yazi),
+            secili_alintilar={a.pk for a in alinti_listesi},
+            yazi_basina_alinti=YAZI_BASINA_ALINTI,
         ),
     )
 

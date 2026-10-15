@@ -1108,6 +1108,55 @@ body.yp {
     font-weight: 600;
 }
 
+/* Yazi formunda alinti secimi */
+.yp-alinti-sec {
+    display: grid;
+    gap: 8px;
+    max-height: 340px;
+    margin: 0;
+    padding: 0;
+    overflow-y: auto;
+    list-style: none;
+}
+.yp-alinti-sec label {
+    display: flex !important;
+    align-items: flex-start;
+    gap: 12px;
+    margin: 0 !important;
+    padding: 10px 12px;
+    border: 1px solid var(--sa-border);
+    border-radius: 10px;
+    font-weight: 400 !important;
+    cursor: pointer;
+}
+.yp-alinti-sec label:has(input:checked) {
+    border-color: var(--sa-text);
+    background: var(--sa-surface-2);
+}
+.yp-alinti-sec input {
+    width: 18px;
+    min-height: 18px !important;
+    margin-top: 3px;
+    accent-color: var(--sa-primary);
+}
+.yp-alinti-sec__metin {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+.yp-alinti-sec__metin strong {
+    font-weight: 500;
+}
+.yp-alinti-sec__metin > span {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    color: var(--sa-muted);
+    font-size: .8rem;
+}
+
 /* Katlanir bolum (SEO) */
 .yp-details {
     border: 1px solid var(--sa-border);

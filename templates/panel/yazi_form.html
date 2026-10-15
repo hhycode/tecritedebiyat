@@ -11,6 +11,28 @@
 {{ form.media }}
 <script src="{% static 'js/medya.js' %}?v=1"></script>
 <script src="{% static 'js/ses-kaydi.js' %}?v=1"></script>
+<script>
+// "Listeyi yenile": ayni sayfayi yeniden ister, yalnizca alinti listesini degistirir; isaretler korunur
+(function () {
+    var dugme = document.querySelector("[data-alinti-yenile]");
+    if (!dugme) return;
+    dugme.addEventListener("click", function () {
+        var kap = document.querySelector("[data-alinti-liste]");
+        var secili = new Set([].map.call(kap.querySelectorAll("input:checked"), function (i) { return i.value; }));
+        dugme.classList.add("is-loading");
+        fetch(location.pathname, { credentials: "same-origin" })
+            .then(function (r) { return r.text(); })
+            .then(function (html) {
+                var yeni = new DOMParser().parseFromString(html, "text/html").querySelector("[data-alinti-liste]");
+                if (!yeni) return;
+                yeni.querySelectorAll("input[name=alintilar]").forEach(function (i) { var vardi = kap.querySelector('input[value="' + i.value + '"]');
+                    i.checked = vardi ? secili.has(i.value) : false; });
+                kap.innerHTML = yeni.innerHTML;
+            })
+            .finally(function () { dugme.classList.remove("is-loading"); });
+    });
+})();
+</script>
 {% endblock %}
 
 {% block ust %}
@@ -181,6 +203,34 @@
                 <p class="sa-errors" data-medya-hata role="alert" hidden></p>
             </div>
             <p class="sa-help" data-medya-dolu hidden>En fazla {{ medya_kurallari.YAZI_BASINA_MEDYA }} medya ekleyebilirsiniz. Yenisini eklemek için birini kaldırın.</p>
+        </section>
+
+        <section class="yp-section" aria-labelledby="yp-b-alintilar" data-alinti-sec>
+            <h2 class="yp-section__title" id="yp-b-alintilar">Alıntılar <span class="text-lowercase fw-normal">(isteğe bağlı)</span></h2>
+            <p class="sa-help mt-0 mb-3">Paylaştığınız alıntılardan seçtikleriniz yazınızın sonunda, kaynağıyla birlikte gösterilir. Henüz onaylanmamış alıntılar onaylandığında görünür. En fazla {{ yazi_basina_alinti }} tane.</p>
+            <div data-alinti-liste>
+            {% if alinti_secenekleri %}
+            <ul class="yp-alinti-sec">
+                {% for a in alinti_secenekleri %}
+                <li>
+                    <label>
+                        <input type="checkbox" name="alintilar" value="{{ a.pk }}"{% if a.pk in secili_alintilar %} checked{% endif %}>
+                        <span class="yp-alinti-sec__metin">
+                            <strong>“{{ a.metin|truncatechars:120 }}”</strong>
+                            <span>{% if a.kaynak %}{{ a.kaynak.ad }} — {{ a.kaynak.yazar.ad }}{% endif %} {% include "panel/_durum.html" with yazi=a %}</span>
+                        </span>
+                    </label>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="sa-muted mb-2">Henüz paylaştığınız bir alıntı yok.</p>
+            {% endif %}
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-2">
+                <a class="sa-btn sa-btn--secondary sa-btn--sm" href="{% url 'yazar_panel_yeni_alinti' %}" target="_blank" rel="noopener"><i class="ph ph-plus" aria-hidden="true"></i>Yeni alıntı oluştur (yeni sekmede)</a>
+                <button type="button" class="sa-btn sa-btn--secondary sa-btn--sm" data-alinti-yenile><i class="ph ph-arrow-clockwise" aria-hidden="true"></i>Listeyi yenile</button>
+            </div>
         </section>
 
         <section class="yp-section">
