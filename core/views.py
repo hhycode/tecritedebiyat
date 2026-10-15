@@ -272,6 +272,39 @@ def superadmin_required(view_func):
     return _wrapped
 
 
+# Kenar menude hangi ogenin aktif gorunecegi: url adi -> menu anahtari
+MENU_URL_ESLESMESI = {
+    "superadmin_dashboard": "panel",
+    "superadmin_ara": "panel",
+    "superadmin_yazilar": "yazilar",
+    "superadmin_yazi_detay": "yazilar",
+    "superadmin_icerik_yonetimi": "icerik",
+    "superadmin_kitaplar": "kitaplar",
+    "superadmin_kitap_maliyeti_ayarlari": "maliyet",
+    "superadmin_kitap_maliyeti_istatistik_sifirla": "maliyet",
+    "superadmin_yazarlar": "yazarlar",
+    "superadmin_kullanicilar": "kullanicilar",
+    "superadmin_kullanici_yeni": "kullanicilar",
+    "superadmin_kullanici_duzenle": "kullanicilar",
+    "superadmin_kullanici_sifre": "kullanicilar",
+    "superadmin_iletisim": "mesajlar",
+    "superadmin_iletisim_detay": "mesajlar",
+    "superadmin_iletisim_sil": "mesajlar",
+}
+# Icerik yonetimi altindaki bazi modellerin kendi menu ogesi var
+MENU_MODEL_ESLESMESI = {"blogyazisi": "yazilar", "kitap": "kitaplar", "kitapmaliyetturu": "maliyet", "yazarprofil": "yazarlar"}
+
+
+def aktif_menu(request):
+    eslesme = request.resolver_match
+    if not eslesme:
+        return ""
+    model_key = eslesme.kwargs.get("model_key")
+    if model_key:
+        return MENU_MODEL_ESLESMESI.get(model_key, "icerik")
+    return MENU_URL_ESLESMESI.get(eslesme.url_name, "")
+
+
 def build_superadmin_context(request):
     pending_posts = list(
         BlogYazisi.objects.select_related("yazar", "kategori")
@@ -335,6 +368,7 @@ def build_superadmin_context(request):
     unread_contact_count = IletisimBasvurusu.objects.filter(incelendi=False).count()
     return {
         "profil": request.superadmin_profil,
+        "aktif_menu": aktif_menu(request),
         "app_list": admin_modules,
         "admin_pending_posts": pending_posts,
         "admin_unread_contacts": unread_contacts,

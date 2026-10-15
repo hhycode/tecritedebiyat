@@ -1,0 +1,60 @@
+{% comment %}Kenar menu. Aktif oge views.aktif_menu() ile belirlenir (aktif_menu baglam degiskeni).{% endcomment %}
+<aside class="sa-sidebar" id="sa-sidebar" aria-label="Yönetim menüsü">
+    <div class="sa-sidebar__brand">
+        <a class="sa-brand" href="{% url 'superadmin_dashboard' %}">
+            {% include "superadmin/_components/logo.html" %}
+            <span class="sa-brand__text">
+                <strong>Tecrit Edebiyat</strong>
+                <small>Yönetim Paneli</small>
+            </span>
+        </a>
+        <button class="sa-icon-btn sa-sidebar__close" type="button" data-menu-kapat aria-label="Menüyü kapat">
+            <i class="ph ph-x" aria-hidden="true"></i>
+        </button>
+    </div>
+
+    <nav class="sa-sidebar__nav">
+        <a class="sa-nav-link{% if aktif_menu == 'panel' %} active{% endif %}" href="{% url 'superadmin_dashboard' %}" title="Kontrol Paneli"{% if aktif_menu == 'panel' %} aria-current="page"{% endif %}>
+            <i class="ph ph-squares-four" aria-hidden="true"></i><span class="sa-nav-label">Kontrol Paneli</span>
+        </a>
+
+        <p class="sa-nav-title"><span>İçerik</span></p>
+        <a class="sa-nav-link{% if aktif_menu == 'yazilar' %} active{% endif %}" href="{% url 'superadmin_yazilar' %}" title="Yazılar"{% if aktif_menu == 'yazilar' %} aria-current="page"{% endif %}>
+            <i class="ph ph-article" aria-hidden="true"></i><span class="sa-nav-label">Yazılar</span>
+            {% if admin_pending_post_count %}<span class="sa-badge" aria-label="{{ admin_pending_post_count }} onay bekliyor">{{ admin_pending_post_count }}</span>{% endif %}
+        </a>
+        <a class="sa-nav-link{% if aktif_menu == 'icerik' %} active{% endif %}" href="{% url 'superadmin_icerik_yonetimi' %}" title="İçerik Yönetimi"{% if aktif_menu == 'icerik' %} aria-current="page"{% endif %}>
+            <i class="ph ph-stack" aria-hidden="true"></i><span class="sa-nav-label">İçerik Yönetimi</span>
+        </a>
+
+        <p class="sa-nav-title"><span>Yayınevi</span></p>
+        <a class="sa-nav-link{% if aktif_menu == 'kitaplar' %} active{% endif %}" href="{% url 'superadmin_kitaplar' %}" title="Kitaplar"{% if aktif_menu == 'kitaplar' %} aria-current="page"{% endif %}>
+            <i class="ph ph-books" aria-hidden="true"></i><span class="sa-nav-label">Kitaplar</span>
+        </a>
+        <a class="sa-nav-link{% if aktif_menu == 'maliyet' %} active{% endif %}" href="{% url 'superadmin_kitap_maliyeti_ayarlari' %}" title="Maliyet Ayarları"{% if aktif_menu == 'maliyet' %} aria-current="page"{% endif %}>
+            <i class="ph ph-calculator" aria-hidden="true"></i><span class="sa-nav-label">Maliyet Ayarları</span>
+        </a>
+
+        <p class="sa-nav-title"><span>Topluluk</span></p>
+        <a class="sa-nav-link{% if aktif_menu == 'yazarlar' %} active{% endif %}" href="{% url 'superadmin_yazarlar' %}" title="Yazarlar"{% if aktif_menu == 'yazarlar' %} aria-current="page"{% endif %}>
+            <i class="ph ph-pen-nib" aria-hidden="true"></i><span class="sa-nav-label">Yazarlar</span>
+        </a>
+        <a class="sa-nav-link{% if aktif_menu == 'kullanicilar' %} active{% endif %}" href="{% url 'superadmin_kullanicilar' %}" title="Kullanıcılar"{% if aktif_menu == 'kullanicilar' %} aria-current="page"{% endif %}>
+            <i class="ph ph-users" aria-hidden="true"></i><span class="sa-nav-label">Kullanıcılar</span>
+        </a>
+        <a class="sa-nav-link{% if aktif_menu == 'mesajlar' %} active{% endif %}" href="{% url 'superadmin_iletisim' %}" title="Mesajlar"{% if aktif_menu == 'mesajlar' %} aria-current="page"{% endif %}>
+            <i class="ph ph-envelope-simple" aria-hidden="true"></i><span class="sa-nav-label">Mesajlar</span>
+            {% if admin_unread_contact_count %}<span class="sa-badge" aria-label="{{ admin_unread_contact_count }} okunmamış">{{ admin_unread_contact_count }}</span>{% endif %}
+        </a>
+    </nav>
+
+    <div class="sa-sidebar__footer">
+        <a class="sa-nav-link" href="{% url 'anasayfa' %}" target="_blank" rel="noopener" title="Siteyi görüntüle">
+            <i class="ph ph-arrow-square-out" aria-hidden="true"></i><span class="sa-nav-label">Siteyi görüntüle</span>
+        </a>
+        <button class="sa-nav-link sa-sidebar__collapse" type="button" data-menu-daralt aria-label="Menüyü daralt" title="Menüyü daralt/genişlet">
+            <i class="ph ph-sidebar-simple" aria-hidden="true"></i><span class="sa-nav-label">Menüyü daralt</span>
+        </button>
+    </div>
+</aside>
+<div class="sa-backdrop" data-menu-kapat aria-hidden="true"></div>
