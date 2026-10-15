@@ -23,6 +23,7 @@ import os
 import math
 from urllib.parse import urlencode
 
+from .giris_korumasi import giris_kilitli_mi
 from .forms import (
     ContactForm,
     PanelBlogYazisiForm,
@@ -1759,13 +1760,16 @@ def kayit(request):
 
 def giris(request):
     if request.method == "POST":
-        username = request.POST["username"]
-        password = request.POST["password"]
+        username = request.POST.get("username", "")
+        password = request.POST.get("password", "")
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
             return redirect("yazar_paneli")
-        messages.error(request, "Kullanici adi veya sifre hatali.")
+        if giris_kilitli_mi(request, username):
+            messages.error(request, "Çok fazla hatalı deneme yapıldı. Lütfen 15 dakika sonra tekrar deneyin.")
+        else:
+            messages.error(request, "Kullanici adi veya sifre hatali.")
     return render(request, "giris.html", seo_context("Giris Yap", "Tecrit Edebiyat hesabina giris yapma sayfasi."))
 
 

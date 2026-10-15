@@ -54,6 +54,16 @@ CSRF_COOKIE_SECURE = True
 # Tarayiciya 30 gun boyunca siteye sadece HTTPS ile gelmesini soyler (alt alan adlari haric)
 SECURE_HSTS_SECONDS = 60 * 60 * 24 * 30
 
+# Giris denemesi kilidi (core/giris_korumasi.py); sayaclar isci surecleri arasinda ortak dosya onbelleginde
+AUTHENTICATION_BACKENDS = ["core.giris_korumasi.GirisKorumaliBackend"]
+CACHES = {
+    "default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"},
+    "giris": {
+        "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
+        "LOCATION": BASE_DIR / ".cache" / "giris",
+    },
+}
+
 INSTALLED_APPS = [
     'admin_interface',           # En üste ekle
     'colorfield',                 # Renk seçici için
