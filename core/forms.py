@@ -1,3 +1,4 @@
+from django.conf import settings
 from django import forms
 from django.utils.html import strip_tags
 from django.utils.text import capfirst
@@ -312,7 +313,8 @@ class PanelBlogYazisiForm(forms.ModelForm):
     class Media:
         js = (
             "https://cdn.ckeditor.com/4.22.1/full-all/ckeditor.js",
-            "js/admin-blog-ckeditor.js?v=2",
+            # Mutlak yol: static() sorgu dizgesini kodlayip (%3Fv%3D2) dosyayi 404'e dusurmesin
+            settings.STATIC_URL + "js/admin-blog-ckeditor.js?v=2",
         )
 
     def __init__(self, *args, is_superadmin=False, panel_gorunumu=False, **kwargs):
