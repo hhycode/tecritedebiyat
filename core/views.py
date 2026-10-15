@@ -280,6 +280,17 @@ def panel_yoneticisi_mi(user, profil):
     return user.is_superuser or profil.rol == YazarProfil.RolSecenekleri.SUPERADMIN
 
 
+def panel_baglami(request, profil, menu, **ekler):
+    """Yazar paneli sablonlarinin (templates/panel/base.html) ortak baglami."""
+    return {
+        "profil": profil,
+        "panel_menu": menu,
+        "panel_ad": request.user.first_name.strip() or profil.ad_soyad,
+        "panel_yonetici": panel_yoneticisi_mi(request.user, profil),
+        **ekler,
+    }
+
+
 def superadmin_required(view_func):
     @wraps(view_func)
     @login_required(login_url=reverse_lazy("admin:login"))

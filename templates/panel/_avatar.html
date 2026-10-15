@@ -1,0 +1,6 @@
+{% comment %}Yazar fotografi ya da bas harfi. boyut: sm | lg{% endcomment %}
+{% if profil.fotograf %}
+<img class="yp-avatar yp-avatar--{{ boyut|default:'sm' }}" src="{{ profil.fotograf.url }}" alt="" loading="lazy">
+{% else %}
+<span class="yp-avatar yp-avatar--{{ boyut|default:'sm' }} yp-avatar--harf" aria-hidden="true">{{ profil.ad_soyad|default:request.user.get_username|slice:":1"|upper }}</span>
+{% endif %}

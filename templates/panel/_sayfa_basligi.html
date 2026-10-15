@@ -1,0 +1,6 @@
+{% comment %}Sayfa basligi. baslik, aciklama, geri_url, geri_metin{% endcomment %}
+<header class="yp-head">
+    {% if geri_url %}<a class="yp-back" href="{{ geri_url }}"><i class="ph ph-arrow-left" aria-hidden="true"></i>{{ geri_metin|default:"Panele dön" }}</a>{% endif %}
+    <h1 class="yp-title">{{ baslik }}</h1>
+    {% if aciklama %}<p class="yp-desc">{{ aciklama }}</p>{% endif %}
+</header>
