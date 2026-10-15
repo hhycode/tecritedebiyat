@@ -13,6 +13,14 @@
 
 {% block superadmin_content %}
 {% include "superadmin/_components/search_form.html" with arama=arama placeholder="Bu listede ara" %}
+{% if suzgecler %}
+<nav class="d-flex flex-wrap gap-2 mb-3" aria-label="Hızlı süzgeçler">
+    <a class="sa-btn sa-btn--sm {% if not secili_suzgec %}sa-btn--primary{% else %}sa-btn--secondary{% endif %}" href="{{ request.path }}"{% if not secili_suzgec %} aria-current="page"{% endif %}>Tümü</a>
+    {% for anahtar, etiket, sayi in suzgecler %}
+    <a class="sa-btn sa-btn--sm {% if secili_suzgec == anahtar %}sa-btn--primary{% else %}sa-btn--secondary{% endif %}" href="?suzgec={{ anahtar }}"{% if secili_suzgec == anahtar %} aria-current="page"{% endif %}>{{ etiket }} <span class="sa-badge position-static">{{ sayi }}</span></a>
+    {% endfor %}
+</nav>
+{% endif %}
 
 <div class="card sa-card sa-table-card">
     <div class="card-body p-0">

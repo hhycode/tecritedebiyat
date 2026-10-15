@@ -3,7 +3,7 @@
 {% block sayfa_ust_etiket %}İçerik{% endblock %}
 {% block sayfa_aciklamasi %}Yazarların paylaştığı alıntıları inceleyin; yayına alın, düzeltme isteyin ya da reddedin.{% endblock %}
 {% block sayfa_aksiyonlari %}
-<a class="sa-btn sa-btn--secondary" href="{% url 'superadmin_icerik_model_liste' 'kaynakkitap' %}">Kaynak kitaplar</a>
+<a class="sa-btn sa-btn--secondary" href="{% url 'superadmin_icerik_model_liste' 'kaynakkitap' %}{% if onay_bekleyen_kitap %}?suzgec=onay-bekleyen{% endif %}">Kaynak kitaplar{% if onay_bekleyen_kitap %} <span class="sa-badge position-static">{{ onay_bekleyen_kitap }} yeni</span>{% endif %}</a>
 <a class="sa-btn sa-btn--secondary" href="{% url 'superadmin_kaynak_kitap_birlestir' %}">Kitapları birleştir</a>
 <a class="sa-btn sa-btn--primary" href="{% url 'superadmin_icerik_model_yeni' 'alinti' %}">Alıntı ekle</a>
 {% endblock %}

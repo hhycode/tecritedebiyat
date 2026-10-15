@@ -156,6 +156,8 @@ CONTENT_MODEL_CONFIG = {
         "full_width_fields": {"ad", "kapak"},
         "search_fields": ["ad", "yazar__ad", "isbn"],
         "select_related": ["yazar"],
+        # Liste ustunde hizli suzgecler: (anahtar, etiket, kosul)
+        "suzgecler": [("onay-bekleyen", "Onay bekleyen yeni kitaplar", Q(onayli=False))],
     },
     "kaynakyazar": {
         "model": KaynakYazar,
@@ -582,6 +584,7 @@ def superadmin_alintilar(request):
             "arama": arama,
             "durumler": Alinti.DurumSecenekleri.choices,
             "geri_adres": request.get_full_path(),
+            "onay_bekleyen_kitap": KaynakKitap.objects.filter(onayli=False).count(),
         }
     )
     return render(request, "superadmin/quotes.html", context)
@@ -993,6 +996,11 @@ def superadmin_icerik_model_liste(request, model_key):
 
     arama = request.GET.get("q", "").strip()
     queryset = config["model"].objects.select_related(*config.get("select_related", [])).order_by("-pk")
+    suzgecler = config.get("suzgecler", [])
+    secili_suzgec = request.GET.get("suzgec", "")
+    for anahtar, _, kosul in suzgecler:
+        if anahtar == secili_suzgec:
+            queryset = queryset.filter(kosul)
     if arama:
         queryset = queryset.filter(arama_filtresi(config["search_fields"], arama)).distinct()
     page_obj, sayfa_sorgusu = sayfala(request, queryset)
@@ -1008,6 +1016,10 @@ def superadmin_icerik_model_liste(request, model_key):
             "arama": arama,
             "add_url": reverse("superadmin_icerik_model_yeni", args=[model_key]),
             "model_key": model_key,
+            "suzgecler": [
+                (anahtar, etiket, config["model"].objects.filter(kosul).count()) for anahtar, etiket, kosul in suzgecler
+            ],
+            "secili_suzgec": secili_suzgec,
         }
     )
     return render(request, "superadmin/content_model_list.html", context)
@@ -2402,7 +2414,7 @@ def yazar_paneli(request):
         panel_baglami(
             request,
             profil,
-            "panel",
+            "alintilar" if liste == "alintilar" else "panel",
             sayilar=liste_sayilari,
             yazi_toplam=sayilar["toplam"],
             alinti_toplam=alinti_sayilari["toplam"],
