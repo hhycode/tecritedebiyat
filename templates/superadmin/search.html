@@ -1,0 +1,42 @@
+{% extends "superadmin/base.html" %}
+
+{% block sayfa_ust_etiket %}Arama{% endblock %}
+{% block sayfa_basligi %}{% if arama %}“{{ arama }}” için sonuçlar{% else %}Panelde ara{% endif %}{% endblock %}
+{% block sayfa_aciklamasi %}Yazılar, kitaplar, yazarlar, alıntılar, kullanıcılar ve mesajlar içinde arar.{% endblock %}
+
+{% block superadmin_content %}
+{% if arama|length < 2 %}
+<div class="sa-card">
+    <div class="sa-empty">
+        <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
+        <strong>Aramak için en az 2 karakter yazın</strong>
+        <span>Üstteki arama kutusunu kullanın; kısayol: <kbd class="sa-kbd position-static">/</kbd></span>
+    </div>
+</div>
+{% elif not gruplar %}
+<div class="sa-card">
+    <div class="sa-empty">
+        <i class="ph ph-magnifying-glass-minus" aria-hidden="true"></i>
+        <strong>Sonuç bulunamadı</strong>
+        <span>“{{ arama }}” hiçbir kayıtla eşleşmedi. Farklı bir kelime deneyin.</span>
+    </div>
+</div>
+{% else %}
+<div class="sa-search-grid">
+    {% for grup in gruplar %}
+    <section class="sa-card sa-table-card" aria-labelledby="grup-{{ forloop.counter }}">
+        <div class="sa-search-group__head">
+            <h2 id="grup-{{ forloop.counter }}"><i class="ph {{ grup.ikon }}" aria-hidden="true"></i>{{ grup.baslik }}</h2>
+            <a class="sa-btn sa-btn--secondary sa-btn--sm" href="{{ grup.liste_url }}">{% if grup.daha_fazla %}Tümünü gör{% else %}Listede aç{% endif %}</a>
+        </div>
+        {% for baslik, alt, url in grup.satirlar %}
+        <a class="sa-search-item" href="{{ url }}">
+            <strong>{{ baslik }}</strong>
+            <span>{{ alt }}</span>
+        </a>
+        {% endfor %}
+    </section>
+    {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

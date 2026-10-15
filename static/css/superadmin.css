@@ -348,8 +348,122 @@ html.sa-menu-dar .sa-sidebar__collapse i {
     display: none;
 }
 .sa-topbar__search {
+    position: relative;
     flex: 1;
     min-width: 0;
+    max-width: 520px;
+}
+.sa-topbar__search > i {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--sa-subtle);
+    font-size: 1rem;
+    pointer-events: none;
+}
+.sa-topbar__search input {
+    width: 100%;
+    height: 38px;
+    padding: 0 40px 0 36px;
+    border: 1px solid var(--sa-border);
+    border-radius: var(--sa-radius-sm);
+    background: var(--sa-surface);
+    color: var(--sa-text);
+    font: inherit;
+}
+.sa-topbar__search input::placeholder {
+    color: var(--sa-subtle);
+}
+.sa-topbar__search input:focus {
+    outline: none;
+    border-color: var(--sa-border-strong);
+    box-shadow: var(--sa-focus);
+}
+.sa-kbd {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    padding: 1px 7px;
+    border: 1px solid var(--sa-border);
+    border-radius: 5px;
+    background: var(--sa-surface-2);
+    color: var(--sa-muted);
+    font: 600 .72rem var(--sa-font);
+}
+.sa-topbar__search input:focus + .sa-kbd {
+    display: none;
+}
+
+/* Arama sonuclari */
+.sa-search-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 16px;
+}
+.sa-search-group__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--sa-border);
+}
+.sa-search-group__head h2 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    font-size: .95rem;
+    font-weight: 600;
+}
+.sa-search-group__head h2 i {
+    color: var(--sa-muted);
+}
+.sa-search-item {
+    display: block;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--sa-border);
+    color: var(--sa-text);
+    text-decoration: none;
+}
+.sa-search-item:last-child {
+    border-bottom: 0;
+}
+.sa-search-item:hover {
+    background: var(--sa-surface-2);
+}
+.sa-search-item strong {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 600;
+}
+.sa-search-item span {
+    color: var(--sa-muted);
+    font-size: .82rem;
+}
+
+/* Bos durum */
+.sa-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 40px 20px;
+    color: var(--sa-muted);
+    text-align: center;
+}
+.sa-empty i {
+    margin-bottom: 4px;
+    color: var(--sa-subtle);
+    font-size: 2rem;
+}
+.sa-empty strong {
+    color: var(--sa-text);
+    font-weight: 600;
 }
 .sa-topbar__actions {
     display: flex;
@@ -966,6 +1080,9 @@ a.sa-card:hover {
     }
 }
 @media (max-width: 575.98px) {
+    .sa-kbd {
+        display: none;
+    }
     .sa-user__name,
     .sa-user__toggle > i {
         display: none;

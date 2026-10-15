@@ -47,6 +47,16 @@
         menuyuAyarla(false);
     });
 
+    // "/" tusu ust bardaki aramaya odaklanir (yazi alanindayken degil)
+    var aramaKutusu = document.querySelector(".sa-topbar__search input");
+    document.addEventListener("keydown", function (olay) {
+        if (olay.key !== "/" || !aramaKutusu) return;
+        var hedef = olay.target;
+        if (hedef.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(hedef.tagName)) return;
+        olay.preventDefault();
+        aramaKutusu.focus();
+    });
+
     // data-onay ozelligi olan formlar gonderilmeden once onay ister
     document.addEventListener("submit", function (olay) {
         var mesaj = olay.target.getAttribute("data-onay");

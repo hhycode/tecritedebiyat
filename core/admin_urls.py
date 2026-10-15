@@ -6,6 +6,7 @@ from . import views
 
 urlpatterns = [
     path("", views.superadmin_dashboard, name="superadmin_dashboard"),
+    path("ara/", views.superadmin_ara, name="superadmin_ara"),
     path("auth/user/", RedirectView.as_view(pattern_name="superadmin_kullanicilar", permanent=False)),
     path("auth/user/add/", RedirectView.as_view(pattern_name="superadmin_kullanici_yeni", permanent=False)),
     path("auth/user/<int:pk>/change/", RedirectView.as_view(pattern_name="superadmin_kullanici_duzenle", permanent=False)),

@@ -390,6 +390,53 @@ def superadmin_dashboard(request):
     return render(request, "superadmin/dashboard.html", context)
 
 
+ARAMA_SONUC_LIMITI = 6
+
+
+@superadmin_required
+def superadmin_ara(request):
+    """Ust bardaki arama: yazi, kitap, yazar, alinti, kullanici ve mesajlarda arar."""
+    arama = request.GET.get("q", "").strip()
+    gruplar = []
+    if len(arama) >= 2:
+        tanimlar = [
+            ("Yazılar", "ph-article", BlogYazisi.objects.select_related("yazar"), ["baslik", "yazar__ad_soyad"],
+             lambda o: (o.baslik, o.yazar.ad_soyad, reverse("superadmin_yazi_detay", args=[o.pk])),
+             reverse("superadmin_yazilar")),
+            ("Kitaplar", "ph-books", Kitap.objects.select_related("yazar", "ikinci_yazar"), ["ad", "yazar__ad_soyad", "ikinci_yazar__ad_soyad"],
+             lambda o: (o.ad, o.yazar_adi, reverse("superadmin_icerik_model_duzenle", args=["kitap", o.pk])),
+             reverse("superadmin_kitaplar")),
+            ("Yazarlar", "ph-pen-nib", YazarProfil.objects.select_related("user"), ["ad_soyad", "user__username"],
+             lambda o: (o.ad_soyad, o.get_rol_display(), reverse("superadmin_icerik_model_duzenle", args=["yazarprofil", o.pk])),
+             reverse("superadmin_yazarlar")),
+            ("Alıntılar", "ph-quotes", Alinti.objects.select_related("kitap"), ["metin", "kitap__ad"],
+             lambda o: (o.metin[:90], o.kitap.ad, reverse("superadmin_icerik_model_duzenle", args=["alinti", o.pk])),
+             reverse("superadmin_icerik_model_liste", args=["alinti"])),
+            ("Kullanıcılar", "ph-users", User.objects.all(), ["username", "first_name", "last_name", "email"],
+             lambda o: (o.username, o.email or "-", reverse("superadmin_kullanici_duzenle", args=[o.pk])),
+             reverse("superadmin_kullanicilar")),
+            ("Mesajlar", "ph-envelope-simple", IletisimBasvurusu.objects.all(), ["ad", "soyad", "email", "mesaj"],
+             lambda o: (f"{o.ad} {o.soyad}", o.get_amac_display(), reverse("superadmin_iletisim_detay", args=[o.pk])),
+             reverse("superadmin_iletisim")),
+        ]
+        for baslik, ikon, queryset, alanlar, satir, liste_url in tanimlar:
+            eslesenler = queryset.filter(arama_filtresi(alanlar, arama)).distinct().order_by("-pk")
+            sonuclar = list(eslesenler[: ARAMA_SONUC_LIMITI + 1])
+            if sonuclar:
+                gruplar.append(
+                    {
+                        "baslik": baslik,
+                        "ikon": ikon,
+                        "satirlar": [satir(o) for o in sonuclar[:ARAMA_SONUC_LIMITI]],
+                        "daha_fazla": len(sonuclar) > ARAMA_SONUC_LIMITI,
+                        "liste_url": f"{liste_url}?{urlencode({'q': arama})}",
+                    }
+                )
+    context = build_superadmin_context(request)
+    context.update({"page_title": "Arama", "arama": arama, "ust_arama": arama, "gruplar": gruplar})
+    return render(request, "superadmin/search.html", context)
+
+
 @superadmin_required
 def superadmin_yazilar(request):
     durum = request.GET.get("durum", "").strip()
@@ -402,7 +449,7 @@ def superadmin_yazilar(request):
     if durum:
         yazilar = yazilar.filter(durum=durum)
     if arama:
-        yazilar = yazilar.filter(Q(baslik__icontains=arama) | Q(yazar__ad_soyad__icontains=arama))
+        yazilar = yazilar.filter(arama_filtresi(["baslik", "yazar__ad_soyad"], arama))
     page_obj, sayfa_sorgusu = sayfala(request, yazilar)
     context = build_superadmin_context(request)
     context.update(
@@ -467,12 +514,7 @@ def superadmin_iletisim(request):
     elif durum == "okunmus":
         basvurular = basvurular.filter(incelendi=True)
     if arama:
-        basvurular = basvurular.filter(
-            Q(ad__icontains=arama)
-            | Q(soyad__icontains=arama)
-            | Q(email__icontains=arama)
-            | Q(mesaj__icontains=arama)
-        )
+        basvurular = basvurular.filter(arama_filtresi(["ad", "soyad", "email", "mesaj"], arama))
     page_obj, sayfa_sorgusu = sayfala(request, basvurular)
     context = build_superadmin_context(request)
     context.update(
@@ -685,10 +727,19 @@ def sayfala(request, queryset, adet=ADMIN_SAYFA_BOYUTU):
     return page_obj, sorgu.urlencode()
 
 
+def turkce_harf_varyantlari(metin):
+    """SQLite icontains Turkce harflerde (ş/Ş, ı/I, i/İ) buyuk-kucuk harf ayirt eder; olasi yazimlari uretir."""
+    kucuk = metin.replace("I", "ı").replace("İ", "i").lower()
+    buyuk = metin.replace("i", "İ").replace("ı", "I").upper()
+    bas_buyuk = buyuk[:1] + kucuk[1:]
+    return {metin, kucuk, buyuk, bas_buyuk}
+
+
 def arama_filtresi(alanlar, arama):
     filtre = Q()
-    for alan in alanlar:
-        filtre |= Q(**{f"{alan}__icontains": arama})
+    for varyant in turkce_harf_varyantlari(arama):
+        for alan in alanlar:
+            filtre |= Q(**{f"{alan}__icontains": varyant})
     return filtre
 
 

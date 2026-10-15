@@ -4,7 +4,11 @@
         <i class="ph ph-list" aria-hidden="true"></i>
     </button>
 
-    <div class="sa-topbar__search"></div>
+    <form class="sa-topbar__search" method="get" action="{% url 'superadmin_ara' %}" role="search">
+        <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
+        <input type="search" name="q" value="{{ ust_arama|default:'' }}" placeholder="Panelde ara: yazı, kitap, yazar, kullanıcı…" aria-label="Panelde ara" minlength="2" autocomplete="off">
+        <kbd class="sa-kbd" aria-hidden="true">/</kbd>
+    </form>
 
     <div class="sa-topbar__actions">
         <button class="sa-icon-btn" type="button" data-tema-degistir aria-label="Temayı değiştir" title="Açık/koyu tema">
