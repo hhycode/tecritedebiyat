@@ -728,6 +728,231 @@ body.yp {
     accent-color: var(--sa-danger);
 }
 
+/* Ses ve video */
+.yp-medya-liste {
+    display: grid;
+    gap: 12px;
+    margin: 0 0 12px;
+    padding: 0;
+    list-style: none;
+}
+.yp-medya-liste:empty {
+    display: none;
+}
+.yp-medya {
+    padding: 14px;
+    border: 1px solid var(--sa-border);
+    border-radius: 12px;
+    background: var(--sa-surface);
+}
+.yp-medya__head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.yp-medya__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--sa-accent-soft);
+    color: var(--sa-accent-ink);
+    font-size: 1.15rem;
+}
+.yp-medya__info {
+    flex: 1;
+    min-width: 0;
+}
+.yp-medya__info strong {
+    display: block;
+    overflow: hidden;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.yp-medya__info span {
+    color: var(--sa-muted);
+    font-size: .8rem;
+}
+.yp-medya__oynatici {
+    margin: 12px 0;
+}
+.yp-medya__oynatici audio {
+    display: block;
+    width: 100%;
+}
+.yp-medya__oynatici video,
+.yp-medya__oynatici iframe {
+    display: block;
+    width: 100%;
+    max-height: 320px;
+    border: 0;
+    border-radius: 10px;
+    background: #000;
+}
+.yp-medya__oynatici iframe.is-video {
+    aspect-ratio: 16 / 9;
+    height: auto;
+}
+.yp-medya__oynatici iframe:not(.is-video) {
+    background: transparent;
+}
+.yp-medya .sa-field textarea {
+    min-height: 64px;
+}
+.yp-medya-ekle .yp-tabs {
+    display: inline-flex;
+    max-width: 100%;
+    margin-bottom: 12px;
+}
+.yp-medya-panel {
+    padding: 2px 0;
+}
+.yp-drop {
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    margin: 0 0 8px !important;
+    padding: 26px 16px;
+    border: 1.5px dashed var(--sa-border-strong);
+    border-radius: 12px;
+    background: var(--sa-surface-2);
+    color: var(--sa-muted);
+    font-weight: 400 !important;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color .15s ease, background-color .15s ease;
+}
+.yp-drop i {
+    color: var(--sa-text);
+    font-size: 1.8rem;
+}
+.yp-drop strong {
+    color: var(--sa-text);
+    font-weight: 600;
+}
+.yp-drop span {
+    font-size: .82rem;
+}
+.yp-drop:hover,
+.yp-drop.is-uzerinde {
+    border-color: var(--sa-text);
+    background: var(--sa-accent-soft);
+}
+.yp-file:focus-visible + .yp-drop {
+    box-shadow: var(--sa-focus);
+}
+.yp-inline {
+    display: flex;
+    gap: 8px;
+}
+.yp-inline .form-control {
+    flex: 1;
+    min-width: 0;
+    min-height: 46px;
+    border-radius: 10px;
+    font-size: 1rem;
+}
+.yp-inline .sa-btn {
+    min-height: 46px;
+}
+.yp-yuklemeler {
+    display: grid;
+    gap: 8px;
+    margin: 12px 0 0;
+    padding: 0;
+    list-style: none;
+}
+.yp-yuklemeler:empty {
+    display: none;
+}
+.yp-ilerleme {
+    padding: 10px 12px;
+    border: 1px solid var(--sa-border);
+    border-radius: 10px;
+}
+.yp-ilerleme__ust {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+    font-size: .85rem;
+}
+.yp-ilerleme__ad {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.yp-ilerleme__yuzde {
+    color: var(--sa-muted);
+    font-variant-numeric: tabular-nums;
+}
+.yp-ilerleme__cubuk {
+    height: 6px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: var(--sa-surface-3);
+}
+.yp-ilerleme__dolgu {
+    display: block;
+    width: 0;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--sa-primary);
+    transition: width .2s ease;
+}
+.yp-kayit {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+    border: 1px solid var(--sa-border);
+    border-radius: 12px;
+    background: var(--sa-surface-2);
+}
+.yp-kayit__durum {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 12px;
+    font-size: .88rem;
+}
+.yp-kayit__isik {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--sa-border-strong);
+}
+.yp-kayit.is-kayitta .yp-kayit__isik {
+    background: var(--sa-danger);
+    animation: yp-nabiz 1.2s ease-in-out infinite;
+}
+.yp-kayit__sure {
+    font-size: 1.35rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+.yp-kayit audio {
+    width: 100%;
+}
+.yp-kayit__dugmeler {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+@keyframes yp-nabiz {
+    50% { opacity: .35; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .yp-kayit.is-kayitta .yp-kayit__isik { animation: none; }
+}
+
 /* Katlanir bolum (SEO) */
 .yp-details {
     border: 1px solid var(--sa-border);
@@ -1026,6 +1251,22 @@ body.yp {
     }
     .yp-card .sa-pagination {
         padding: 12px 16px 14px;
+    }
+    .yp-medya-ekle .yp-tabs {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        width: 100%;
+    }
+    .yp-medya-ekle .yp-tabs a {
+        justify-content: center;
+        padding: 7px 4px;
+        font-size: .78rem;
+    }
+    .yp-medya-ekle .yp-tabs i {
+        display: none;
+    }
+    .yp-inline {
+        flex-direction: column;
     }
 }
 @media (prefers-reduced-motion: reduce) {

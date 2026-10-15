@@ -1,0 +1,26 @@
+{% comment %}Yazi formunda tek medya karti. medya: YaziMedyasi. Ayni yapi medya.js'teki <template> ile de uretilir.{% endcomment %}
+<li class="yp-medya" data-medya-id="{{ medya.pk }}" data-kaynak="{{ medya.kaynak }}" data-bagli="{% if medya.yazi_id %}1{% endif %}">
+    <input type="hidden" name="medya" value="{{ medya.pk }}">
+    <div class="yp-medya__head">
+        <i class="ph {% if medya.kaynak == 'baglanti' %}ph-link{% elif medya.tur == 'video' %}ph-film-strip{% else %}ph-microphone{% endif %} yp-medya__icon" aria-hidden="true"></i>
+        <div class="yp-medya__info">
+            <strong data-medya-ad>{% if medya.kaynak == "baglanti" %}{{ medya.get_saglayici_display }}{% else %}{{ medya.orijinal_ad }}{% endif %}</strong>
+            <span data-medya-ozet>{% if medya.kaynak == "baglanti" %}{{ medya.get_tur_display }} bağlantısı{% else %}{{ medya.get_tur_display }} · {{ medya.boyut_metni }}{% endif %}</span>
+        </div>
+        <button type="button" class="sa-btn sa-btn--danger-outline sa-btn--sm" data-medya-kaldir><i class="ph ph-x" aria-hidden="true"></i>Kaldır</button>
+    </div>
+    <div class="yp-medya__oynatici" data-medya-oynatici>
+        {% if medya.kaynak == "dosya" %}
+            {% if medya.tur == "video" %}<video controls playsinline preload="metadata" src="{{ medya.dosya.url }}"></video>
+            {% else %}<audio controls preload="metadata" src="{{ medya.dosya.url }}"></audio>{% endif %}
+        {% else %}
+            <iframe src="{{ medya.gomme_adresi }}" title="{{ medya.get_saglayici_display }} oynatıcısı" loading="lazy"
+                    {% if medya.gomme_yuksekligi %}height="{{ medya.gomme_yuksekligi }}"{% else %}class="is-video"{% endif %}
+                    allow="autoplay; encrypted-media; fullscreen; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+        {% endif %}
+    </div>
+    <div class="sa-field">
+        <label for="medya-aciklama-{{ medya.pk }}">Açıklama ya da transkript <span class="sa-muted fw-normal">(isteğe bağlı)</span></label>
+        <textarea id="medya-aciklama-{{ medya.pk }}" name="medya_aciklama_{{ medya.pk }}" rows="2" maxlength="{{ medya_kurallari.ACIKLAMA_SINIRI }}" placeholder="Görme ya da işitme engelli okurlar için kısa açıklama veya metnin tamamı">{{ medya.aciklama }}</textarea>
+    </div>
+</li>

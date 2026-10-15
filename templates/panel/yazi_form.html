@@ -9,6 +9,8 @@
 
 {% block ek_js %}
 {{ form.media }}
+<script src="{% static 'js/medya.js' %}?v=1"></script>
+<script src="{% static 'js/ses-kaydi.js' %}?v=1"></script>
 {% endblock %}
 
 {% block ust %}
@@ -113,6 +115,72 @@
                     </div>
                 </div>
             </div>
+        </section>
+
+        <section class="yp-section" aria-labelledby="yp-b-medya" id="medya"
+                 data-medya
+                 data-yukle-url="{% url 'yazar_panel_medya_yukle' %}"
+                 data-baglanti-url="{% url 'yazar_panel_medya_baglanti' %}"
+                 data-sil-url="{% url 'yazar_panel_medya_sil' 0 %}"
+                 data-en-fazla="{{ medya_kurallari.YAZI_BASINA_MEDYA }}"
+                 data-ses-siniri="{{ medya_kurallari.SES_SINIRI }}"
+                 data-video-siniri="{{ medya_kurallari.VIDEO_SINIRI }}"
+                 data-kayit-suresi="{{ medya_kurallari.KAYIT_SURESI_SN }}"
+                 data-aciklama-siniri="{{ medya_kurallari.ACIKLAMA_SINIRI }}">
+            <h2 class="yp-section__title" id="yp-b-medya">Ses ve video <span class="text-lowercase fw-normal">(isteğe bağlı)</span></h2>
+            <p class="sa-help mt-0 mb-3">Şiirinizi seslendirebilir, bir söyleşi videosu ekleyebilirsiniz. Yazınızın sayfasında metnin üstünde gösterilir; en fazla {{ medya_kurallari.YAZI_BASINA_MEDYA }} tane.</p>
+
+            <ul class="yp-medya-liste" data-medya-liste aria-live="polite">
+                {% for medya in medya_listesi %}{% include "panel/_medya_karti.html" %}{% endfor %}
+            </ul>
+
+            <div class="yp-medya-ekle" data-medya-ekle>
+                <div class="yp-tabs" role="tablist" aria-label="Medya ekleme yöntemi">
+                    <a href="#medya-dosya" role="tab" aria-selected="true" aria-current="true" aria-controls="medya-dosya" id="medya-sekme-dosya" data-medya-sekme="dosya"><i class="ph ph-upload-simple" aria-hidden="true"></i>Dosya yükle</a>
+                    <a href="#medya-baglanti" role="tab" aria-selected="false" aria-controls="medya-baglanti" id="medya-sekme-baglanti" data-medya-sekme="baglanti" tabindex="-1"><i class="ph ph-link" aria-hidden="true"></i>Bağlantı ekle</a>
+                    <a href="#medya-kayit" role="tab" aria-selected="false" aria-controls="medya-kayit" id="medya-sekme-kayit" data-medya-sekme="kayit" tabindex="-1"><i class="ph ph-microphone" aria-hidden="true"></i>Ses kaydet</a>
+                </div>
+
+                <div class="yp-medya-panel" role="tabpanel" id="medya-dosya" aria-labelledby="medya-sekme-dosya" data-medya-panel="dosya">
+                    <input class="yp-file" type="file" id="medya-dosya-girdi" accept=".mp3,.m4a,.ogg,.wav,.mp4,.webm,audio/mpeg,audio/mp4,audio/ogg,audio/wav,video/mp4,video/webm" data-medya-dosya>
+                    <label class="yp-drop" for="medya-dosya-girdi" data-medya-birak>
+                        <i class="ph ph-cloud-arrow-up" aria-hidden="true"></i>
+                        <strong>Dosya seçin ya da buraya sürükleyin</strong>
+                        <span>Ses: MP3, M4A, OGG, WAV — en fazla {{ medya_kurallari.SES_SINIRI|filesizeformat }} · Video: MP4, WebM — en fazla {{ medya_kurallari.VIDEO_SINIRI|filesizeformat }}</span>
+                    </label>
+                    <p class="sa-help mb-0">iPhone'larda en sorunsuz çalışan biçimler MP3/M4A (ses) ve MP4 (video).</p>
+                </div>
+
+                <div class="yp-medya-panel" role="tabpanel" id="medya-baglanti" aria-labelledby="medya-sekme-baglanti" data-medya-panel="baglanti" hidden>
+                    <label for="medya-baglanti-girdi" class="form-label fw-semibold">Bağlantıyı yapıştırın</label>
+                    <div class="yp-inline">
+                        <input type="url" id="medya-baglanti-girdi" class="form-control" inputmode="url" placeholder="https://www.youtube.com/watch?v=…" data-medya-baglanti autocomplete="off">
+                        <button type="button" class="sa-btn sa-btn--secondary" data-medya-baglanti-ekle><i class="ph ph-plus" aria-hidden="true"></i>Ekle</button>
+                    </div>
+                    <p class="sa-help mb-0">YouTube, Vimeo, SoundCloud ve Spotify bağlantıları desteklenir.</p>
+                </div>
+
+                <div class="yp-medya-panel" role="tabpanel" id="medya-kayit" aria-labelledby="medya-sekme-kayit" data-medya-panel="kayit" hidden>
+                    <div class="yp-kayit" data-kayit>
+                        <div class="yp-kayit__durum">
+                            <span class="yp-kayit__isik" aria-hidden="true"></span>
+                            <span class="yp-kayit__sure" data-kayit-sure aria-live="off">00:00</span>
+                            <span class="sa-muted" data-kayit-bilgi>Mikrofonunuzla en fazla {% widthratio medya_kurallari.KAYIT_SURESI_SN 60 1 %} dakikalık kayıt yapabilirsiniz. Kaydı dinleyip onayladıktan sonra eklenir.</span>
+                        </div>
+                        <audio controls hidden data-kayit-dinle></audio>
+                        <div class="yp-kayit__dugmeler">
+                            <button type="button" class="sa-btn sa-btn--primary" data-kayit-basla><i class="ph ph-record" aria-hidden="true"></i>Kaydı başlat</button>
+                            <button type="button" class="sa-btn sa-btn--danger" data-kayit-durdur hidden><i class="ph ph-stop" aria-hidden="true"></i>Durdur</button>
+                            <button type="button" class="sa-btn sa-btn--accent" data-kayit-ekle hidden><i class="ph ph-check" aria-hidden="true"></i>Kaydı ekle</button>
+                            <button type="button" class="sa-btn sa-btn--secondary" data-kayit-yeniden hidden><i class="ph ph-arrow-counter-clockwise" aria-hidden="true"></i>Yeniden kaydet</button>
+                        </div>
+                    </div>
+                </div>
+
+                <ul class="yp-yuklemeler" data-medya-yuklemeler aria-live="polite"></ul>
+                <p class="sa-errors" data-medya-hata role="alert" hidden></p>
+            </div>
+            <p class="sa-help" data-medya-dolu hidden>En fazla {{ medya_kurallari.YAZI_BASINA_MEDYA }} medya ekleyebilirsiniz. Yenisini eklemek için birini kaldırın.</p>
         </section>
 
         <section class="yp-section">
