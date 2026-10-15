@@ -1901,3 +1901,13 @@ body.custom-menu-open .custom-menu-toggle * {
         padding: 6rem 11rem 0 0;
     }
 }
+
+/* Footer: tema masaustunde sutunlara sabit 650 px veriyordu; menuye madde eklenince
+   (SSS ile 9 madde) sol kart tasiyordu. 650 px en az yukseklik olarak kalir, icerik
+   artarsa sutunlar birlikte uzar (ayni boyda kalirlar). */
+@media only screen and (min-width: 1200px) {
+    .mxd-footer .footer-blocks__column {
+        height: auto;
+        min-height: 650px;
+    }
+}

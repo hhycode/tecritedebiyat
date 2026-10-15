@@ -80,7 +80,7 @@
     <link rel="stylesheet" type="text/css" href="{% static 'css/loaders/loader.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/plugins.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/custom.css' %}?v=6">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/custom.css' %}?v=7">
 
     <meta name="theme-color" media="(prefers-color-scheme: light)" content="#FAF7F6">
     <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#161616">
@@ -204,14 +204,9 @@
                 <div class="footer-blocks__card fullheight-card">
                     <div class="footer-blocks__nav">
                         <ul class="footer-nav">
-                            <li class="footer-nav__item anim-uni-in-up"><a href="{% url 'anasayfa' %}" class="footer-nav__link btn-anim"><span class="btn-caption">Ana Sayfa</span></a></li>
-                            <li class="footer-nav__item anim-uni-in-up"><a href="{% url 'hakkimizda' %}" class="footer-nav__link btn-anim"><span class="btn-caption">Hakkımızda</span></a></li>
-                            <li class="footer-nav__item anim-uni-in-up"><a href="/kitaplar/" class="footer-nav__link btn-anim"><span class="btn-caption">Kitaplar</span></a></li>
-                            <li class="footer-nav__item anim-uni-in-up"><a href="/yazarlar/" class="footer-nav__link btn-anim"><span class="btn-caption">Yazarlar</span></a></li>
-                            <li class="footer-nav__item anim-uni-in-up"><a href="{% url 'kitap_maliyeti_hesapla' %}" class="footer-nav__link btn-anim"><span class="btn-caption">Teklif Al</span></a></li>
-                            <li class="footer-nav__item anim-uni-in-up"><a href="/blog/" class="footer-nav__link btn-anim"><span class="btn-caption">Blog</span></a></li>
-                            <li class="footer-nav__item anim-uni-in-up"><a href="{% url 'alintilar' %}" class="footer-nav__link btn-anim"><span class="btn-caption">Alıntılar</span></a></li>
-                            <li class="footer-nav__item anim-uni-in-up"><a href="/iletisim/" class="footer-nav__link btn-anim"><span class="btn-caption">İletişim</span></a></li>
+                            {% for madde in site_menusu %}
+                            <li class="footer-nav__item anim-uni-in-up"><a href="{{ madde.url }}" class="footer-nav__link btn-anim"{% if madde.aktif %} aria-current="page"{% endif %}><span class="btn-caption">{{ madde.etiket }}</span></a></li>
+                            {% endfor %}
                         </ul>
                     </div>
                     <div class="footer-blocks__links anim-uni-in-up">
