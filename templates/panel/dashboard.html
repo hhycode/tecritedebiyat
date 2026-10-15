@@ -11,25 +11,26 @@
     </div>
     <div class="yp-hero__actions">
         <a class="sa-btn sa-btn--primary sa-btn--lg" href="{% url 'yazar_panel_yeni_yazi' %}"><i class="ph ph-pen-nib" aria-hidden="true"></i>Yeni yazı gönder</a>
+        <a class="sa-btn sa-btn--secondary sa-btn--lg" href="{% url 'yazar_panel_yeni_alinti' %}"><i class="ph ph-quotes" aria-hidden="true"></i>Alıntı paylaş</a>
     </div>
 </section>
 {% endblock %}
 
 {% block icerik %}
-<div class="yp-stats" role="list" aria-label="Yazı özetiniz">
-    <a role="listitem" class="sa-kpi{% if durum == 'yayinda' %} is-active{% endif %}" href="?durum=yayinda#yazilarim">
-        <span class="sa-kpi__head"><span class="sa-kpi__label">Yayındaki yazılarım</span><span class="sa-kpi__icon sa-kpi__icon--success"><i class="ph ph-check-circle" aria-hidden="true"></i></span></span>
+<div class="yp-stats" role="list" aria-label="{% if liste == 'alintilar' %}Alıntı{% else %}Yazı{% endif %} özetiniz">
+    <a role="listitem" class="sa-kpi{% if durum == 'yayinda' %} is-active{% endif %}" href="?{{ liste_sorgusu }}durum=yayinda#yazilarim">
+        <span class="sa-kpi__head"><span class="sa-kpi__label">Yayındaki {% if liste == 'alintilar' %}alıntılarım{% else %}yazılarım{% endif %}</span><span class="sa-kpi__icon sa-kpi__icon--success"><i class="ph ph-check-circle" aria-hidden="true"></i></span></span>
         <span class="sa-kpi__value">{{ sayilar.yayinda }}</span>
     </a>
-    <a role="listitem" class="sa-kpi{% if durum == 'taslak' %} is-active{% endif %}" href="?durum=taslak#yazilarim">
+    <a role="listitem" class="sa-kpi{% if durum == 'taslak' %} is-active{% endif %}" href="?{{ liste_sorgusu }}durum=taslak#yazilarim">
         <span class="sa-kpi__head"><span class="sa-kpi__label">Taslaklarım</span><span class="sa-kpi__icon"><i class="ph ph-note-pencil" aria-hidden="true"></i></span></span>
         <span class="sa-kpi__value">{{ sayilar.taslak }}</span>
     </a>
-    <a role="listitem" class="sa-kpi{% if durum == 'incelemede' %} is-active{% endif %}" href="?durum=incelemede#yazilarim">
+    <a role="listitem" class="sa-kpi{% if durum == 'incelemede' %} is-active{% endif %}" href="?{{ liste_sorgusu }}durum=incelemede#yazilarim">
         <span class="sa-kpi__head"><span class="sa-kpi__label">İncelemede</span><span class="sa-kpi__icon sa-kpi__icon--warning"><i class="ph ph-hourglass-medium" aria-hidden="true"></i></span></span>
         <span class="sa-kpi__value">{{ sayilar.incelemede }}</span>
     </a>
-    <a role="listitem" class="sa-kpi{% if durum == 'duzeltme' %} is-active{% endif %}{% if sayilar.duzeltme %} sa-kpi--dikkat{% endif %}" href="?durum=duzeltme#yazilarim">
+    <a role="listitem" class="sa-kpi{% if durum == 'duzeltme' %} is-active{% endif %}{% if sayilar.duzeltme %} sa-kpi--dikkat{% endif %}" href="?{{ liste_sorgusu }}durum=duzeltme#yazilarim">
         <span class="sa-kpi__head"><span class="sa-kpi__label">Düzeltme / ret</span><span class="sa-kpi__icon sa-kpi__icon--danger"><i class="ph ph-arrow-u-up-left" aria-hidden="true"></i></span></span>
         <span class="sa-kpi__value">{{ sayilar.duzeltme }}</span>
     </a>
@@ -39,20 +40,62 @@
     <section class="yp-card" id="yazilarim" aria-labelledby="yp-yazilarim-baslik">
         <div class="yp-card__head">
             <div>
-                <h2 class="yp-card__title" id="yp-yazilarim-baslik">Yazılarım</h2>
+                <h2 class="visually-hidden" id="yp-yazilarim-baslik">{% if liste == 'alintilar' %}Alıntılarım{% else %}Yazılarım{% endif %}</h2>
+                <nav class="yp-liste-sec" aria-label="Liste">
+                    <a href="?#yazilarim"{% if liste == 'yazilar' %} aria-current="page"{% endif %}>Yazılarım <b>{{ yazi_toplam }}</b></a>
+                    <a href="?liste=alintilar#yazilarim"{% if liste == 'alintilar' %} aria-current="page"{% endif %}>Alıntılarım <b>{{ alinti_toplam }}</b></a>
+                </nav>
                 <p class="yp-card__sub">Son güncellenenler üstte</p>
             </div>
             {% if sayilar.toplam %}
             <nav class="yp-tabs" aria-label="Duruma göre süz">
                 {% for anahtar, ad, sayi in durum_sekmeleri %}
-                <a href="{% if anahtar %}?durum={{ anahtar }}{% else %}?{% endif %}#yazilarim"{% if durum == anahtar %} aria-current="true"{% endif %}>{{ ad }} <b>{{ sayi }}</b></a>
+                <a href="?{{ liste_sorgusu }}{% if anahtar %}durum={{ anahtar }}{% endif %}#yazilarim"{% if durum == anahtar %} aria-current="true"{% endif %}>{{ ad }} <b>{{ sayi }}</b></a>
                 {% endfor %}
             </nav>
             {% endif %}
         </div>
 
         <div class="yp-card__body--flush">
-            {% if page_obj.object_list %}
+            {% if page_obj.object_list and liste == "alintilar" %}
+            <ul class="yp-posts">
+                {% for alinti in page_obj.object_list %}
+                <li class="yp-post">
+                    <div class="yp-post__main">
+                        <a class="yp-post__title yp-post__title--alinti" href="{% url 'yazar_panel_alinti_duzenle' alinti.pk %}">“{{ alinti.metin|truncatechars:110 }}”</a>
+                        <div class="yp-post__meta">
+                            {% include "panel/_durum.html" with yazi=alinti %}
+                            {% if alinti.kaynak %}<span><i class="ph ph-book-open" aria-hidden="true"></i>{{ alinti.kaynak.ad }} — {{ alinti.kaynak.yazar.ad }}{% if alinti.sayfa_no %}, s. {{ alinti.sayfa_no }}{% endif %}</span>{% endif %}
+                            {% if alinti.updated_at %}<span><i class="ph ph-clock" aria-hidden="true"></i><time datetime="{{ alinti.updated_at|date:'c' }}">{{ alinti.updated_at|date:"j M Y" }}</time></span>{% endif %}
+                        </div>
+                        {% if alinti.admin_notu and alinti.durum == "duzeltme" or alinti.admin_notu and alinti.durum == "reddedildi" %}
+                        <p class="yp-post__note"><i class="ph ph-chat-circle-text" aria-hidden="true"></i><span><b>Editör notu:</b> {{ alinti.admin_notu }}</span></p>
+                        {% endif %}
+                    </div>
+                    <div class="yp-post__actions">
+                        {% if alinti.durum == "yayinda" and alinti.kaynak %}
+                        <a class="sa-btn sa-btn--secondary sa-btn--sm" href="{{ alinti.kaynak.get_absolute_url }}" target="_blank" rel="noopener"><i class="ph ph-arrow-square-out" aria-hidden="true"></i>Görüntüle</a>
+                        {% endif %}
+                        <a class="sa-btn sa-btn--secondary sa-btn--sm" href="{% url 'yazar_panel_alinti_duzenle' alinti.pk %}"><i class="ph ph-pencil-simple" aria-hidden="true"></i>Düzenle</a>
+                        <form method="post" action="{% url 'yazar_panel_alinti_sil' alinti.pk %}" data-onay="Bu alıntı kalıcı olarak silinecek. Bu işlem geri alınamaz. Devam edilsin mi?">
+                            {% csrf_token %}
+                            <button type="submit" class="sa-btn sa-btn--danger-outline sa-btn--sm" aria-label="Alıntıyı sil"><i class="ph ph-trash" aria-hidden="true"></i><span class="yp-hide-sm">Sil</span></button>
+                        </form>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+            {% if page_obj.paginator.num_pages > 1 %}
+            {% include "superadmin/_components/pagination.html" with page_obj=page_obj sayfa_sorgusu=sayfa_sorgusu %}
+            {% endif %}
+            {% elif liste == "alintilar" and not sayilar.toplam %}
+            <div class="yp-empty">
+                <i class="ph ph-quotes" aria-hidden="true"></i>
+                <strong>Henüz alıntı paylaşmadınız</strong>
+                <span>Okuduğunuz bir kitaptan etkilendiğiniz bir bölümü kaynağıyla birlikte paylaşın.</span>
+                <a class="sa-btn sa-btn--primary" href="{% url 'yazar_panel_yeni_alinti' %}"><i class="ph ph-quotes" aria-hidden="true"></i>İlk alıntımı paylaş</a>
+            </div>
+            {% elif page_obj.object_list and liste == "yazilar" %}
             <ul class="yp-posts">
                 {% for yazi in page_obj.object_list %}
                 <li class="yp-post">
@@ -105,18 +148,18 @@
                 <span>Yazarken “Taslak olarak kaydet”i seçerseniz yazınız burada sizi bekler.</span>
                 {% elif durum == "incelemede" %}
                 <i class="ph ph-hourglass-medium" aria-hidden="true"></i>
-                <strong>İncelemede yazınız yok</strong>
-                <span>Gönderdiğiniz yazılar editör onayını beklerken burada görünür.</span>
+                <strong>İncelemede {% if liste == 'alintilar' %}alıntınız{% else %}yazınız{% endif %} yok</strong>
+                <span>Gönderdikleriniz editör onayını beklerken burada görünür.</span>
                 {% elif durum == "yayinda" %}
                 <i class="ph ph-books" aria-hidden="true"></i>
-                <strong>Henüz yayında yazınız yok</strong>
-                <span>Editör onayladığında yazılarınız burada listelenir.</span>
+                <strong>Henüz yayında {% if liste == 'alintilar' %}alıntınız{% else %}yazınız{% endif %} yok</strong>
+                <span>Editör onayladığında burada listelenir.</span>
                 {% else %}
                 <i class="ph ph-check-circle" aria-hidden="true"></i>
-                <strong>Düzeltme bekleyen yazınız yok</strong>
-                <span>Editör bir yazınız için değişiklik isterse burada görürsünüz.</span>
+                <strong>Düzeltme bekleyen {% if liste == 'alintilar' %}alıntınız{% else %}yazınız{% endif %} yok</strong>
+                <span>Editör değişiklik isterse burada görürsünüz.</span>
                 {% endif %}
-                <a class="sa-btn sa-btn--secondary sa-btn--sm" href="?#yazilarim">Tüm yazılarımı göster</a>
+                <a class="sa-btn sa-btn--secondary sa-btn--sm" href="?{{ liste_sorgusu }}#yazilarim">Tümünü göster</a>
             </div>
             {% endif %}
         </div>
@@ -127,7 +170,7 @@
             <div class="yp-card__head">
                 <div>
                     <h2 class="yp-card__title" id="yp-bildirim-baslik">Geri bildirimler</h2>
-                    <p class="yp-card__sub">Editörün yazılarınızla ilgili son işlemleri</p>
+                    <p class="yp-card__sub">Editörün yazı ve alıntılarınızla ilgili son işlemleri</p>
                 </div>
             </div>
             <div class="yp-card__body--flush">
@@ -135,11 +178,11 @@
                 <ul class="sa-feed yp-feed">
                     {% for g in geri_bildirimler %}
                     <li>
-                        <a class="sa-feed__item" href="{% url 'yazar_panel_yazi_duzenle' g.yazi.pk %}">
+                        <a class="sa-feed__item" href="{{ g.oge.url }}">
                             <i class="ph {{ g.ikon }}{% if g.renk %} yp-feed__icon--{{ g.renk }}{% endif %}" aria-hidden="true"></i>
                             <div>
-                                <strong>{{ g.yazi.baslik }}</strong>
-                                <span>{{ g.metin }} · <time datetime="{{ g.zaman|date:'c' }}">{{ g.zaman|date:"j M, H:i" }}</time></span>
+                                <strong>{{ g.oge.baslik }}</strong>
+                                <span>{{ g.oge.tur }} · {{ g.metin }} · <time datetime="{{ g.zaman|date:'c' }}">{{ g.zaman|date:"j M, H:i" }}</time></span>
                                 {% if g.not %}<div class="yp-feed__quote">{{ g.not }}</div>{% endif %}
                             </div>
                         </a>
@@ -150,7 +193,7 @@
                 <div class="yp-empty yp-empty--sm">
                     <i class="ph ph-bell-simple" aria-hidden="true"></i>
                     <strong>Henüz geri bildirim yok</strong>
-                    <span>Editör yazılarınızı incelediğinde sonuç burada görünür.</span>
+                    <span>Editör gönderdiklerinizi incelediğinde sonuç burada görünür.</span>
                 </div>
                 {% endif %}
             </div>
@@ -171,6 +214,7 @@
             <div class="yp-card__body">
                 <nav class="yp-quick" aria-labelledby="yp-hizli-baslik">
                     <a class="is-primary" href="{% url 'yazar_panel_yeni_yazi' %}"><i class="ph ph-pen-nib" aria-hidden="true"></i><span><strong>Yeni yazı gönder</strong><span>Öykü, deneme, şiir…</span></span></a>
+                    <a href="{% url 'yazar_panel_yeni_alinti' %}"><i class="ph ph-quotes" aria-hidden="true"></i><span><strong>Alıntı paylaş</strong><span>Okuduğunuz kitaplardan</span></span></a>
                     <a href="{% url 'yazar_panel_profil' %}"><i class="ph ph-user-circle" aria-hidden="true"></i><span><strong>Profili düzenle</strong><span>Fotoğraf, biyografi, bağlantılar</span></span></a>
                     <a href="{% url 'yazar_panel_sifre' %}"><i class="ph ph-lock-key" aria-hidden="true"></i><span><strong>Şifremi değiştir</strong><span>Hesap güvenliği</span></span></a>
                 </nav>

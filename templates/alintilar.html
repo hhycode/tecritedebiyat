@@ -53,7 +53,7 @@
 <div class="mxd-section padding-default alintilar-grid-section">
     <div class="mxd-container grid-l-container">
         <div class="mxd-block">
-            <p class="te-alinti-giris">Okurlarımız ve yazarlarımız okudukları kitaplardan alıntıları <a href="{% url 'yazar_paneli' %}">yazar panelinden</a> paylaşabilir; her alıntı editör onayından sonra yayımlanır.</p>
+            <p class="te-alinti-giris">Okurlarımız ve yazarlarımız okudukları kitaplardan alıntıları <a href="{% url 'yazar_panel_yeni_alinti' %}">yazar panelinden</a> paylaşabilir; her alıntı editör onayından sonra yayımlanır.</p>
             {% include "partials/alinti_listesi.html" with yorum_goster=False %}
         </div>
     </div>

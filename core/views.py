@@ -30,7 +30,9 @@ from urllib.parse import urlencode
 from .dashboard import dashboard_verisi
 from .giris_korumasi import giris_kilitli_mi
 from .forms import (
+    yazarin_gorebildigi_kitaplar,
     ContactForm,
+    PanelAlintiForm,
     PanelBlogYazisiForm,
     PanelPasswordForm,
     PanelProfileForm,
@@ -56,6 +58,7 @@ from .forms import (
     SuperadminYazarProfilForm,
 )
 from .models import (
+    ALINTI_SINIRI,
     Alinti,
     AlintiKategori,
     AnaSayfaYayinKarti,
@@ -2082,19 +2085,36 @@ def yazar_panel_ozeti(profil):
     return sayilar
 
 
-def yazar_panel_karsilama(sayilar, kitap_sayisi):
+def yazar_alinti_ozeti(user):
+    """Kullanicinin paylastigi alintilarin durum sayilari (tek sorgu)."""
+    D = Alinti.DurumSecenekleri
+    return Alinti.objects.filter(paylasan=user).aggregate(
+        toplam=Count("id"),
+        yayinda=Count("id", filter=Q(durum=D.YAYINDA)),
+        taslak=Count("id", filter=Q(durum=D.TASLAK)),
+        incelemede=Count("id", filter=Q(durum=D.INCELEMEDE)),
+        duzeltme=Count("id", filter=Q(durum__in=PANEL_DURUM_FILTRELERI["duzeltme"])),
+    )
+
+
+def yazar_panel_karsilama(sayilar, kitap_sayisi, alinti_sayilari=None):
     """Karsilama alanindaki kisa durum ozeti; yalnizca gercek sayilardan cumle kurar."""
-    if not sayilar["toplam"]:
-        return ["Panelinize hoş geldiniz. İlk yazınızı gönderdiğinizde durumunu buradan takip edebilirsiniz."]
+    alinti_sayilari = alinti_sayilari or {"toplam": 0, "duzeltme": 0, "incelemede": 0}
+    if not sayilar["toplam"] and not alinti_sayilari["toplam"]:
+        return ["Panelinize hoş geldiniz. İlk yazınızı ya da bir kitaptan alıntınızı gönderdiğinizde durumunu buradan takip edebilirsiniz."]
     cumleler = []
     if sayilar["duzeltme"]:
         cumleler.append(f"{sayilar['duzeltme']} yazınız için editörden geri bildirim var.")
+    if alinti_sayilari["duzeltme"]:
+        cumleler.append(f"{alinti_sayilari['duzeltme']} alıntınız için editörden geri bildirim var.")
+    if alinti_sayilari["incelemede"]:
+        cumleler.append(f"{alinti_sayilari['incelemede']} alıntınız editör incelemesinde.")
     if sayilar["incelemede"]:
         cumleler.append(f"{sayilar['incelemede']} yazınız editör incelemesinde.")
     if sayilar["taslak"]:
         cumleler.append(f"{sayilar['taslak']} taslağınız sizi bekliyor.")
     if not cumleler:
-        cumleler.append("Bekleyen bir işiniz yok; tüm yazılarınız yayında.")
+        cumleler.append("Bekleyen bir işiniz yok; gönderdikleriniz yayında.")
     if sayilar["okunma"]:
         cumleler.append(f"Yayındaki yazılarınız 15 Ekim 2026'dan bu yana {sayilar['okunma']} kez okundu.")
     if kitap_sayisi:
@@ -2113,42 +2133,53 @@ GERI_BILDIRIM_METINLERI = {
 
 
 def yazar_geri_bildirimleri(request, profil, adet=6):
-    """Yazarin yazilari uzerinde baskalarinin (editorlerin) yaptigi islemler; LogEntry'den okunur."""
-    yazilar = {str(y["pk"]): y for y in BlogYazisi.objects.filter(yazar=profil).values("pk", "baslik", "durum", "admin_notu")}
-    if not yazilar:
+    """Yazarin yazilari ve alintilari uzerinde baskalarinin (editorlerin) yaptigi islemler; LogEntry'den okunur."""
+    kayitli = {}
+    for y in BlogYazisi.objects.filter(yazar=profil).values("pk", "baslik", "durum", "admin_notu"):
+        kayitli[("blogyazisi", str(y["pk"]))] = {
+            **y, "url": reverse("yazar_panel_yazi_duzenle", args=[y["pk"]]), "tur": "Yazı",
+        }
+    for a in Alinti.objects.filter(paylasan=request.user).values("pk", "metin", "durum", "admin_notu", "kaynak__ad"):
+        kayitli[("alinti", str(a["pk"]))] = {
+            "pk": a["pk"], "baslik": a["kaynak__ad"] or a["metin"][:40], "durum": a["durum"], "admin_notu": a["admin_notu"],
+            "url": reverse("yazar_panel_alinti_duzenle", args=[a["pk"]]), "tur": "Alıntı",
+        }
+    if not kayitli:
         return []
+    kosul = Q()
+    for model in ("blogyazisi", "alinti"):
+        kimlikler = [k[1] for k in kayitli if k[0] == model]
+        if kimlikler:
+            kosul |= Q(content_type__model=model, object_id__in=kimlikler)
     kayitlar = (
-        LogEntry.objects.filter(
-            content_type__app_label="core",
-            content_type__model="blogyazisi",
-            object_id__in=list(yazilar),
-            action_flag=CHANGE,
-        )
+        LogEntry.objects.filter(kosul, content_type__app_label="core", action_flag=CHANGE)
         .exclude(user=request.user)
+        .select_related("content_type")
         .order_by("-action_time")[:adet]
     )
     sonuc = []
     gosterilen_not = set()
     for kayit in kayitlar:
-        yazi = yazilar[kayit.object_id]
+        oge = kayitli[(kayit.content_type.model, kayit.object_id)]
         mesaj = kayit.get_change_message()
         if mesaj.startswith("Durum: "):
             metin, renk, ikon = GERI_BILDIRIM_METINLERI.get(mesaj[7:], (mesaj[7:], "", "ph-info"))
         elif mesaj == "Yazara not güncellendi":
             metin, renk, ikon = "Editör not bıraktı", "warning", "ph-chat-circle-text"
         else:
-            metin, renk, ikon = "Editör yazınızı düzenledi", "", "ph-pencil-simple"
-        # Not, yalnizca yazi hala duzeltme/ret durumundaysa ve o yazinin en yeni kaydinda gosterilir
+            metin, renk, ikon = f"Editör {oge['tur'].lower()}nızı düzenledi", "", "ph-pencil-simple"
+        # Not, yalnizca icerik hala duzeltme/ret durumundaysa ve en yeni kaydinda gosterilir
         not_metni = ""
+        anahtar = (kayit.content_type.model, oge["pk"])
         if (
-            yazi["admin_notu"]
-            and yazi["durum"] in PANEL_DURUM_FILTRELERI["duzeltme"]
+            oge["admin_notu"]
+            and oge["durum"] in PANEL_DURUM_FILTRELERI["duzeltme"]
             and renk in ("warning", "danger")
-            and yazi["pk"] not in gosterilen_not
+            and anahtar not in gosterilen_not
         ):
-            not_metni = yazi["admin_notu"]
-            gosterilen_not.add(yazi["pk"])
-        sonuc.append({"yazi": yazi, "metin": metin, "renk": renk, "ikon": ikon, "zaman": kayit.action_time, "not": not_metni})
+            not_metni = oge["admin_notu"]
+            gosterilen_not.add(anahtar)
+        sonuc.append({"oge": oge, "metin": metin, "renk": renk, "ikon": ikon, "zaman": kayit.action_time, "not": not_metni})
     return sonuc
 
 
@@ -2158,18 +2189,29 @@ def yazar_paneli(request):
     sayilar = yazar_panel_ozeti(profil)
     kitap_sayisi = Kitap.objects.filter(Q(yazar=profil) | Q(ikinci_yazar=profil), yayinda=True).count()
 
+    alinti_sayilari = yazar_alinti_ozeti(request.user)
+    liste = "alintilar" if request.GET.get("liste") == "alintilar" else "yazilar"
     durum = request.GET.get("durum", "")
     if durum not in PANEL_DURUM_FILTRELERI:
         durum = ""
-    yazilar = (
-        BlogYazisi.objects.filter(yazar=profil)
-        .select_related("kategori")
-        .only("baslik", "slug", "durum", "kategori__ad", "okunma_sayisi", "admin_notu", "yayin_tarihi", "created_at", "updated_at")
-        .order_by(F("updated_at").desc(nulls_last=True), "-id")
-    )
+    if liste == "alintilar":
+        kayitlar = (
+            Alinti.objects.filter(paylasan=request.user)
+            .select_related("kaynak__yazar")
+            .order_by(F("updated_at").desc(nulls_last=True), "-id")
+        )
+        liste_sayilari = alinti_sayilari
+    else:
+        kayitlar = (
+            BlogYazisi.objects.filter(yazar=profil)
+            .select_related("kategori")
+            .only("baslik", "slug", "durum", "kategori__ad", "okunma_sayisi", "admin_notu", "yayin_tarihi", "created_at", "updated_at")
+            .order_by(F("updated_at").desc(nulls_last=True), "-id")
+        )
+        liste_sayilari = sayilar
     if durum:
-        yazilar = yazilar.filter(durum__in=PANEL_DURUM_FILTRELERI[durum])
-    page_obj, sayfa_sorgusu = sayfala(request, yazilar, PANEL_SAYFA_BOYUTU)
+        kayitlar = kayitlar.filter(durum__in=PANEL_DURUM_FILTRELERI[durum])
+    page_obj, sayfa_sorgusu = sayfala(request, kayitlar, PANEL_SAYFA_BOYUTU)
 
     profil_eksikleri = [ad for ad, dolu in (("fotoğraf", profil.fotograf), ("biyografi", profil.biyografi.strip())) if not dolu]
 
@@ -2180,15 +2222,19 @@ def yazar_paneli(request):
             request,
             profil,
             "panel",
-            sayilar=sayilar,
-            karsilama=yazar_panel_karsilama(sayilar, kitap_sayisi),
+            sayilar=liste_sayilari,
+            yazi_toplam=sayilar["toplam"],
+            alinti_toplam=alinti_sayilari["toplam"],
+            liste=liste,
+            liste_sorgusu="liste=alintilar&" if liste == "alintilar" else "",
+            karsilama=yazar_panel_karsilama(sayilar, kitap_sayisi, alinti_sayilari),
             durum=durum,
             durum_sekmeleri=[
-                ("", "Tümü", sayilar["toplam"]),
-                ("taslak", "Taslak", sayilar["taslak"]),
-                ("incelemede", "İncelemede", sayilar["incelemede"]),
-                ("yayinda", "Yayında", sayilar["yayinda"]),
-                ("duzeltme", "Düzeltme / ret", sayilar["duzeltme"]),
+                ("", "Tümü", liste_sayilari["toplam"]),
+                ("taslak", "Taslak", liste_sayilari["taslak"]),
+                ("incelemede", "İncelemede", liste_sayilari["incelemede"]),
+                ("yayinda", "Yayında", liste_sayilari["yayinda"]),
+                ("duzeltme", "Düzeltme / ret", liste_sayilari["duzeltme"]),
             ],
             page_obj=page_obj,
             sayfa_sorgusu=sayfa_sorgusu,
@@ -2481,3 +2527,139 @@ def yazar_panel_yazi_sil(request, pk):
 
     return redirect("yazar_panel_yazi_duzenle", pk=pk)
 
+
+# ---------- Yazar paneli: alintilar ----------
+
+@login_required(login_url="giris")
+def yazar_panel_kitap_ara(request):
+    """Alinti formundaki kitap/yazar onerileri (JSON). Yalnizca onayli kitaplar ve kullanicinin ekledikleri."""
+    from .kaynak import normal_anahtar
+
+    sorgu = normal_anahtar(request.GET.get("q", ""))[:100]
+    if len(sorgu) < 2:
+        return JsonResponse({"kitaplar": [], "yazarlar": []})
+    if request.GET.get("tur") == "yazar":
+        yazarlar = (
+            KaynakYazar.objects.filter(ad_normal__contains=sorgu)
+            .filter(Q(kitaplar__onayli=True) | Q(kitaplar__ekleyen=request.user))
+            .distinct()
+            .order_by("ad")[:20]
+        )
+        sirali = sorted(yazarlar, key=lambda y: (not y.ad_normal.startswith(sorgu), y.ad_normal))[:8]
+        return JsonResponse({"kitaplar": [], "yazarlar": [{"ad": y.ad} for y in sirali]})
+    adaylar = (
+        yazarin_gorebildigi_kitaplar(request.user)
+        .filter(Q(ad_normal__contains=sorgu) | Q(yazar__ad_normal__contains=sorgu))
+        .select_related("yazar", "katalog_kitabi")
+        .order_by("ad")[:30]
+    )
+    sirali = sorted(adaylar, key=lambda k: (not k.ad_normal.startswith(sorgu), not k.yazar.ad_normal.startswith(sorgu), k.ad_normal))[:8]
+    return JsonResponse(
+        {
+            "kitaplar": [
+                {
+                    "id": k.pk,
+                    "ad": k.ad,
+                    "yazar": k.yazar.ad,
+                    "kunye": " · ".join(str(p) for p in [k.yayinevi, k.basim_yili] if p),
+                    "kapak": k.kapak_url,
+                    "onay_bekliyor": not k.onayli,
+                }
+                for k in sirali
+            ],
+            "yazarlar": [],
+        }
+    )
+
+
+def yazar_alinti_formu(request, profil, alinti=None):
+    """Yeni alinti ve duzenleme. Yazar: taslak ya da incelemeye gonder; yonetici dogrudan yayinlayabilir."""
+    D = Alinti.DurumSecenekleri
+    yonetici = panel_yoneticisi_mi(request.user, profil)
+    yeni_mi = alinti is None
+    onceki_durum = None if yeni_mi else alinti.durum
+
+    if request.method == "POST":
+        form = PanelAlintiForm(request.POST, request.FILES, instance=alinti, user=request.user)
+        if form.is_valid():
+            islem = request.POST.get("islem")
+            with transaction.atomic():
+                kaynak = form.kaynak_kitabi_hazirla()
+                alinti = form.save(commit=False)
+                alinti.kaynak = kaynak
+                alinti.paylasan = request.user
+                if islem == "taslak":
+                    alinti.durum = D.TASLAK
+                elif yonetici and islem == "yayinla":
+                    alinti.durum = D.YAYINDA
+                    alinti.onaylayan = request.user
+                else:
+                    alinti.durum = D.INCELEMEDE
+                if alinti.durum != D.YAYINDA:
+                    alinti.onaylayan = None
+                alinti.save()
+                form.save_m2m()
+                islem_kaydet(
+                    request, alinti, ADDITION if yeni_mi else CHANGE,
+                    f"Yazar panelinden {'eklendi' if yeni_mi else 'güncellendi'} ({alinti.get_durum_display()})",
+                )
+            if form.mevcut_kitap_kullanildi:
+                messages.info(request, f"“{kaynak}” zaten kayıtlıydı; alıntınız bu kitaba eklendi.")
+            if alinti.durum == D.TASLAK:
+                messages.success(request, "Alıntınız taslak olarak kaydedildi.")
+                return redirect("yazar_panel_alinti_duzenle", pk=alinti.pk)
+            if alinti.durum == D.YAYINDA:
+                messages.success(request, "Alıntınız yayında.")
+            elif onceki_durum == D.YAYINDA:
+                messages.success(request, "Değişiklikleriniz kaydedildi. Alıntınız editör onayından sonra yeniden yayımlanacak.")
+            else:
+                messages.success(request, "Alıntınız editör onayına gönderildi.")
+            return redirect(f"{reverse('yazar_paneli')}?liste=alintilar#yazilarim")
+        messages.error(request, "Alıntınız kaydedilmedi. Lütfen işaretli alanları düzeltin.")
+        if alinti is not None:
+            alinti = Alinti.objects.select_related("kaynak__yazar").get(pk=alinti.pk)
+    else:
+        form = PanelAlintiForm(instance=alinti, user=request.user)
+
+    # Formda gosterilecek secili kitap (gecersiz gonderimde de korunur)
+    secili_kitap = None
+    kaynak_id = form["kaynak_id"].value()
+    if kaynak_id and str(kaynak_id).isdigit():
+        secili_kitap = yazarin_gorebildigi_kitaplar(request.user).select_related("yazar").filter(pk=int(kaynak_id)).first()
+
+    return render(
+        request,
+        "panel/alinti_form.html",
+        panel_baglami(
+            request,
+            profil,
+            "alinti" if yeni_mi else "panel",
+            form=form,
+            alinti=alinti,
+            secili_kitap=secili_kitap,
+            yonetici=yonetici,
+            alinti_siniri=ALINTI_SINIRI,
+        ),
+    )
+
+
+@login_required(login_url="giris")
+def yazar_panel_yeni_alinti(request):
+    return yazar_alinti_formu(request, get_or_create_user_profile(request.user))
+
+
+@login_required(login_url="giris")
+def yazar_panel_alinti_duzenle(request, pk):
+    alinti = get_object_or_404(Alinti.objects.select_related("kaynak__yazar"), pk=pk, paylasan=request.user)
+    return yazar_alinti_formu(request, get_or_create_user_profile(request.user), alinti)
+
+
+@login_required(login_url="giris")
+@require_POST
+def yazar_panel_alinti_sil(request, pk):
+    alinti = get_object_or_404(Alinti, pk=pk, paylasan=request.user)
+    with transaction.atomic():
+        islem_kaydet(request, alinti, DELETION, "Yazar panelinden silindi")
+        alinti.delete()
+    messages.success(request, "Alıntınız silindi.")
+    return redirect(f"{reverse('yazar_paneli')}?liste=alintilar#yazilarim")

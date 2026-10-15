@@ -338,6 +338,35 @@ body.yp {
     font-variant-numeric: tabular-nums;
 }
 
+/* ---------- Yazilar / alintilar secimi ---------- */
+.yp-liste-sec {
+    display: flex;
+    gap: 18px;
+}
+.yp-liste-sec a {
+    padding-bottom: 4px;
+    border-bottom: 2px solid transparent;
+    color: var(--sa-muted);
+    font-family: var(--yp-font-baslik);
+    font-size: 1.12rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+.yp-liste-sec a[aria-current="page"] {
+    border-bottom-color: var(--sa-text);
+    color: var(--sa-text);
+}
+.yp-liste-sec b {
+    color: var(--sa-subtle);
+    font-family: var(--sa-font);
+    font-size: .8rem;
+    font-weight: 600;
+}
+.yp-post__title--alinti {
+    font-family: var(--yp-font-baslik);
+    font-weight: 500;
+}
+
 /* ---------- Yazi listesi ---------- */
 .yp-posts {
     margin: 0;
@@ -951,6 +980,132 @@ body.yp {
 }
 @media (prefers-reduced-motion: reduce) {
     .yp-kayit.is-kayitta .yp-kayit__isik { animation: none; }
+}
+
+/* Alinti formu: kitap secimi */
+.yp-combobox {
+    position: relative;
+}
+.yp-combobox > i {
+    position: absolute;
+    top: 50%;
+    left: 14px;
+    color: var(--sa-muted);
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+.yp-combobox input {
+    padding-left: 40px !important;
+}
+.yp-combobox__liste {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(100% + 6px);
+    z-index: 20;
+    max-height: 340px;
+    margin: 0;
+    padding: 6px;
+    overflow-y: auto;
+    border: 1px solid var(--sa-border);
+    border-radius: 12px;
+    background: var(--sa-surface);
+    box-shadow: var(--sa-shadow-lg);
+    list-style: none;
+}
+.yp-combobox__secenek {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+.yp-combobox__secenek:hover,
+.yp-combobox__secenek[aria-selected="true"] {
+    background: var(--sa-surface-2);
+}
+.yp-combobox__kapak,
+.yp-kitap-secili__kapak {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 34px;
+    height: 48px;
+    overflow: hidden;
+    border-radius: 4px;
+    background: var(--sa-surface-3);
+    color: var(--sa-muted);
+}
+.yp-combobox__kapak img,
+.yp-kitap-secili__kapak img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.yp-combobox__metin {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+.yp-combobox__metin strong {
+    overflow: hidden;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.yp-combobox__metin span {
+    color: var(--sa-muted);
+    font-size: .8rem;
+}
+.yp-combobox__ekle {
+    margin-top: 4px;
+    border-top: 1px solid var(--sa-border);
+    border-radius: 0 0 8px 8px;
+    color: var(--sa-text);
+    font-weight: 600;
+}
+.yp-combobox__ekle i {
+    font-size: 1.2rem;
+}
+.yp-kitap-secili {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border: 1px solid var(--sa-border);
+    border-radius: 12px;
+    background: var(--sa-surface-2);
+}
+.yp-kitap-secili__bilgi {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+}
+.yp-kitap-secili__bilgi strong {
+    font-family: var(--yp-font-baslik);
+    font-size: 1.05rem;
+    font-weight: 600;
+}
+.yp-kitap-secili__bilgi span {
+    color: var(--sa-muted);
+    font-size: .85rem;
+}
+.yp-yeni-kitap {
+    margin-top: 4px;
+    padding: 16px;
+    border: 1px dashed var(--sa-border-strong);
+    border-radius: 12px;
+}
+.yp-yeni-kitap legend {
+    float: none;
+    width: auto;
+    margin: 0 0 4px;
+    padding: 0 6px;
+    font-size: 1rem;
+    font-weight: 600;
 }
 
 /* Katlanir bolum (SEO) */

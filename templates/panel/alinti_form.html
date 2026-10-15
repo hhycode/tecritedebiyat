@@ -1,0 +1,138 @@
+{% extends "panel/base.html" %}
+{% load static %}
+
+{% block baslik %}{% if alinti %}Alıntıyı düzenle{% else %}Alıntı paylaş{% endif %}{% endblock %}
+
+{% block ek_js %}
+<script src="{% static 'js/kitap-sec.js' %}?v=1"></script>
+{% endblock %}
+
+{% block ust %}
+{% url 'yazar_paneli' as panel_url %}
+{% if alinti %}
+{% include "panel/_sayfa_basligi.html" with baslik="Alıntıyı düzenle" aciklama="Kaynağı ve metni güncelleyebilirsiniz; değişiklikler editör onayından geçer." geri_url=panel_url %}
+{% else %}
+{% include "panel/_sayfa_basligi.html" with baslik="Alıntı paylaş" aciklama="Okuduğunuz bir kitaptan etkilendiğiniz bir bölümü paylaşın. Kaynak her zaman alıntıyla birlikte gösterilir; editör onayından sonra yayımlanır." geri_url=panel_url %}
+{% endif %}
+{% endblock %}
+
+{% block icerik %}
+{% if alinti and not yonetici %}
+    {% if alinti.durum == "duzeltme" or alinti.durum == "reddedildi" %}
+    <div class="yp-note yp-note--danger" role="note">
+        <i class="ph ph-chat-circle-text" aria-hidden="true"></i>
+        <div>
+            <strong>{% if alinti.durum == "duzeltme" %}Editör bu alıntı için düzeltme istedi{% else %}Bu alıntı reddedildi{% endif %}</strong>
+            {% if alinti.admin_notu %}<p class="yp-note__text">{{ alinti.admin_notu }}</p>{% endif %}
+            <p class="sa-muted mt-1">Düzenleyip yeniden incelemeye gönderebilirsiniz.</p>
+        </div>
+    </div>
+    {% elif alinti.durum == "yayinda" %}
+    <div class="yp-note yp-note--warning" role="note">
+        <i class="ph ph-warning" aria-hidden="true"></i>
+        <div>
+            <strong>Bu alıntı şu anda yayında</strong>
+            <p>Değişiklikleri kaydettiğinizde alıntı, editör yeniden onaylayana kadar sitede görünmez.</p>
+        </div>
+    </div>
+    {% endif %}
+{% endif %}
+
+<form method="post" enctype="multipart/form-data" class="yp-card yp-form" data-gonderim
+      {% if alinti.durum == "yayinda" and not yonetici %}data-onay="Alıntınız editör yeniden onaylayana kadar sitede görünmeyecek. Devam edilsin mi?"{% endif %}>
+    {% csrf_token %}
+    <div class="yp-card__body">
+        {% if form.non_field_errors %}
+        <div class="alert sa-alert alert-danger" role="alert">{% for hata in form.non_field_errors %}<div>{{ hata }}</div>{% endfor %}</div>
+        {% endif %}
+
+        <section class="yp-section" aria-labelledby="yp-b-kitap">
+            <h2 class="yp-section__title" id="yp-b-kitap">Kitap</h2>
+            <div class="yp-kitap-sec" data-kitap-sec data-ara-url="{% url 'yazar_panel_kitap_ara' %}">
+                {{ form.kaynak_id }}
+                <div class="yp-kitap-secili" data-secili {% if not secili_kitap %}hidden{% endif %}>
+                    <span class="yp-kitap-secili__kapak" data-secili-kapak>{% if secili_kitap.kapak_url %}<img src="{{ secili_kitap.kapak_url }}" alt="">{% else %}<i class="ph ph-book-open" aria-hidden="true"></i>{% endif %}</span>
+                    <span class="yp-kitap-secili__bilgi">
+                        <strong data-secili-ad>{{ secili_kitap.ad }}</strong>
+                        <span data-secili-yazar>{{ secili_kitap.yazar.ad }}{% if secili_kitap.basim_yili %} · {{ secili_kitap.basim_yili }}{% endif %}</span>
+                    </span>
+                    <button type="button" class="sa-btn sa-btn--secondary sa-btn--sm" data-degistir><i class="ph ph-arrows-left-right" aria-hidden="true"></i>Değiştir</button>
+                </div>
+
+                <div class="sa-field{% if form.kaynak_id.errors %} sa-field--error{% endif %}" data-arama-alani {% if secili_kitap %}hidden{% endif %}>
+                    <label for="kitap-ara">Kitap adı ya da yazarı</label>
+                    <div class="yp-combobox">
+                        <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
+                        <input type="text" id="kitap-ara" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="kitap-oneriler"
+                               autocomplete="off" placeholder="ör. Kürk Mantolu Madonna" data-arama
+                               value="{% if not secili_kitap %}{{ form.yeni_kitap_ad.value|default:'' }}{% endif %}">
+                        <ul class="yp-combobox__liste" id="kitap-oneriler" role="listbox" aria-label="Kitap önerileri" hidden data-oneriler></ul>
+                    </div>
+                    <span class="sa-help">En az iki harf yazın; kayıtlı kitaplar önerilir. Bulamazsanız yeni kitap olarak ekleyebilirsiniz.</span>
+                    <span class="visually-hidden" aria-live="polite" data-oneri-durum></span>
+                    {% for hata in form.kaynak_id.errors %}<p class="sa-errors">{{ hata }}</p>{% endfor %}
+                </div>
+
+                <fieldset class="yp-yeni-kitap" data-yeni-kitap {% if secili_kitap or not form.yeni_kitap_ad.value and not form.yeni_yazar_ad.value %}hidden{% endif %}>
+                    <legend>Yeni kitap ekle</legend>
+                    <p class="sa-help mt-0 mb-3">Kitap, ilk alıntısı onaylandığında sitede görünür. Aynı kitap zaten kayıtlıysa mevcut kayıt kullanılır.</p>
+                    <div class="sa-form-grid">
+                        {% include "panel/_alan.html" with field=form.yeni_kitap_ad etiket="Kitap adı" %}
+                        <div class="sa-field{% if form.yeni_yazar_ad.errors %} sa-field--error{% endif %}">
+                            <label for="{{ form.yeni_yazar_ad.id_for_label }}">Yazarı</label>
+                            <input type="text" name="{{ form.yeni_yazar_ad.html_name }}" id="{{ form.yeni_yazar_ad.id_for_label }}" maxlength="150" list="yazar-onerileri" autocomplete="off" value="{{ form.yeni_yazar_ad.value|default:'' }}" data-yazar>
+                            <datalist id="yazar-onerileri" data-yazar-oneriler></datalist>
+                            {% for hata in form.yeni_yazar_ad.errors %}<p class="sa-errors">{{ hata }}</p>{% endfor %}
+                        </div>
+                        {% include "panel/_alan.html" with field=form.yeni_yayinevi etiket="Yayınevi (isteğe bağlı)" %}
+                        {% include "panel/_alan.html" with field=form.yeni_basim_yili etiket="Basım yılı (isteğe bağlı)" %}
+                        {% include "panel/_alan.html" with field=form.yeni_isbn etiket="ISBN (isteğe bağlı)" %}
+                        <div class="sa-field{% if form.yeni_kapak.errors %} sa-field--error{% endif %}">
+                            <label for="{{ form.yeni_kapak.id_for_label }}">Kapak görseli (isteğe bağlı)</label>
+                            <input type="file" name="{{ form.yeni_kapak.html_name }}" id="{{ form.yeni_kapak.id_for_label }}" accept="image/*">
+                            <span class="sa-help">En fazla 5 MB.</span>
+                            {% for hata in form.yeni_kapak.errors %}<p class="sa-errors">{{ hata }}</p>{% endfor %}
+                        </div>
+                    </div>
+                    <button type="button" class="sa-btn sa-btn--secondary sa-btn--sm mt-3" data-yeni-vazgec><i class="ph ph-magnifying-glass" aria-hidden="true"></i>Kayıtlı kitaplarda ara</button>
+                </fieldset>
+            </div>
+        </section>
+
+        <section class="yp-section" aria-labelledby="yp-b-alinti">
+            <h2 class="yp-section__title" id="yp-b-alinti">Alıntı</h2>
+            <div class="sa-form-grid">
+                {% include "panel/_alan.html" with field=form.metin etiket="Alıntı" sayac=alinti_siniri tam=True %}
+                {% include "panel/_alan.html" with field=form.sayfa_no etiket="Sayfa (isteğe bağlı)" %}
+                {% include "panel/_alan.html" with field=form.kategori etiket="Kategori (isteğe bağlı)" %}
+                {% include "panel/_alan.html" with field=form.yorum etiket="Kişisel yorumunuz (isteğe bağlı)" sayac=alinti_siniri tam=True yardim="Kitap sayfasında alıntının altında “Paylaşanın notu” olarak görünür." %}
+            </div>
+        </section>
+
+        <div class="yp-actions">
+            <span class="yp-actions__hint">Alıntılar kaynağıyla birlikte, editör onayından sonra yayımlanır.</span>
+            <button class="sa-btn sa-btn--secondary sa-btn--lg" type="submit" name="islem" value="taslak" data-yukleniyor="Kaydediliyor…"><i class="ph ph-floppy-disk" aria-hidden="true"></i><span data-metin>Taslak olarak kaydet</span></button>
+            {% if yonetici %}
+            <button class="sa-btn sa-btn--primary sa-btn--lg" type="submit" name="islem" value="yayinla" data-yukleniyor="Yayınlanıyor…"><i class="ph ph-check" aria-hidden="true"></i><span data-metin>Yayınla</span></button>
+            {% else %}
+            <button class="sa-btn sa-btn--primary sa-btn--lg" type="submit" name="islem" value="gonder" data-yukleniyor="Gönderiliyor…"><i class="ph ph-paper-plane-tilt" aria-hidden="true"></i><span data-metin>İncelemeye gönder</span></button>
+            {% endif %}
+        </div>
+    </div>
+</form>
+
+{% if alinti %}
+<section class="yp-card" aria-labelledby="yp-b-sil">
+    <div class="yp-card__body d-flex flex-wrap align-items-center justify-content-between gap-3">
+        <div>
+            <h2 class="yp-card__title" id="yp-b-sil">Alıntıyı sil</h2>
+            <p class="yp-card__sub">Alıntı kalıcı olarak silinir ve eklendiği yazılardan da kalkar. Bu işlem geri alınamaz.</p>
+        </div>
+        <form method="post" action="{% url 'yazar_panel_alinti_sil' alinti.pk %}" data-onay="Bu alıntı kalıcı olarak silinecek. Devam edilsin mi?">
+            {% csrf_token %}
+            <button class="sa-btn sa-btn--danger-outline" type="submit"><i class="ph ph-trash" aria-hidden="true"></i>Alıntıyı sil</button>
+        </form>
+    </div>
+</section>
+{% endif %}
+{% endblock %}

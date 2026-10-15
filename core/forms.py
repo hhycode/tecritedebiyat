@@ -1,5 +1,6 @@
 from django.conf import settings
 from django import forms
+from django.db import models
 from django.utils.html import strip_tags
 from django.utils.text import capfirst
 from django.forms import DateInput
@@ -9,6 +10,7 @@ from django.contrib.auth.password_validation import validate_password
 
 from .models import (
     Alinti,
+    ALINTI_SINIRI,
     AlintiKategori,
     AnaSayfaYayinKarti,
     BlogKategori,
@@ -391,6 +393,139 @@ class PanelBlogYazisiForm(forms.ModelForm):
             yazi.save()
             self.save_m2m()
         return yazi
+
+
+def yazarin_gorebildigi_kitaplar(user):
+    """Oneride ve secimde kullanilabilecek kaynak kitaplar: onaylilar + kullanicinin kendi ekledikleri."""
+    return KaynakKitap.objects.filter(models.Q(onayli=True) | models.Q(ekleyen=user))
+
+
+class PanelAlintiForm(forms.ModelForm):
+    """Yazar panelinde alinti: secilen kitap (kaynak_id) ya da yeni kitap alanlari.
+
+    Ayni kitap tekrar olusturulmaz: ad + yazar Turkce duyarli normal anahtarla eslesirse mevcut kayit kullanilir.
+    """
+
+    kaynak_id = forms.IntegerField(required=False, widget=forms.HiddenInput)
+    yeni_kitap_ad = forms.CharField(label="Kitap adı", max_length=200, required=False)
+    yeni_yazar_ad = forms.CharField(label="Yazarı", max_length=150, required=False)
+    yeni_yayinevi = forms.CharField(label="Yayınevi", max_length=150, required=False)
+    yeni_basim_yili = forms.IntegerField(label="Basım yılı", required=False, min_value=1450, max_value=2100)
+    yeni_isbn = forms.CharField(label="ISBN", max_length=20, required=False)
+    yeni_kapak = forms.ImageField(label="Kapak görseli", required=False)
+
+    class Meta:
+        model = Alinti
+        fields = ["metin", "sayfa_no", "yorum", "kategori"]
+        widgets = {
+            "metin": forms.Textarea(attrs={"rows": 5, "maxlength": ALINTI_SINIRI, "placeholder": "Kitaptaki cümleyi olduğu gibi yazın"}),
+            "yorum": forms.Textarea(attrs={"rows": 3, "maxlength": ALINTI_SINIRI, "placeholder": "Bu alıntı size ne düşündürdü? (isteğe bağlı)"}),
+            "sayfa_no": forms.NumberInput(attrs={"min": 1, "max": 99999, "inputmode": "numeric", "placeholder": "ör. 42"}),
+        }
+
+    def __init__(self, *args, user=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.user = user
+        self.mevcut_kitap_kullanildi = False
+        self.fields["metin"].label = "Alıntı"
+        self.fields["sayfa_no"].label = "Sayfa"
+        self.fields["yorum"].label = "Kişisel yorumunuz"
+        self.fields["kategori"].label = "Kategori"
+        self.fields["kategori"].empty_label = "Kategori seçin (isteğe bağlı)"
+        self.fields["kategori"].queryset = AlintiKategori.objects.order_by("ad")
+        if self.instance.pk and self.instance.kaynak_id and not self.is_bound:
+            self.initial["kaynak_id"] = self.instance.kaynak_id
+
+    def clean_metin(self):
+        metin = self.cleaned_data["metin"].strip()
+        if len(metin) < 3:
+            raise forms.ValidationError("Alıntı çok kısa.")
+        return metin
+
+    def clean_sayfa_no(self):
+        sayfa = self.cleaned_data.get("sayfa_no")
+        if sayfa is not None and not 1 <= sayfa <= 99999:
+            raise forms.ValidationError("Geçerli bir sayfa numarası yazın.")
+        return sayfa
+
+    def clean_yeni_kapak(self):
+        return gorsel_boyutunu_dogrula(self.cleaned_data.get("yeni_kapak"))
+
+    def clean_yeni_isbn(self):
+        from .kaynak import isbn_normal
+
+        deger = self.cleaned_data.get("yeni_isbn", "").strip()
+        if deger and not isbn_normal(deger):
+            raise forms.ValidationError("ISBN 10 ya da 13 haneli olmalı (tireler olabilir).")
+        return isbn_normal(deger)
+
+    def clean(self):
+        from .kaynak import normal_anahtar
+
+        temiz = super().clean()
+        kaynak_id = temiz.get("kaynak_id")
+        self.secilen_kitap = None
+        self.yeni_kitap = None
+        if kaynak_id:
+            self.secilen_kitap = yazarin_gorebildigi_kitaplar(self.user).filter(pk=kaynak_id).select_related("yazar").first()
+            if self.secilen_kitap is None:
+                self.add_error("kaynak_id", "Seçtiğiniz kitap bulunamadı. Yeniden arayıp seçin.")
+            return temiz
+
+        kitap_ad = " ".join(temiz.get("yeni_kitap_ad", "").split())
+        yazar_ad = " ".join(temiz.get("yeni_yazar_ad", "").split())
+        if not kitap_ad and not yazar_ad:
+            self.add_error("kaynak_id", "Alıntının hangi kitaptan olduğunu seçin ya da yeni kitap ekleyin.")
+            return temiz
+        if not kitap_ad:
+            self.add_error("yeni_kitap_ad", "Kitabın adını yazın.")
+        if not yazar_ad:
+            self.add_error("yeni_yazar_ad", "Kitabın yazarını yazın.")
+        if not kitap_ad or not yazar_ad:
+            return temiz
+
+        # Ayni kitap zaten varsa onu kullan (yeni kayit acma)
+        mevcut = KaynakKitap.objects.select_related("yazar").filter(
+            ad_normal=normal_anahtar(kitap_ad), yazar__ad_normal=normal_anahtar(yazar_ad)
+        ).first()
+        isbn = temiz.get("yeni_isbn", "")
+        if isbn:
+            isbn_kitabi = KaynakKitap.objects.select_related("yazar").filter(isbn=isbn).first()
+            if isbn_kitabi and (mevcut is None or isbn_kitabi.pk != mevcut.pk):
+                self.add_error("yeni_isbn", f"Bu ISBN zaten “{isbn_kitabi}” kitabına ait. Arama kutusundan o kitabı seçin.")
+                return temiz
+        if mevcut:
+            self.secilen_kitap = mevcut
+            self.mevcut_kitap_kullanildi = True
+        else:
+            self.yeni_kitap = {
+                "ad": kitap_ad,
+                "yazar_ad": yazar_ad,
+                "yayinevi": " ".join(temiz.get("yeni_yayinevi", "").split()),
+                "basim_yili": temiz.get("yeni_basim_yili"),
+                "isbn": isbn,
+                "kapak": temiz.get("yeni_kapak"),
+            }
+        return temiz
+
+    def kaynak_kitabi_hazirla(self):
+        """Secilen ya da yeni olusturulan KaynakKitap (kaydetmeden once cagirilir)."""
+        from .kaynak import normal_anahtar
+
+        if self.secilen_kitap is not None:
+            return self.secilen_kitap
+        bilgi = self.yeni_kitap
+        yazar = KaynakYazar.objects.filter(ad_normal=normal_anahtar(bilgi["yazar_ad"])).first()
+        if yazar is None:
+            yazar = KaynakYazar.objects.create(ad=bilgi["yazar_ad"])
+        kitap = KaynakKitap(
+            ad=bilgi["ad"], yazar=yazar, yayinevi=bilgi["yayinevi"], basim_yili=bilgi["basim_yili"],
+            isbn=bilgi["isbn"], ekleyen=self.user, onayli=False,
+        )
+        if bilgi["kapak"]:
+            kitap.kapak = bilgi["kapak"]
+        kitap.save()
+        return kitap
 
 
 class SuperadminAlintiKategoriForm(SuperadminStyledModelForm):
