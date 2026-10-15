@@ -1,0 +1,7 @@
+{% comment %}Tek form alani. field, [etiket], [yardim], [sayac=karakter siniri], [tam], [sinif]{% endcomment %}
+<div class="sa-field{% if tam %} full{% endif %}{% if field.errors %} sa-field--error{% endif %}{% if sinif %} {{ sinif }}{% endif %}">
+    <label for="{{ field.id_for_label }}">{{ etiket|default:field.label }}{% if sayac %} <span class="yp-counter" data-sayac="{{ field.id_for_label }}" data-sinir="{{ sayac }}" aria-hidden="true"></span>{% endif %}</label>
+    {{ field }}
+    {% if yardim %}<span class="sa-help">{{ yardim }}</span>{% endif %}
+    {% for hata in field.errors %}<p class="sa-errors">{{ hata }}</p>{% endfor %}
+</div>

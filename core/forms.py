@@ -1,4 +1,5 @@
 from django import forms
+from django.utils.html import strip_tags
 from django.utils.text import capfirst
 from django.forms import DateInput
 from django.contrib.auth.forms import PasswordChangeForm, PasswordResetForm, SetPasswordForm
@@ -287,15 +288,15 @@ class PanelBlogYazisiForm(forms.ModelForm):
     etiketler_input = forms.CharField(
         required=False,
         label="Etiketler",
-        help_text="Virgülle ayırın: seo, web tasarım, dijital pazarlama",
+        help_text="Virgülle ayırın: öykü, deneme, şiir",
     )
 
     class Meta:
         model = BlogYazisi
         fields = ["baslik", "ozet", "icerik", "gorsel", "kategoriler", "meta_title", "meta_description", "seo_keywords", "durum"]
         widgets = {
-            "baslik": forms.TextInput(attrs={"placeholder": "Yazı başlığı"}),
-            "ozet": forms.Textarea(attrs={"placeholder": "Kısa özet", "rows": 4}),
+            "baslik": forms.TextInput(attrs={"placeholder": "Yazınızın başlığı"}),
+            "ozet": forms.Textarea(attrs={"placeholder": "Bir iki cümleyle yazınızı anlatın", "rows": 3}),
             "icerik": forms.Textarea(
                 attrs={
                     "rows": 24,
@@ -311,13 +312,16 @@ class PanelBlogYazisiForm(forms.ModelForm):
     class Media:
         js = (
             "https://cdn.ckeditor.com/4.22.1/full-all/ckeditor.js",
-            "js/admin-blog-ckeditor.js",
+            "js/admin-blog-ckeditor.js?v=2",
         )
 
-    def __init__(self, *args, is_superadmin=False, **kwargs):
+    def __init__(self, *args, is_superadmin=False, panel_gorunumu=False, **kwargs):
         super().__init__(*args, **kwargs)
         turkce_etiketleri_uygula(self)
         self.is_superadmin = is_superadmin
+        # Icerik editorde (CKEditor) yazilir; tarayicinin gizli alana "required" uyarisi gonderimi
+        # sessizce engellemesin diye zorunluluk sunucuda (clean_icerik) denetlenir.
+        self.fields["icerik"].required = False
         self.fields["kategoriler"].queryset = self.fields["kategoriler"].queryset.order_by("ad")
         self.fields["kategoriler"].required = False
         self.fields["kategoriler"].label = "Kategori"
@@ -331,6 +335,9 @@ class PanelBlogYazisiForm(forms.ModelForm):
         self.fields["meta_description"].label = "SEO açıklaması"
         self.fields["seo_keywords"].label = "SEO anahtar kelimeleri"
         self.fields["seo_keywords"].help_text = "Virgülle ayırın."
+        if panel_gorunumu:
+            # Telefonda Ctrl/Cmd ile coklu secim yapilamaz; onay kutulari kullanilir
+            self.fields["kategoriler"].widget = forms.CheckboxSelectMultiple(choices=self.fields["kategoriler"].choices)
         if is_superadmin:
             self.fields["durum"].choices = [
                 (BlogYazisi.DurumSecenekleri.YAYINDA, "Yayında"),
@@ -340,6 +347,7 @@ class PanelBlogYazisiForm(forms.ModelForm):
         else:
             self.fields["durum"].choices = [
                 (BlogYazisi.DurumSecenekleri.INCELEMEDE, "İncelemede"),
+                (BlogYazisi.DurumSecenekleri.TASLAK, "Taslak"),
             ]
             self.fields["durum"].widget = forms.HiddenInput()
             self.fields["durum"].initial = BlogYazisi.DurumSecenekleri.INCELEMEDE
@@ -354,6 +362,12 @@ class PanelBlogYazisiForm(forms.ModelForm):
 
     def clean_gorsel(self):
         return gorsel_boyutunu_dogrula(self.cleaned_data.get("gorsel"))
+
+    def clean_icerik(self):
+        icerik = self.cleaned_data.get("icerik", "")
+        if not strip_tags(icerik).replace("&nbsp;", "").strip() and "<img" not in icerik:
+            raise forms.ValidationError("Yazının içeriği boş olamaz.")
+        return icerik
 
     def save(self, commit=True):
         yazi = super().save(commit=False)

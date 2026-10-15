@@ -1,0 +1,158 @@
+{% extends "panel/base.html" %}
+{% load static %}
+
+{% block baslik %}{% if yazi %}Yazıyı düzenle{% else %}Yeni yazı{% endif %}{% endblock %}
+
+{% block ek_css %}
+<link rel="stylesheet" href="{% static 'css/ckeditor-styles.css' %}">
+{% endblock %}
+
+{% block ek_js %}
+{{ form.media }}
+{% endblock %}
+
+{% block ust %}
+{% url 'yazar_paneli' as panel_url %}
+{% if yazi %}
+{% include "panel/_sayfa_basligi.html" with baslik="Yazıyı düzenle" aciklama=yazi.baslik geri_url=panel_url %}
+{% else %}
+{% include "panel/_sayfa_basligi.html" with baslik="Yeni yazı" aciklama="Öykünüzü, denemenizi ya da şiirinizi paylaşın. Editörümüz inceledikten sonra yayımlanır." geri_url=panel_url %}
+{% endif %}
+{% endblock %}
+
+{% block icerik %}
+{% if yazi and not is_superadmin %}
+    {% if yazi.durum == "duzeltme" or yazi.durum == "reddedildi" %}
+    <div class="yp-note yp-note--danger" role="note">
+        <i class="ph ph-chat-circle-text" aria-hidden="true"></i>
+        <div>
+            <strong>{% if yazi.durum == "duzeltme" %}Editör bu yazı için düzeltme istedi{% else %}Bu yazı reddedildi{% endif %}</strong>
+            {% if yazi.admin_notu %}<p class="yp-note__text">{{ yazi.admin_notu }}</p>{% endif %}
+            <p class="sa-muted mt-1">Düzenleyip yeniden incelemeye gönderebilirsiniz.</p>
+        </div>
+    </div>
+    {% elif yazi.durum == "yayinda" %}
+    <div class="yp-note yp-note--warning" role="note">
+        <i class="ph ph-warning" aria-hidden="true"></i>
+        <div>
+            <strong>Bu yazı şu anda yayında</strong>
+            <p>Değişiklikleri kaydettiğinizde yazı, editör yeniden onaylayana kadar siteden kaldırılır. İlk yayın tarihi korunur.</p>
+        </div>
+    </div>
+    {% elif yazi.durum == "incelemede" %}
+    <div class="yp-note yp-note--info" role="note">
+        <i class="ph ph-hourglass-medium" aria-hidden="true"></i>
+        <div>
+            <strong>Yazınız editör incelemesinde</strong>
+            <p>Bu sırada düzenleyebilirsiniz; editör en son hâlini inceler.</p>
+        </div>
+    </div>
+    {% endif %}
+{% endif %}
+
+<form method="post" enctype="multipart/form-data" class="yp-card yp-form" data-gonderim
+      {% if yazi.durum == "yayinda" and not is_superadmin %}data-onay="Yazınız editör yeniden onaylayana kadar siteden kaldırılacak. Devam edilsin mi?"{% endif %}>
+    {% csrf_token %}
+    <div class="yp-card__body">
+        {% if form.non_field_errors %}
+        <div class="alert sa-alert alert-danger" role="alert">{% for hata in form.non_field_errors %}<div>{{ hata }}</div>{% endfor %}</div>
+        {% endif %}
+
+        <section class="yp-section" aria-labelledby="yp-b-yazi">
+            <h2 class="yp-section__title" id="yp-b-yazi">Yazı</h2>
+            <div class="sa-form-grid sa-form-grid--single">
+                {% include "panel/_alan.html" with field=form.baslik etiket="Başlık" sinif="yp-field-title" %}
+                {% include "panel/_alan.html" with field=form.ozet etiket="Kısa özet" sayac=320 yardim="Blog listesinde ve paylaşımlarda başlığın altında görünür." %}
+                {% include "panel/_alan.html" with field=form.icerik etiket="Metin" %}
+            </div>
+        </section>
+
+        <section class="yp-section" aria-labelledby="yp-b-sinif">
+            <h2 class="yp-section__title" id="yp-b-sinif">Kategori ve etiketler</h2>
+            <div class="sa-form-grid sa-form-grid--single">
+                <fieldset class="sa-field{% if form.kategoriler.errors %} sa-field--error{% endif %}">
+                    <legend class="fs-6 fw-semibold mb-2">Kategori <span class="sa-muted fw-normal">(birden fazla seçebilirsiniz)</span></legend>
+                    {% if form.fields.kategoriler.queryset.exists %}
+                    <div class="yp-checks">
+                        {% for secenek in form.kategoriler %}
+                        <label for="{{ secenek.id_for_label }}">{{ secenek.tag }}{{ secenek.choice_label }}</label>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <span class="sa-help">Henüz kategori tanımlanmamış. Yazınızı kategorisiz gönderebilirsiniz; editör uygun kategoriyi seçer.</span>
+                    {% endif %}
+                    {% for hata in form.kategoriler.errors %}<p class="sa-errors">{{ hata }}</p>{% endfor %}
+                </fieldset>
+                {% include "panel/_alan.html" with field=form.etiketler_input etiket="Etiketler" yardim="Virgülle ayırın: öykü, deneme, şiir. En fazla 15 etiket." %}
+                {% if is_superadmin %}
+                {% include "panel/_alan.html" with field=form.durum etiket="Durum" %}
+                {% else %}
+                {{ form.durum }}
+                {% endif %}
+            </div>
+        </section>
+
+        <section class="yp-section" aria-labelledby="yp-b-gorsel">
+            <h2 class="yp-section__title" id="yp-b-gorsel">Kapak görseli</h2>
+            <div class="sa-field{% if form.gorsel.errors %} sa-field--error{% endif %}">
+                <div class="yp-upload" data-gorsel>
+                    <div class="yp-upload__preview" data-onizleme>
+                        {% if yazi.gorsel %}<img src="{{ yazi.gorsel.url }}" alt="Mevcut kapak görseli">{% else %}<i class="ph ph-image" aria-hidden="true"></i>{% endif %}
+                    </div>
+                    <div class="yp-upload__controls">
+                        <div class="yp-upload__buttons">
+                            <input class="yp-file" type="file" name="{{ form.gorsel.html_name }}" id="{{ form.gorsel.id_for_label }}" accept="image/*">
+                            <label class="sa-btn sa-btn--secondary sa-btn--sm mb-0" for="{{ form.gorsel.id_for_label }}"><i class="ph ph-upload-simple" aria-hidden="true"></i>{% if yazi.gorsel %}Görseli değiştir{% else %}Görsel seç{% endif %}</label>
+                            <span class="yp-upload__name" data-dosya-adi>{% if not yazi.gorsel %}Seçilmedi{% endif %}</span>
+                        </div>
+                        {% if yazi.gorsel %}
+                        <label class="yp-clear"><input type="checkbox" name="{{ form.gorsel.html_name }}-clear" data-kaldir>Görseli kaldır</label>
+                        {% endif %}
+                        <span class="sa-help mt-0">JPG, PNG ya da WebP; en fazla 5 MB. Yatay görseller daha iyi görünür.</span>
+                        {% for hata in form.gorsel.errors %}<p class="sa-errors">{{ hata }}</p>{% endfor %}
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="yp-section">
+            <details class="yp-details"{% if form.meta_title.errors or form.meta_description.errors or form.seo_keywords.errors %} open{% endif %}>
+                <summary><i class="ph ph-magnifying-glass" aria-hidden="true"></i>Arama motoru ayarları <small>İsteğe bağlı</small><i class="ph ph-caret-down" aria-hidden="true"></i></summary>
+                <div class="yp-details__body">
+                    <p class="sa-help mt-0 mb-3">Boş bırakırsanız başlık ve özetiniz kullanılır.</p>
+                    <div class="sa-form-grid sa-form-grid--single">
+                        {% include "panel/_alan.html" with field=form.meta_title etiket="Arama sonucunda görünecek başlık" %}
+                        {% include "panel/_alan.html" with field=form.meta_description etiket="Arama sonucunda görünecek açıklama" sayac=320 %}
+                        {% include "panel/_alan.html" with field=form.seo_keywords etiket="Anahtar kelimeler" yardim="Virgülle ayırın." %}
+                    </div>
+                </div>
+            </details>
+        </section>
+
+        <div class="yp-actions">
+            {% if is_superadmin %}
+            <button class="sa-btn sa-btn--primary sa-btn--lg" type="submit" data-yukleniyor="Kaydediliyor…"><i class="ph ph-floppy-disk" aria-hidden="true"></i><span data-metin>Kaydet</span></button>
+            {% else %}
+            <span class="yp-actions__hint">Yazınız editör onayından sonra yayımlanır.</span>
+            <button class="sa-btn sa-btn--secondary sa-btn--lg" type="submit" name="islem" value="taslak" formnovalidate data-yukleniyor="Kaydediliyor…"><i class="ph ph-floppy-disk" aria-hidden="true"></i><span data-metin>Taslak olarak kaydet</span></button>
+            <button class="sa-btn sa-btn--primary sa-btn--lg" type="submit" name="islem" value="gonder" data-yukleniyor="Gönderiliyor…"><i class="ph ph-paper-plane-tilt" aria-hidden="true"></i><span data-metin>İncelemeye gönder</span></button>
+            {% endif %}
+        </div>
+    </div>
+</form>
+
+{% if yazi %}
+<section class="yp-card" aria-labelledby="yp-b-sil">
+    <div class="yp-card__body d-flex flex-wrap align-items-center justify-content-between gap-3">
+        <div>
+            <h2 class="yp-card__title" id="yp-b-sil">Yazıyı sil</h2>
+            <p class="yp-card__sub">Yazı kalıcı olarak silinir{% if yazi.durum == "yayinda" %} ve siteden kaldırılır{% endif %}. Bu işlem geri alınamaz.</p>
+        </div>
+        <form method="post" action="{% url 'yazar_panel_yazi_sil' yazi.pk %}" data-onay="“{{ yazi.baslik }}” kalıcı olarak silinecek. Bu işlem geri alınamaz. Devam edilsin mi?">
+            {% csrf_token %}
+            <button class="sa-btn sa-btn--danger-outline" type="submit"><i class="ph ph-trash" aria-hidden="true"></i>Yazıyı sil</button>
+        </form>
+    </div>
+</section>
+{% endif %}
+{% endblock %}

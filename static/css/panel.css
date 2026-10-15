@@ -674,6 +674,7 @@ body.yp {
     min-width: 0;
 }
 .yp-upload__buttons {
+    position: relative;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -681,8 +682,11 @@ body.yp {
 }
 .yp-file {
     position: absolute;
+    top: 0;
+    left: 0;
     width: 1px;
     height: 1px;
+    overflow: hidden;
     opacity: 0;
     pointer-events: none;
 }
@@ -697,8 +701,14 @@ body.yp {
     text-overflow: ellipsis;
     white-space: nowrap;
 }
+.sa-field label.sa-btn {
+    display: inline-flex;
+    margin-bottom: 0;
+}
+.sa-field .yp-clear,
 .yp-clear {
     display: inline-flex;
+    margin-bottom: 0;
     align-items: center;
     gap: 6px;
     color: var(--sa-danger);

@@ -2174,76 +2174,30 @@ def yazar_panel_sifre(request):
     )
 
 
-@login_required(login_url="giris")
-def yazar_panel_yeni_yazi(request):
-    profil = get_or_create_user_profile(request.user)
+def yazar_yazi_formu(request, profil, yazi=None):
+    """Yeni yazi ve duzenleme ortak akisi.
+
+    Yazar: "Taslak olarak kaydet" (islem=taslak) ya da "Incelemeye gonder"; yazi hicbir zaman dogrudan
+    yayina cikmaz. Yayindaki bir yazi duzenlenirse yeniden incelemeye gider ama ilk yayin tarihi korunur.
+    Yonetici: durumu formdan secer.
+    """
+    D = BlogYazisi.DurumSecenekleri
     is_superadmin = panel_yoneticisi_mi(request.user, profil)
-    if request.method == "POST":
-        post_data = request.POST.copy()
-        if not is_superadmin:
-            post_data["durum"] = BlogYazisi.DurumSecenekleri.INCELEMEDE
-        form = PanelBlogYazisiForm(post_data, request.FILES, is_superadmin=is_superadmin)
-        if form.is_valid():
-            yazi = form.save(commit=False)
-            yazi.yazar = profil
-            if is_superadmin:
-                if yazi.durum == BlogYazisi.DurumSecenekleri.YAYINDA and not yazi.onaylayan:
-                    yazi.onaylayan = request.user
-            else:
-                yazi.durum = BlogYazisi.DurumSecenekleri.INCELEMEDE
-                yazi.onaylayan = None
-                yazi.yayin_tarihi = None
-            yazi.save()
-            form.save_m2m()
-            islem_kaydet(request, yazi, ADDITION, f"Yazar panelinden eklendi ({yazi.get_durum_display()})")
-            if is_superadmin and yazi.durum == BlogYazisi.DurumSecenekleri.YAYINDA:
-                messages.success(request, "Yazın doğrudan yayına alındı.")
-            elif is_superadmin:
-                messages.success(request, "Yazın kaydedildi.")
-            else:
-                messages.success(request, "Yazın editör onayına gönderildi.")
-            return redirect("yazar_paneli")
-    else:
-        form = PanelBlogYazisiForm(is_superadmin=is_superadmin)
-
-    return render(
-        request,
-        "admin/panel_yazi_form.html",
-        {
-            "profil": profil,
-            "form": form,
-            "form_title": "Yeni Yazı Ekle",
-            "submit_label": "Yazıyı Kaydet",
-            "stats": build_panel_stats(profil),
-            "is_superadmin": is_superadmin,
-        },
-    )
-
-
-@login_required(login_url="giris")
-def yazar_panel_yazi_duzenle(request, pk):
-    profil = get_or_create_user_profile(request.user)
-    is_superadmin = panel_yoneticisi_mi(request.user, profil)
-    yazi = get_object_or_404(BlogYazisi, pk=pk, yazar=profil)
+    yeni_mi = yazi is None
+    onceki_durum = None if yeni_mi else yazi.durum
 
     if request.method == "POST":
-        mevcut_gorsel = yazi.gorsel if yazi.gorsel else None
+        mevcut_gorsel = yazi.gorsel if yazi and yazi.gorsel else None
         gorsel_temizle = request.POST.get("gorsel-clear") == "on"
         yeni_gorsel = request.FILES.get("gorsel")
         post_data = request.POST.copy()
+        taslak_mi = request.POST.get("islem") == "taslak"
         if not is_superadmin:
-            post_data["durum"] = BlogYazisi.DurumSecenekleri.INCELEMEDE
+            post_data["durum"] = D.TASLAK if taslak_mi else D.INCELEMEDE
 
-        form = PanelBlogYazisiForm(
-            post_data,
-            request.FILES,
-            instance=yazi,
-            is_superadmin=is_superadmin,
-        )
-
+        form = PanelBlogYazisiForm(post_data, request.FILES, instance=yazi, is_superadmin=is_superadmin, panel_gorunumu=True)
         if form.is_valid():
             yazi = form.save(commit=False)
-
             if gorsel_temizle and not yeni_gorsel:
                 if mevcut_gorsel:
                     mevcut_gorsel.delete(save=False)
@@ -2253,41 +2207,64 @@ def yazar_panel_yazi_duzenle(request, pk):
 
             yazi.yazar = profil
             if is_superadmin:
-                if yazi.durum == BlogYazisi.DurumSecenekleri.YAYINDA and not yazi.onaylayan:
+                if yazi.durum == D.YAYINDA and not yazi.onaylayan:
                     yazi.onaylayan = request.user
             else:
-                yazi.durum = BlogYazisi.DurumSecenekleri.INCELEMEDE
+                yazi.durum = D.TASLAK if taslak_mi else D.INCELEMEDE
                 yazi.onaylayan = None
-                yazi.yayin_tarihi = None
-
             yazi.save()
             form.save_m2m()
-            islem_kaydet(request, yazi, CHANGE, f"Yazar panelinden güncellendi ({yazi.get_durum_display()})")
+            islem_kaydet(
+                request,
+                yazi,
+                ADDITION if yeni_mi else CHANGE,
+                f"Yazar panelinden {'eklendi' if yeni_mi else 'güncellendi'} ({yazi.get_durum_display()})",
+            )
 
-            if is_superadmin and yazi.durum == BlogYazisi.DurumSecenekleri.YAYINDA:
-                messages.success(request, "Yazın güncellendi ve yayında tutuldu.")
-            elif is_superadmin:
-                messages.success(request, "Yazın güncellendi.")
+            if is_superadmin:
+                messages.success(request, "Yazınız yayında." if yazi.durum == D.YAYINDA else "Yazınız kaydedildi.")
+                return redirect("yazar_paneli")
+            if taslak_mi:
+                messages.success(request, "Taslağınız kaydedildi. Hazır olduğunuzda incelemeye gönderebilirsiniz.")
+                return redirect("yazar_panel_yazi_duzenle", pk=yazi.pk)
+            if onceki_durum == D.YAYINDA:
+                messages.success(request, "Değişiklikleriniz kaydedildi. Yazınız editör onayından sonra yeniden yayımlanacak.")
             else:
-                messages.success(request, "Güncellenen yazın yeniden editör onayına gönderildi.")
-
+                messages.success(request, "Yazınız editör onayına gönderildi. Sonucu panelinizden takip edebilirsiniz.")
             return redirect("yazar_paneli")
+        messages.error(request, "Yazınız kaydedilmedi. Lütfen işaretli alanları düzeltin.")
     else:
-        form = PanelBlogYazisiForm(instance=yazi, is_superadmin=is_superadmin)
+        form = PanelBlogYazisiForm(instance=yazi, is_superadmin=is_superadmin, panel_gorunumu=True)
+
+    if yazi is not None and request.method == "POST":
+        # Gecersiz gonderimde form, nesneyi kaydedilmemis degerlerle doldurur; sayfada kayitli hali gosterilir
+        yazi = BlogYazisi.objects.get(pk=yazi.pk)
 
     return render(
         request,
-        "admin/panel_yazi_form.html",
-        {
-            "profil": profil,
-            "form": form,
-            "yazi": yazi,
-            "form_title": "Yazıyı Düzenle",
-            "submit_label": "Değişiklikleri Kaydet",
-            "stats": build_panel_stats(profil),
-            "is_superadmin": is_superadmin,
-        },
+        "panel/yazi_form.html",
+        panel_baglami(
+            request,
+            profil,
+            "yazi" if yeni_mi else "panel",
+            form=form,
+            yazi=yazi,
+            onceki_durum=onceki_durum,
+            is_superadmin=is_superadmin,
+        ),
     )
+
+
+@login_required(login_url="giris")
+def yazar_panel_yeni_yazi(request):
+    return yazar_yazi_formu(request, get_or_create_user_profile(request.user))
+
+
+@login_required(login_url="giris")
+def yazar_panel_yazi_duzenle(request, pk):
+    profil = get_or_create_user_profile(request.user)
+    yazi = get_object_or_404(BlogYazisi, pk=pk, yazar=profil)
+    return yazar_yazi_formu(request, profil, yazi)
 
 
 @login_required(login_url="giris")

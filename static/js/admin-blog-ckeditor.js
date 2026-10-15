@@ -13,10 +13,19 @@ document.addEventListener("DOMContentLoaded", function () {
     CKEDITOR.instances[textarea.id].destroy(true);
   }
 
+  // Telefonda alti satirlik arac cubugu yerine yazarin en cok kullandigi araclar
+  const darEkran = window.matchMedia("(max-width: 767.98px)").matches;
+  const kisaAraclar = [
+    { name: "basicstyles", items: ["Bold", "Italic", "Underline", "RemoveFormat"] },
+    { name: "paragraph", items: ["NumberedList", "BulletedList", "Blockquote", "JustifyCenter"] },
+    { name: "links", items: ["Link", "Unlink"] },
+    { name: "history", items: ["Undo", "Redo"] }
+  ];
+
   CKEDITOR.replace(textarea.id, {
-    height: 420,
+    height: darEkran ? 320 : 420,
     removeButtons: "",
-    toolbar: [
+    toolbar: darEkran ? kisaAraclar : [
       {
         name: "document",
         items: ["Source", "-", "Preview", "Print"]
@@ -50,7 +59,9 @@ document.addEventListener("DOMContentLoaded", function () {
         items: ["TextColor", "BGColor"]
       }
     ],
-    allowedContent: true
+    allowedContent: true,
+    // Surum uyarisi yazarlara gosterilmez; CKEditor 4'un destek sonu ayrica takip ediliyor
+    versionCheck: false
   });
 
   textarea.dataset.ckeditorInitialized = "true";
