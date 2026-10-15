@@ -1,0 +1,170 @@
+/* Alinti kartlari (templates/partials/alinti_karti.html): alintilar, kitap/yazar alinti sayfalari ve yazilar.
+   Renkler eski alintilar sayfasinin paletiyle ayni; site temasi 1rem = 10px. */
+.te-alinti-izgara {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 2.4rem;
+}
+.te-alinti {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 3.2rem 2.8rem;
+    border: 1px solid rgba(23, 23, 23, .08);
+    border-radius: 2.4rem;
+    color: #171717;
+}
+.te-alinti--sari { background: #ddf160; }
+.te-alinti--mor { background: #9f8be7; color: #fff; }
+.te-alinti--beyaz { background: #fff; }
+.te-alinti a {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: .3rem;
+}
+.te-alinti__isaret {
+    margin-bottom: 1.2rem;
+    font-size: 3.6rem;
+    font-weight: 700;
+    line-height: 1;
+}
+.te-alinti__metin {
+    flex: 1;
+    margin: 0;
+}
+.te-alinti__metin p {
+    margin: 0;
+    font-size: 1.7rem;
+    line-height: 1.55;
+    color: inherit;
+}
+.te-alinti__yorum {
+    margin: 1.6rem 0 0;
+    font-size: 1.4rem;
+    line-height: 1.5;
+    opacity: .85;
+    color: inherit;
+}
+.te-alinti__yorum span {
+    font-weight: 700;
+}
+.te-alinti__kaynak {
+    display: flex;
+    flex-direction: column;
+    gap: .4rem;
+    margin-top: 2.8rem;
+    padding-top: 1.8rem;
+    border-top: 1px solid rgba(23, 23, 23, .12);
+    font-size: 1.4rem;
+}
+.te-alinti--mor .te-alinti__kaynak {
+    border-top-color: rgba(255, 255, 255, .28);
+}
+.te-alinti__yazar {
+    font-size: 1.6rem;
+    font-weight: 700;
+}
+.te-alinti__kitap cite {
+    font-style: italic;
+}
+.te-alinti__paylasan {
+    opacity: .75;
+}
+.te-alinti__etiket {
+    align-self: flex-start;
+    margin-top: .8rem;
+    color: inherit !important;
+    border-color: currentColor !important;
+}
+.te-alinti-bos,
+.te-alinti-giris {
+    grid-column: 1 / -1;
+    margin: 0 0 3.2rem;
+    font-size: 1.6rem;
+}
+.te-alinti-giris a {
+    text-decoration: underline;
+    text-underline-offset: .3rem;
+}
+.te-alinti-baslik {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    margin: 0 0 2.4rem;
+    font-size: 2.4rem;
+}
+.te-alinti-baslik span {
+    font-size: 1.6rem;
+    opacity: .6;
+}
+.te-alinti-sayfalama {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+    margin-top: 4rem;
+    font-size: 1.5rem;
+}
+/* Kitap kunyesi */
+.te-kunye {
+    display: flex;
+    align-items: flex-start;
+    gap: 2.4rem;
+}
+.te-kunye > div {
+    min-width: 0;
+}
+.te-kunye .inner-headline__title {
+    font-size: clamp(3.4rem, 6vw, 7.2rem);
+    overflow-wrap: break-word;
+    hyphens: auto;
+}
+.te-kunye__kapak {
+    flex-shrink: 0;
+    width: 12rem;
+    border-radius: 1rem;
+    box-shadow: 0 1rem 3rem rgba(0, 0, 0, .18);
+}
+.te-kunye__satir {
+    margin: .8rem 0 0;
+    font-size: 1.5rem;
+    opacity: .8;
+}
+.te-kunye__satir a,
+.inner-headline__text a {
+    text-decoration: underline;
+    text-underline-offset: .3rem;
+}
+.te-kitap-liste {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .8rem 2.4rem;
+    margin: 2.4rem 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: 1.5rem;
+}
+.te-kitap-liste a {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: .3rem;
+}
+.te-kitap-liste span {
+    opacity: .6;
+}
+/* Yazinin sonundaki alintilar */
+.te-yazi-alintilar {
+    margin: 4rem 0 0;
+}
+.te-yazi-alintilar .te-alinti-izgara {
+    grid-template-columns: minmax(0, 1fr);
+}
+@media (max-width: 1199.98px) {
+    .te-alinti-izgara { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 767.98px) {
+    .te-alinti-izgara { grid-template-columns: minmax(0, 1fr); gap: 1.6rem; }
+    .te-alinti { padding: 2.4rem 2rem; border-radius: 1.8rem; }
+    .te-kunye { flex-direction: column; }
+    .te-kunye__kapak { width: 9rem; }
+}

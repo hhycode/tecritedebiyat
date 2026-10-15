@@ -1,0 +1,19 @@
+{% comment %}
+Alinti karti; kaynak (kitap, yazar, sayfa) her zaman gorunur.
+Kullanim: {% include "partials/alinti_karti.html" with alinti=alinti renk="sari|mor|beyaz" yorum_goster=True %}
+{% endcomment %}
+<figure class="te-alinti te-alinti--{{ renk|default:'beyaz' }}">
+    <span class="te-alinti__isaret" aria-hidden="true">&ldquo;</span>
+    <blockquote class="te-alinti__metin"{% if alinti.kaynak_id %} cite="{{ request.scheme }}://{{ request.get_host }}{{ alinti.kaynak.get_absolute_url }}"{% endif %}>
+        <p>{{ alinti.metin|linebreaksbr }}</p>
+    </blockquote>
+    {% if yorum_goster and alinti.yorum %}
+    <p class="te-alinti__yorum"><span>Paylaşanın notu:</span> {{ alinti.yorum }}</p>
+    {% endif %}
+    <figcaption class="te-alinti__kaynak">
+        <span class="te-alinti__yazar">— <a href="{{ alinti.kaynak.yazar.get_absolute_url }}">{{ alinti.kaynak.yazar.ad }}</a></span>
+        <span class="te-alinti__kitap"><cite><a href="{{ alinti.kaynak.get_absolute_url }}">{{ alinti.kaynak.ad }}</a></cite>{% if alinti.sayfa_no %}, s. {{ alinti.sayfa_no }}{% endif %}</span>
+        {% if alinti.paylasan %}<span class="te-alinti__paylasan">Paylaşan: {{ alinti.paylasan.profil.ad_soyad|default:alinti.paylasan.get_username }}</span>{% endif %}
+        {% if alinti.kategori %}<span class="tag tag-default tag-outline-permanent te-alinti__etiket">{{ alinti.kategori.ad }}</span>{% endif %}
+    </figcaption>
+</figure>

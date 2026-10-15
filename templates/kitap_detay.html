@@ -87,6 +87,12 @@
                                                     {% if not kitap.kitapyurdu_link and not kitap.dr_link and not kitap.trendyol_link and not kitap.shopier_link %}Yakında{% endif %}
                                                 </p>
                                             </div>
+                                            {% if alinti_sayisi %}
+                                            <div class="mxd-data-list__item">
+                                                <p class="mxd-data-list__name">Alıntılar</p>
+                                                <p class="mxd-data-list__content"><a href="{{ alinti_kaynagi.get_absolute_url }}">Bu kitaptan {{ alinti_sayisi }} alıntı</a></p>
+                                            </div>
+                                            {% endif %}
                                         </div>
 
                                         <div class="col-12 col-md-6 col-xl-5 mxd-data-list__column loading__item">

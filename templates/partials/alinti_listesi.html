@@ -1,0 +1,16 @@
+{% comment %}Alinti kartlari izgarasi + sayfalama. sayfa_nesnesi, sayfalandirildi_mi, bos_metin, [yorum_goster]{% endcomment %}
+<div class="te-alinti-izgara">
+    {% for alinti in sayfa_nesnesi.object_list %}
+    {% cycle 'sari' 'mor' 'beyaz' as renk silent %}
+    {% include "partials/alinti_karti.html" with alinti=alinti renk=renk yorum_goster=yorum_goster %}
+    {% empty %}
+    <p class="te-alinti-bos">{{ bos_metin|default:"Henüz görüntülenecek alıntı bulunmuyor." }}</p>
+    {% endfor %}
+</div>
+{% if sayfalandirildi_mi %}
+<nav class="te-alinti-sayfalama" aria-label="Sayfalama">
+    {% if sayfa_nesnesi.has_previous %}<a class="btn btn-anim btn-line-small btn-bright" href="?sayfa={{ sayfa_nesnesi.previous_page_number }}"><i class="ph-bold ph-arrow-left" aria-hidden="true"></i><span class="btn-caption">Önceki</span></a>{% endif %}
+    <span>{{ sayfa_nesnesi.number }} / {{ sayfa_nesnesi.paginator.num_pages }}</span>
+    {% if sayfa_nesnesi.has_next %}<a class="btn btn-anim btn-line-small btn-bright" href="?sayfa={{ sayfa_nesnesi.next_page_number }}"><span class="btn-caption">Sonraki</span><i class="ph-bold ph-arrow-right" aria-hidden="true"></i></a>{% endif %}
+</nav>
+{% endif %}

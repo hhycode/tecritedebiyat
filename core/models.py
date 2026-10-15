@@ -336,8 +336,13 @@ class Alinti(models.Model):
         verbose_name_plural = "Alıntılar"
 
     def save(self, *args, **kwargs):
-        if self.durum == self.DurumSecenekleri.YAYINDA and not self.yayin_tarihi:
-            self.yayin_tarihi = timezone.now()
+        if self.durum == self.DurumSecenekleri.YAYINDA:
+            if not self.yayin_tarihi:
+                self.yayin_tarihi = timezone.now()
+            # Yazarin ekledigi kitap, ilk alintisi yayina alininca sitede gorunur olur
+            if self.kaynak_id and not self.kaynak.onayli:
+                KaynakKitap.objects.filter(pk=self.kaynak_id).update(onayli=True)
+                self.kaynak.onayli = True
         super().save(*args, **kwargs)
 
     def __str__(self):

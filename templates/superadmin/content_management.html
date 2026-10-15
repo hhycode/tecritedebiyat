@@ -94,7 +94,7 @@
         <a class="card sa-card h-100 text-decoration-none text-dark" href="{% url 'superadmin_icerik_model_liste' 'alinti' %}">
             <div class="card-body p-4">
                 <div class="h3 mb-1">Alıntı Yönetimi</div>
-                <div class="sa-muted">Metin, etiket, kategori düzenle</div>
+                <div class="sa-muted">Metin, kaynak, durum ve etiket düzenle</div>
             </div>
         </a>
     </div>
@@ -103,6 +103,22 @@
             <div class="card-body p-4">
                 <div class="h3 mb-1">Alıntı Kategorileri</div>
                 <div class="sa-muted">Alıntı kategorilerini yönet</div>
+            </div>
+        </a>
+    </div>
+    <div class="col-12 col-md-6 col-xl-3">
+        <a class="card sa-card h-100 text-decoration-none text-dark" href="{% url 'superadmin_icerik_model_liste' 'kaynakkitap' %}">
+            <div class="card-body p-4">
+                <div class="h3 mb-1">Kaynak Kitaplar</div>
+                <div class="sa-muted">Alıntı yapılan kitaplar, künye ve kapak</div>
+            </div>
+        </a>
+    </div>
+    <div class="col-12 col-md-6 col-xl-3">
+        <a class="card sa-card h-100 text-decoration-none text-dark" href="{% url 'superadmin_icerik_model_liste' 'kaynakyazar' %}">
+            <div class="card-body p-4">
+                <div class="h3 mb-1">Kaynak Yazarlar</div>
+                <div class="sa-muted">Alıntı yapılan kitapların yazarları</div>
             </div>
         </a>
     </div>

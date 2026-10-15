@@ -17,6 +17,8 @@ from .models import (
     BlogYazisi,
     Etiket,
     IletisimBasvurusu,
+    KaynakKitap,
+    KaynakYazar,
     Kitap,
     KitapMaliyetiAyarlari,
     KitapMaliyetTuru,
@@ -538,10 +540,13 @@ class SuperadminAlintiForm(SuperadminStyledModelForm):
 
     class Meta:
         model = Alinti
-        fields = ["kitap", "metin", "sayfa_no", "kategori", "one_cikan", "yayinda"]
+        fields = ["kaynak", "metin", "sayfa_no", "yorum", "kategori", "durum", "admin_notu", "one_cikan"]
         widgets = {
-            "metin": forms.Textarea(attrs={"rows": 8}),
+            "metin": forms.Textarea(attrs={"rows": 6}),
+            "yorum": forms.Textarea(attrs={"rows": 3}),
+            "admin_notu": forms.Textarea(attrs={"rows": 3}),
         }
+        labels = {"admin_notu": "Yazara not", "one_cikan": "Öne çıkan"}
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -565,6 +570,29 @@ class SuperadminAlintiForm(SuperadminStyledModelForm):
             alinti.save()
             self.save_m2m()
         return alinti
+
+
+class SuperadminKaynakKitapForm(SuperadminStyledModelForm):
+    class Meta:
+        model = KaynakKitap
+        fields = ["ad", "yazar", "yayinevi", "basim_yili", "isbn", "kapak", "katalog_kitabi", "onayli"]
+
+    def clean_kapak(self):
+        return gorsel_boyutunu_dogrula(self.cleaned_data.get("kapak"))
+
+    def clean_isbn(self):
+        from .kaynak import isbn_normal
+
+        deger = self.cleaned_data.get("isbn", "").strip()
+        if deger and not isbn_normal(deger):
+            raise forms.ValidationError("ISBN 10 ya da 13 haneli olmalı.")
+        return isbn_normal(deger)
+
+
+class SuperadminKaynakYazarForm(SuperadminStyledModelForm):
+    class Meta:
+        model = KaynakYazar
+        fields = ["ad", "yazar_profili"]
 
 
 class SuperadminKullaniciForm(SuperadminStyledModelForm):

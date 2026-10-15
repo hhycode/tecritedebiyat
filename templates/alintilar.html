@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Alıntılar | Tecrit Edebiyat{% endblock %}
 {% block meta_description %}Edebiyatın seçilmiş alıntılarını, yazar sözlerini ve ilham veren metinleri Tecrit Edebiyat’ta keşfedin.{% endblock %}
@@ -8,29 +9,10 @@
 {% block twitter_title %}Alıntılar | Tecrit Edebiyat{% endblock %}
 {% block twitter_description %}Edebiyatın güçlü cümleleri, unutulmaz alıntılar ve ilham veren sözler.{% endblock %}
 
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/alinti.css' %}?v=1">{% endblock %}
+
 {% block extra_head %}
-{% if sayfa_nesnesi.object_list %}
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "ItemList",
-  "itemListElement": [
-    {% for alinti in sayfa_nesnesi.object_list %}
-    {
-      "@type": "ListItem",
-      "position": {{ forloop.counter }},
-      "item": {
-        "@type": "Quotation",
-        "text": "{{ alinti.metin|escapejs }}",
-        {% if alinti.kitap.yazar_adi %}"creator": {"@type": "Person", "name": "{{ alinti.kitap.yazar_adi|escapejs }}"},{% endif %}
-        "isPartOf": {"@type": "Book", "name": "{{ alinti.kitap.ad|escapejs }}", "url": "{{ request.scheme }}://{{ request.get_host }}{{ alinti.kitap.get_absolute_url }}"}
-      }
-    }{% if not forloop.last %},{% endif %}
-    {% endfor %}
-  ]
-}
-</script>
-{% endif %}
+{% include "partials/alinti_jsonld.html" %}
 {% endblock %}
 
 {% block content %}
@@ -71,78 +53,8 @@
 <div class="mxd-section padding-default alintilar-grid-section">
     <div class="mxd-container grid-l-container">
         <div class="mxd-block">
-            <div class="row g-0" style="row-gap: 3.2rem;">
-                {% for alinti in sayfa_nesnesi.object_list %}
-                {% cycle '#ddf160' '#9f8be7' '#ffffff' as alinti_bg silent %}
-                <div class="col-12 col-md-6 col-xl-4 mxd-grid-item" style="display:flex;">
-                    <div class="alinti-card" style="width:100%; display:flex; flex-direction:column; justify-content:space-between; padding:3.2rem 2.8rem; border-radius:2.4rem; background:{{ alinti_bg }}; border:1px solid rgba(23,23,23,.08);">
-                        <div>
-                            <p style="font-size:3.6rem; line-height:1; margin-bottom:1.2rem; font-weight:700; {% if alinti_bg == '#9f8be7' %}color:#ffffff;{% else %}color:#171717;{% endif %}">&ldquo;</p>
-                            <p style="font-size:1.7rem; line-height:1.55; {% if alinti_bg == '#9f8be7' %}color:#ffffff;{% else %}color:#171717;{% endif %}">{{ alinti.metin }}</p>
-                        </div>
-                        <div style="margin-top:2.8rem; padding-top:1.8rem; border-top:1px solid {% if alinti_bg == '#9f8be7' %}rgba(255,255,255,.24){% else %}rgba(23,23,23,.08){% endif %};">
-                            <p style="font-weight:700; margin-bottom:.4rem; {% if alinti_bg == '#9f8be7' %}color:#ffffff;{% else %}color:#171717;{% endif %}">— {{ alinti.kitap.yazar_adi }}</p>
-                            <p class="t-small" style="margin-bottom: {% if alinti.kategori %}1rem{% else %}0{% endif %}; {% if alinti_bg == '#9f8be7' %}color:rgba(255,255,255,.78);{% else %}color:var(--t-medium);{% endif %}">
-                                <a href="{{ alinti.kitap.get_absolute_url }}" style="text-decoration:underline; {% if alinti_bg == '#9f8be7' %}color:#ffffff;{% else %}color:#171717;{% endif %}">{{ alinti.kitap.ad }}</a>{% if alinti.sayfa_no %}, s. {{ alinti.sayfa_no }}{% endif %}
-                            </p>
-                            {% if alinti.kategori %}
-                            <span class="tag tag-default tag-outline-permanent tag-link-outline-premanent" style="{% if alinti_bg == '#9f8be7' %}color:#ffffff; border-color:rgba(255,255,255,.4);{% else %}color:#171717; border-color:rgba(23,23,23,.24);{% endif %}">{{ alinti.kategori.ad }}</span>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-                {% empty %}
-                <div class="col-12 mxd-grid-item">
-                    <div class="content-block">
-                        <p>Henüz görüntülenecek alıntı bulunmuyor.</p>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-
-            {% if sayfalandirildi_mi %}
-                <div class="mxd-blog-pagination">
-                    <div class="mxd-blog-pagination__inner">
-                        <nav class="mxd-blog-pagination__items">
-                            {% if sayfa_nesnesi.has_previous %}
-                                <a class="mxd-blog-pagination__item blog-pagination-control prev btn btn-anim btn-line-small btn-bright anim-no-delay slide-left" href="?sayfa={{ sayfa_nesnesi.previous_page_number }}">
-                                    <i class="ph-bold ph-arrow-left"></i>
-                                    <span class="btn-caption">Önceki</span>
-                                </a>
-                            {% else %}
-                                <span class="mxd-blog-pagination__item blog-pagination-control prev btn btn-anim btn-line-small btn-bright anim-no-delay slide-left disabled">
-                                    <i class="ph-bold ph-arrow-left"></i>
-                                    <span class="btn-caption">Önceki</span>
-                                </span>
-                            {% endif %}
-
-                            {% for num in sayfa_nesnesi.paginator.page_range %}
-                                {% if sayfa_nesnesi.number == num %}
-                                    <span class="mxd-blog-pagination__item blog-pagination-number btn btn-anim active">
-                                        <span class="btn-caption">{{ num }}</span>
-                                    </span>
-                                {% elif num > sayfa_nesnesi.number|add:'-3' and num < sayfa_nesnesi.number|add:'3' %}
-                                    <a class="mxd-blog-pagination__item blog-pagination-number btn btn-anim" href="?sayfa={{ num }}">
-                                        <span class="btn-caption">{{ num }}</span>
-                                    </a>
-                                {% endif %}
-                            {% endfor %}
-
-                            {% if sayfa_nesnesi.has_next %}
-                                <a class="mxd-blog-pagination__item blog-pagination-control next btn btn-anim btn-line-small btn-bright anim-no-delay slide-right" href="?sayfa={{ sayfa_nesnesi.next_page_number }}">
-                                    <span class="btn-caption">Sonraki</span>
-                                    <i class="ph-bold ph-arrow-right"></i>
-                                </a>
-                            {% else %}
-                                <span class="mxd-blog-pagination__item blog-pagination-control next btn btn-anim btn-line-small btn-bright anim-no-delay slide-right disabled">
-                                    <span class="btn-caption">Sonraki</span>
-                                    <i class="ph-bold ph-arrow-right"></i>
-                                </span>
-                            {% endif %}
-                        </nav>
-                    </div>
-                </div>
-            {% endif %}
+            <p class="te-alinti-giris">Okurlarımız ve yazarlarımız okudukları kitaplardan alıntıları <a href="{% url 'yazar_paneli' %}">yazar panelinden</a> paylaşabilir; her alıntı editör onayından sonra yayımlanır.</p>
+            {% include "partials/alinti_listesi.html" with yorum_goster=False %}
         </div>
     </div>
 </div>

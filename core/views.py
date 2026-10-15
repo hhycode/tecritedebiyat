@@ -12,7 +12,7 @@ from django.core.paginator import Paginator
 from django.db import transaction
 from django.db.models import Count, F, Q, Sum
 from django.db.models.deletion import ProtectedError
-from django.http import JsonResponse
+from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 from django.urls import NoReverseMatch, reverse, reverse_lazy
@@ -38,6 +38,8 @@ from .forms import (
     SifremiUnuttumForm,
     SifreSifirlaForm,
     SuperadminAlintiForm,
+    SuperadminKaynakKitapForm,
+    SuperadminKaynakYazarForm,
     SuperadminAlintiKategoriForm,
     SuperadminAnaSayfaYayinKartiForm,
     SuperadminBlogKategoriForm,
@@ -63,6 +65,8 @@ from .models import (
     BlogYazisi,
     Etiket,
     IletisimBasvurusu,
+    KaynakKitap,
+    KaynakYazar,
     Kitap,
     KitapMaliyetiAyarlari,
     KitapMaliyetiHesaplamaKaydi,
@@ -128,11 +132,38 @@ CONTENT_MODEL_CONFIG = {
         "form_class": SuperadminAlintiForm,
         "title": "Alıntılar",
         "singular": "Alıntı",
-        "list_headers": ["Kitap", "Kategori", "Sayfa", "Yayında"],
-        "list_values": lambda obj: [obj.kitap.ad, obj.kategori.ad if obj.kategori else "-", obj.sayfa_no or "-", "Evet" if obj.yayinda else "Hayır"],
-        "full_width_fields": {"metin", "etiketler_input"},
-        "search_fields": ["metin", "kitap__ad"],
-        "select_related": ["kitap", "kategori"],
+        "list_headers": ["Alıntı", "Kitap", "Durum", "Paylaşan"],
+        "list_values": lambda obj: [
+            obj.metin[:60] + ("…" if len(obj.metin) > 60 else ""),
+            str(obj.kaynak) if obj.kaynak_id else "-",
+            obj.get_durum_display(),
+            obj.paylasan.get_username() if obj.paylasan_id else "-",
+        ],
+        "full_width_fields": {"metin", "yorum", "admin_notu", "etiketler_input"},
+        "search_fields": ["metin", "kaynak__ad", "kaynak__yazar__ad"],
+        "select_related": ["kaynak__yazar", "paylasan"],
+    },
+    "kaynakkitap": {
+        "model": KaynakKitap,
+        "form_class": SuperadminKaynakKitapForm,
+        "title": "Kaynak kitaplar",
+        "singular": "Kaynak kitap",
+        "list_headers": ["Kitap", "Yazar", "Yıl", "Onaylı"],
+        "list_values": lambda obj: [obj.ad, obj.yazar.ad, obj.basim_yili or "-", "Evet" if obj.onayli else "Hayır"],
+        "full_width_fields": {"ad", "kapak"},
+        "search_fields": ["ad", "yazar__ad", "isbn"],
+        "select_related": ["yazar"],
+    },
+    "kaynakyazar": {
+        "model": KaynakYazar,
+        "form_class": SuperadminKaynakYazarForm,
+        "title": "Kaynak yazarlar",
+        "singular": "Kaynak yazar",
+        "list_headers": ["Yazar", "Sitedeki profil"],
+        "list_values": lambda obj: [obj.ad, obj.yazar_profili.ad_soyad if obj.yazar_profili_id else "-"],
+        "full_width_fields": {"ad"},
+        "search_fields": ["ad"],
+        "select_related": ["yazar_profili"],
     },
     "blogkategori": {
         "model": BlogKategori,
@@ -411,8 +442,8 @@ def superadmin_ara(request):
             ("Yazarlar", "ph-pen-nib", YazarProfil.objects.select_related("user"), ["ad_soyad", "user__username"],
              lambda o: (o.ad_soyad, o.get_rol_display(), reverse("superadmin_icerik_model_duzenle", args=["yazarprofil", o.pk])),
              reverse("superadmin_yazarlar")),
-            ("Alıntılar", "ph-quotes", Alinti.objects.select_related("kitap"), ["metin", "kitap__ad"],
-             lambda o: (o.metin[:90], o.kitap.ad, reverse("superadmin_icerik_model_duzenle", args=["alinti", o.pk])),
+            ("Alıntılar", "ph-quotes", Alinti.objects.select_related("kaynak__yazar"), ["metin", "kaynak__ad", "kaynak__yazar__ad"],
+             lambda o: (o.metin[:90], str(o.kaynak) if o.kaynak_id else "Kaynaksız", reverse("superadmin_icerik_model_duzenle", args=["alinti", o.pk])),
              reverse("superadmin_icerik_model_liste", args=["alinti"])),
             ("Kullanıcılar", "ph-users", User.objects.all(), ["username", "first_name", "last_name", "email"],
              lambda o: (o.username, o.email or "-", reverse("superadmin_kullanici_duzenle", args=[o.pk])),
@@ -1105,11 +1136,7 @@ def anasayfa(request):
         .filter(durum=BlogYazisi.DurumSecenekleri.YAYINDA)
         .order_by("-yayin_tarihi", "-created_at")[:3]
     )
-    one_cikan_alintilar = list(
-        Alinti.objects.select_related("kitap", "kitap__yazar__user")
-        .filter(yayinda=True)
-        .order_by("-created_at")[:6]
-    )
+    one_cikan_alintilar = list(yayindaki_alintilar()[:6])
     fallback_alintilar = [
         {"metin": "Bir kitap, içinizdeki donmuş denize indirilmiş bir baltadır.", "yazar": "Franz Kafka"},
         {"metin": "İnsan ancak yüreğiyle baktığı zaman doğruyu görebilir.", "yazar": "Antoine de Saint-Exupéry"},
@@ -1121,7 +1148,7 @@ def anasayfa(request):
     alinti_kartlari = [
         {
             "metin": alinti.metin,
-            "yazar": alinti.kitap.yazar_adi,
+            "yazar": alinti.kaynak.yazar.ad,
         }
         for alinti in one_cikan_alintilar
     ]
@@ -1219,7 +1246,7 @@ def kitaplar(request):
 
 def kitap_detay(request, slug):
     kitap = get_object_or_404(
-        Kitap.objects.select_related("yazar__user").prefetch_related("turler", "alintilar"),
+        Kitap.objects.select_related("yazar__user", "kaynak").prefetch_related("turler"),
         slug=slug,
         yayinda=True,
     )
@@ -1250,8 +1277,13 @@ def kitap_detay(request, slug):
         )
         .order_by("-yayin_tarihi")[:3]
     ) if kitap.yazar else BlogYazisi.objects.none()
+    # Bu katalog kitabindan yapilmis yayindaki alintilar (varsa kitabin alinti sayfasina baglanir)
+    alinti_kaynagi = getattr(kitap, "kaynak", None)
+    alinti_sayisi = yayindaki_alintilar().filter(kaynak=alinti_kaynagi).count() if alinti_kaynagi else 0
     context = {
         "kitap": kitap,
+        "alinti_kaynagi": alinti_kaynagi,
+        "alinti_sayisi": alinti_sayisi,
         "onceki_kitap": onceki_kitap,
         "sonraki_kitap": sonraki_kitap,
         "benzer_kitaplar": benzer_kitaplar,
@@ -1267,8 +1299,14 @@ def kitap_detay(request, slug):
 
 def yazarlar(request):
     yazar_listesi = (
-        YazarProfil.objects.select_related("user")
+        YazarProfil.objects.select_related("user", "kaynak_yazar")
         .prefetch_related("kitaplar", "ikinci_yazar_kitaplar", "blog_yazilari")
+        .annotate(
+            alinti_sayisi=Count(
+                "kaynak_yazar__kitaplar__alintilar",
+                filter=Q(kaynak_yazar__kitaplar__alintilar__durum=Alinti.DurumSecenekleri.YAYINDA),
+            )
+        )
         .filter(onayli=True)
         .order_by("ad_soyad")
     )
@@ -1418,13 +1456,17 @@ def blog_detay(request, slug):
     )
 
 
-def alintilar(request):
-    alinti_listesi = (
-        Alinti.objects.select_related("kitap", "kategori", "kitap__yazar__user")
-        .prefetch_related("etiketler")
-        .filter(yayinda=True)
-        .order_by("-created_at")
+def yayindaki_alintilar():
+    """Sitede gosterilen alintilar: yayinda ve kaynagi belli olanlar."""
+    return (
+        Alinti.objects.select_related("kaynak__yazar", "kategori", "paylasan__profil")
+        .filter(durum=Alinti.DurumSecenekleri.YAYINDA, kaynak__isnull=False)
+        .order_by("-yayin_tarihi", "-created_at")
     )
+
+
+def alintilar(request):
+    alinti_listesi = yayindaki_alintilar()
     sayfa_nesnesi = Paginator(alinti_listesi, 12).get_page(request.GET.get("sayfa"))
 
     return render(
@@ -1435,8 +1477,60 @@ def alintilar(request):
             "sayfa_nesnesi": sayfa_nesnesi,
             "sayfalandirildi_mi": sayfa_nesnesi.paginator.num_pages > 1,
             **seo_context(
-                "Alintilar | Tecrit Edebiyat",
-                "Kitaplardan secilmis, paylasilmaya deger alintilar ve kaynak eser bilgileri.",
+                "Alıntılar | Tecrit Edebiyat",
+                "Kitaplardan seçilmiş, paylaşılmaya değer alıntılar ve kaynak eser bilgileri.",
+                request.build_absolute_uri(),
+            ),
+        },
+    )
+
+
+def alinti_kitap(request, slug):
+    kitap = get_object_or_404(KaynakKitap.objects.select_related("yazar", "katalog_kitabi"), slug=slug)
+    alinti_listesi = yayindaki_alintilar().filter(kaynak=kitap)
+    if not kitap.onayli and not alinti_listesi.exists():
+        raise Http404("Kitap bulunamadı")
+    sayfa_nesnesi = Paginator(alinti_listesi, 12).get_page(request.GET.get("sayfa"))
+    kunye = " · ".join(str(p) for p in [kitap.yayinevi, kitap.basim_yili] if p)
+    return render(
+        request,
+        "alintilar_kitap.html",
+        {
+            "kitap": kitap,
+            "kunye": kunye,
+            "sayfa_nesnesi": sayfa_nesnesi,
+            "sayfalandirildi_mi": sayfa_nesnesi.paginator.num_pages > 1,
+            **seo_context(
+                f"{kitap.ad} – Alıntılar | Tecrit Edebiyat",
+                f"{kitap.yazar.ad} imzalı {kitap.ad} kitabından okurlarımızın paylaştığı alıntılar.",
+                request.build_absolute_uri(),
+            ),
+        },
+    )
+
+
+def alinti_yazar(request, slug):
+    yazar = get_object_or_404(KaynakYazar.objects.select_related("yazar_profili"), slug=slug)
+    alinti_listesi = yayindaki_alintilar().filter(kaynak__yazar=yazar)
+    kitaplar = list(
+        yazar.kitaplar.annotate(
+            yayindaki=Count("alintilar", filter=Q(alintilar__durum=Alinti.DurumSecenekleri.YAYINDA))
+        ).filter(Q(onayli=True) | Q(yayindaki__gt=0)).order_by("-yayindaki", "ad")
+    )
+    if not kitaplar:
+        raise Http404("Yazar bulunamadı")
+    sayfa_nesnesi = Paginator(alinti_listesi, 12).get_page(request.GET.get("sayfa"))
+    return render(
+        request,
+        "alintilar_yazar.html",
+        {
+            "yazar": yazar,
+            "kitaplar": kitaplar,
+            "sayfa_nesnesi": sayfa_nesnesi,
+            "sayfalandirildi_mi": sayfa_nesnesi.paginator.num_pages > 1,
+            **seo_context(
+                f"{yazar.ad} – Alıntılar | Tecrit Edebiyat",
+                f"{yazar.ad} kitaplarından okurlarımızın paylaştığı alıntılar.",
                 request.build_absolute_uri(),
             ),
         },

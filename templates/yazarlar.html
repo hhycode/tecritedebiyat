@@ -105,6 +105,12 @@
                                                 <i class="ph ph-check"></i>
                                                 <span>{{ yazar.blog_yazilari.count }} blog yazısı</span>
                                             </li>
+                                            {% if yazar.alinti_sayisi %}
+                                            <li class="anim-uni-in-up">
+                                                <i class="ph ph-check"></i>
+                                                <span><a href="{{ yazar.kaynak_yazar.get_absolute_url }}">Kitaplarından {{ yazar.alinti_sayisi }} alıntı</a></span>
+                                            </li>
+                                            {% endif %}
                                         </ul>
                                     </div>
                                 </div>

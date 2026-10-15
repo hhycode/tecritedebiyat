@@ -1,0 +1,22 @@
+{% if sayfa_nesnesi.object_list %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "itemListElement": [
+    {% for alinti in sayfa_nesnesi.object_list %}
+    {
+      "@type": "ListItem",
+      "position": {{ forloop.counter }},
+      "item": {
+        "@type": "Quotation",
+        "text": "{{ alinti.metin|escapejs }}",
+        "creator": {"@type": "Person", "name": "{{ alinti.kaynak.yazar.ad|escapejs }}"},
+        "isPartOf": {"@type": "Book", "name": "{{ alinti.kaynak.ad|escapejs }}", "url": "{{ request.scheme }}://{{ request.get_host }}{{ alinti.kaynak.get_absolute_url }}"}
+      }
+    }{% if not forloop.last %},{% endif %}
+    {% endfor %}
+  ]
+}
+</script>
+{% endif %}
