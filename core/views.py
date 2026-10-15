@@ -393,7 +393,6 @@ def superadmin_yazi_durum_guncelle(request, pk):
                 if not yazi.yayin_tarihi:
                     yazi.yayin_tarihi = timezone.now()
             else:
-                yazi.yayin_tarihi = None
                 if yeni_durum == BlogYazisi.DurumSecenekleri.INCELEMEDE:
                     yazi.onaylayan = None
                 else:
@@ -685,7 +684,6 @@ def superadmin_icerik_model_duzenle(request, model_key, pk):
                     nesne.onaylayan = request.user
                 elif nesne.durum != BlogYazisi.DurumSecenekleri.YAYINDA:
                     nesne.onaylayan = None
-                    nesne.yayin_tarihi = None
             nesne.save()
             if hasattr(form, "save_m2m"):
                 form.save_m2m()

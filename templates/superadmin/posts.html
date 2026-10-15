@@ -49,12 +49,12 @@
                                     <input type="hidden" name="durum" value="yayinda">
                                     <button class="btn btn-sm btn-primary rounded-pill" type="submit">Yayına Al</button>
                                 </form>
-                                <form method="post" action="{% url 'superadmin_yazi_durum_guncelle' yazi.pk %}">
+                                <form method="post" data-onay="Bu yazı incelemeye alınacak. Yayındaysa siteden kaldırılır. Devam edilsin mi?" action="{% url 'superadmin_yazi_durum_guncelle' yazi.pk %}">
                                     {% csrf_token %}
                                     <input type="hidden" name="durum" value="incelemede">
                                     <button class="btn btn-sm btn-outline-secondary rounded-pill" type="submit">İncelemede</button>
                                 </form>
-                                <form method="post" action="{% url 'superadmin_yazi_durum_guncelle' yazi.pk %}">
+                                <form method="post" data-onay="Bu yazı reddedilecek. Yayındaysa siteden kaldırılır. Devam edilsin mi?" action="{% url 'superadmin_yazi_durum_guncelle' yazi.pk %}">
                                     {% csrf_token %}
                                     <input type="hidden" name="durum" value="reddedildi">
                                     <button class="btn btn-sm btn-outline-danger rounded-pill" type="submit">Reddet</button>

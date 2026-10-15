@@ -320,6 +320,15 @@
         </main>
     </div>
 </div>
+<script>
+// data-onay ozelligi olan formlar gonderilmeden once onay ister
+document.addEventListener("submit", function (event) {
+    var mesaj = event.target.getAttribute("data-onay");
+    if (mesaj && !window.confirm(mesaj)) {
+        event.preventDefault();
+    }
+});
+</script>
 {% block extra_js %}{% endblock %}
 </body>
 </html>

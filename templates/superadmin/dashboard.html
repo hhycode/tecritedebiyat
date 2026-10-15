@@ -109,7 +109,7 @@
                                     <input type="hidden" name="durum" value="yayinda">
                                     <button class="btn btn-sm btn-dark" type="submit">Yayınla</button>
                                 </form>
-                                <form method="post" action="{% url 'superadmin_yazi_durum_guncelle' yazi.pk %}">
+                                <form method="post" data-onay="Bu yazı reddedilecek. Yayındaysa siteden kaldırılır. Devam edilsin mi?" action="{% url 'superadmin_yazi_durum_guncelle' yazi.pk %}">
                                     {% csrf_token %}
                                     <input type="hidden" name="durum" value="reddedildi">
                                     <button class="btn btn-sm btn-outline-danger" type="submit">Reddet</button>
