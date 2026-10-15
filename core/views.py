@@ -484,7 +484,13 @@ def superadmin_yazi_durum_guncelle(request, pk):
     yazi = get_object_or_404(BlogYazisi, pk=pk)
     if request.method == "POST":
         yeni_durum = request.POST.get("durum")
+        not_degisti = False
+        if "admin_notu" in request.POST:
+            yeni_not = request.POST["admin_notu"].strip()[:2000]
+            not_degisti = yeni_not != yazi.admin_notu
+            yazi.admin_notu = yeni_not
         if yeni_durum in dict(BlogYazisi.DurumSecenekleri.choices):
+            durum_degisti = yeni_durum != yazi.durum
             yazi.durum = yeni_durum
             if yeni_durum == BlogYazisi.DurumSecenekleri.YAYINDA:
                 yazi.onaylayan = request.user
@@ -496,8 +502,14 @@ def superadmin_yazi_durum_guncelle(request, pk):
                 else:
                     yazi.onaylayan = request.user
             yazi.save()
-            islem_kaydet(request, yazi, CHANGE, f"Durum: {yazi.get_durum_display()}")
-            messages.success(request, f'"{yazi.baslik}" için durum güncellendi.')
+            if durum_degisti:
+                islem_kaydet(request, yazi, CHANGE, f"Durum: {yazi.get_durum_display()}")
+                messages.success(request, f'"{yazi.baslik}" için durum güncellendi.')
+            elif not_degisti:
+                islem_kaydet(request, yazi, CHANGE, "Yazara not güncellendi")
+                messages.success(request, f'"{yazi.baslik}" için yazara not kaydedildi.')
+        if request.POST.get("sonra") == "detay":
+            return redirect("superadmin_yazi_detay", pk=yazi.pk)
     return redirect("superadmin_yazilar")
 
 
@@ -1972,7 +1984,7 @@ PANEL_DURUM_FILTRELERI = {
     "taslak": [BlogYazisi.DurumSecenekleri.TASLAK],
     "incelemede": [BlogYazisi.DurumSecenekleri.INCELEMEDE],
     "yayinda": [BlogYazisi.DurumSecenekleri.YAYINDA],
-    "duzeltme": [BlogYazisi.DurumSecenekleri.REDDEDILDI],
+    "duzeltme": [BlogYazisi.DurumSecenekleri.DUZELTME, BlogYazisi.DurumSecenekleri.REDDEDILDI],
 }
 PANEL_SAYFA_BOYUTU = 10
 
@@ -2010,6 +2022,56 @@ def yazar_panel_karsilama(sayilar, kitap_sayisi):
     if kitap_sayisi:
         cumleler.append(f"Yayınevimizde {kitap_sayisi} kitabınız yayında.")
     return cumleler
+
+
+# Editorun durum degisikligi kaydi (islem_kaydet: "Durum: <ad>") -> yazara gosterilen metin, renk, ikon
+GERI_BILDIRIM_METINLERI = {
+    "Yayında": ("Yayına alındı", "success", "ph-check-circle"),
+    "Düzeltme istendi": ("Düzeltme istendi", "danger", "ph-arrow-u-up-left"),
+    "Reddedildi": ("Reddedildi", "danger", "ph-x-circle"),
+    "İncelemede": ("İncelemeye alındı", "", "ph-hourglass-medium"),
+    "Taslak": ("Taslağa çevrildi", "", "ph-note-pencil"),
+}
+
+
+def yazar_geri_bildirimleri(request, profil, adet=6):
+    """Yazarin yazilari uzerinde baskalarinin (editorlerin) yaptigi islemler; LogEntry'den okunur."""
+    yazilar = {str(y["pk"]): y for y in BlogYazisi.objects.filter(yazar=profil).values("pk", "baslik", "durum", "admin_notu")}
+    if not yazilar:
+        return []
+    kayitlar = (
+        LogEntry.objects.filter(
+            content_type__app_label="core",
+            content_type__model="blogyazisi",
+            object_id__in=list(yazilar),
+            action_flag=CHANGE,
+        )
+        .exclude(user=request.user)
+        .order_by("-action_time")[:adet]
+    )
+    sonuc = []
+    gosterilen_not = set()
+    for kayit in kayitlar:
+        yazi = yazilar[kayit.object_id]
+        mesaj = kayit.get_change_message()
+        if mesaj.startswith("Durum: "):
+            metin, renk, ikon = GERI_BILDIRIM_METINLERI.get(mesaj[7:], (mesaj[7:], "", "ph-info"))
+        elif mesaj == "Yazara not güncellendi":
+            metin, renk, ikon = "Editör not bıraktı", "warning", "ph-chat-circle-text"
+        else:
+            metin, renk, ikon = "Editör yazınızı düzenledi", "", "ph-pencil-simple"
+        # Not, yalnizca yazi hala duzeltme/ret durumundaysa ve o yazinin en yeni kaydinda gosterilir
+        not_metni = ""
+        if (
+            yazi["admin_notu"]
+            and yazi["durum"] in PANEL_DURUM_FILTRELERI["duzeltme"]
+            and renk in ("warning", "danger")
+            and yazi["pk"] not in gosterilen_not
+        ):
+            not_metni = yazi["admin_notu"]
+            gosterilen_not.add(yazi["pk"])
+        sonuc.append({"yazi": yazi, "metin": metin, "renk": renk, "ikon": ikon, "zaman": kayit.action_time, "not": not_metni})
+    return sonuc
 
 
 @login_required(login_url="giris")
@@ -2053,6 +2115,7 @@ def yazar_paneli(request):
             page_obj=page_obj,
             sayfa_sorgusu=sayfa_sorgusu,
             profil_eksikleri=profil_eksikleri,
+            geri_bildirimler=yazar_geri_bildirimleri(request, profil),
         ),
     )
 

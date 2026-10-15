@@ -123,6 +123,39 @@
     </section>
 
     <aside class="yp-side">
+        <section class="yp-card" aria-labelledby="yp-bildirim-baslik">
+            <div class="yp-card__head">
+                <div>
+                    <h2 class="yp-card__title" id="yp-bildirim-baslik">Geri bildirimler</h2>
+                    <p class="yp-card__sub">Editörün yazılarınızla ilgili son işlemleri</p>
+                </div>
+            </div>
+            <div class="yp-card__body--flush">
+                {% if geri_bildirimler %}
+                <ul class="sa-feed yp-feed">
+                    {% for g in geri_bildirimler %}
+                    <li>
+                        <a class="sa-feed__item" href="{% url 'yazar_panel_yazi_duzenle' g.yazi.pk %}">
+                            <i class="ph {{ g.ikon }}{% if g.renk %} yp-feed__icon--{{ g.renk }}{% endif %}" aria-hidden="true"></i>
+                            <div>
+                                <strong>{{ g.yazi.baslik }}</strong>
+                                <span>{{ g.metin }} · <time datetime="{{ g.zaman|date:'c' }}">{{ g.zaman|date:"j M, H:i" }}</time></span>
+                                {% if g.not %}<div class="yp-feed__quote">{{ g.not }}</div>{% endif %}
+                            </div>
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <div class="yp-empty yp-empty--sm">
+                    <i class="ph ph-bell-simple" aria-hidden="true"></i>
+                    <strong>Henüz geri bildirim yok</strong>
+                    <span>Editör yazılarınızı incelediğinde sonuç burada görünür.</span>
+                </div>
+                {% endif %}
+            </div>
+        </section>
+
         {% if profil_eksikleri %}
         <section class="yp-card" aria-labelledby="yp-profil-baslik">
             <div class="yp-card__head"><h2 class="yp-card__title" id="yp-profil-baslik">Profilinizi tamamlayın</h2></div>

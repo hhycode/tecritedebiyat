@@ -330,12 +330,6 @@ body.yp {
     font-variant-numeric: tabular-nums;
 }
 
-/* ---------- Durum etiketleri ---------- */
-.sa-pill--danger {
-    background: var(--sa-danger-soft);
-    color: var(--sa-danger);
-}
-
 /* ---------- Yazi listesi ---------- */
 .yp-posts {
     margin: 0;

@@ -4,7 +4,7 @@
 {% block sayfa_ust_etiket %}Yazı{% endblock %}
 {% block sayfa_aciklamasi %}{{ yazi.yazar.ad_soyad }} · {{ yazi.kategori.ad|default:"-" }} · {{ yazi.created_at|date:"d.m.Y H:i" }}{% endblock %}
 {% block sayfa_aksiyonlari %}
-<span class="sa-pill{% if yazi.durum == 'yayinda' %} sa-pill--success{% elif yazi.durum == 'incelemede' %} sa-pill--warning{% endif %}">{{ yazi.get_durum_display }}</span>
+<span class="sa-pill{% if yazi.durum == 'yayinda' %} sa-pill--success{% elif yazi.durum == 'incelemede' %} sa-pill--warning{% elif yazi.durum == 'duzeltme' or yazi.durum == 'reddedildi' %} sa-pill--danger{% endif %}">{{ yazi.get_durum_display }}</span>
 <a class="sa-btn sa-btn--secondary" href="{% url 'superadmin_icerik_model_duzenle' 'blogyazisi' yazi.pk %}">Düzenle</a>
 <a class="sa-btn sa-btn--secondary" href="{% url 'superadmin_yazilar' %}">Listeye Dön</a>
 {% endblock %}
@@ -26,12 +26,21 @@
                         <input type="hidden" name="durum" value="incelemede">
                         <button class="sa-btn sa-btn--secondary" type="submit">İncelemede</button>
                     </form>{% endif %}
-                    {% if yazi.durum != 'reddedildi' %}<form method="post" data-onay="Bu yazı reddedilecek. Yayındaysa siteden kaldırılır. Devam edilsin mi?" action="{% url 'superadmin_yazi_durum_guncelle' yazi.pk %}">
-                        {% csrf_token %}
-                        <input type="hidden" name="durum" value="reddedildi">
-                        <button class="sa-btn sa-btn--danger-outline" type="submit">Reddet</button>
-                    </form>{% endif %}
                 </div>
+
+                <form method="post" action="{% url 'superadmin_yazi_durum_guncelle' yazi.pk %}" class="border rounded-4 p-3 mb-4 sa-field">
+                    {% csrf_token %}
+                    <input type="hidden" name="sonra" value="detay">
+                    <label for="yazara-not">Yazara geri bildirim</label>
+                    <textarea id="yazara-not" name="admin_notu" rows="3" maxlength="2000" placeholder="Örn. Giriş paragrafını kısaltıp yeniden gönderebilir misiniz?">{{ yazi.admin_notu }}</textarea>
+                    <span class="sa-help">Yazar bu notu, yazısı “Düzeltme istendi” ya da “Reddedildi” durumundayken yazar panelinde görür.</span>
+                    <div class="d-flex gap-2 flex-wrap mt-3">
+                        <button class="sa-btn sa-btn--secondary" type="submit" name="durum" value="duzeltme">Düzeltme iste</button>
+                        <button class="sa-btn sa-btn--danger-outline" type="submit" name="durum" value="reddedildi">Reddet</button>
+                        <button class="sa-btn sa-btn--secondary" type="submit" name="durum" value="{{ yazi.durum }}">Yalnızca notu kaydet</button>
+                    </div>
+                    {% if yazi.durum == 'yayinda' %}<span class="sa-help">Düzeltme istemek ya da reddetmek yazıyı siteden kaldırır.</span>{% endif %}
+                </form>
 
                 {% if yazi.ozet %}
                 <div class="border rounded-4 p-3 mb-4">
@@ -51,12 +60,6 @@
                     <div class="fs-5">{{ yazi.icerik|temiz_html }}</div>
                 </div>
 
-                {% if yazi.admin_notu %}
-                <div class="border rounded-4 p-3 mt-4">
-                    <div class="sa-muted small mb-1">Admin Notu</div>
-                    <div style="white-space: pre-wrap;">{{ yazi.admin_notu }}</div>
-                </div>
-                {% endif %}
             </div>
         </div>
     </div>

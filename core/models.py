@@ -251,6 +251,7 @@ class BlogYazisi(models.Model):
     class DurumSecenekleri(models.TextChoices):
         TASLAK = "taslak", "Taslak"
         INCELEMEDE = "incelemede", "İncelemede"
+        DUZELTME = "duzeltme", "Düzeltme istendi"
         YAYINDA = "yayinda", "Yayında"
         REDDEDILDI = "reddedildi", "Reddedildi"
 
@@ -268,6 +269,7 @@ class BlogYazisi(models.Model):
     )
     etiketler = models.ManyToManyField(Etiket, blank=True, related_name="blog_yazilari")
     durum = models.CharField(max_length=20, choices=DurumSecenekleri.choices, default=DurumSecenekleri.TASLAK)
+    # Editorun yazara notu; yazar panelinde "Duzeltme istendi"/"Reddedildi" durumlarinda gosterilir
     admin_notu = models.TextField(blank=True, default="")
     onaylayan = models.ForeignKey(
         User,
