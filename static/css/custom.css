@@ -1703,3 +1703,201 @@ body.custom-menu-open .custom-menu-toggle * {
         overflow-wrap: anywhere;
     }
 }
+
+/* ============================================================
+   Tam ekran menu (templates/partials/site_menu.html)
+   Madde yazilari sabit piksel yerine her maddenin kendi yuksekligine gore olceklenir
+   (container query: 1cqh = maddenin yuksekliginin %1'i). Madde sayisi artarsa her madde
+   kisalir ve yazi kendiliginden kuculur. 24 px altina inmez; sigmazsa yalnizca menu kutusu kayar.
+   ============================================================ */
+.main-menu__item {
+    container-type: size;
+    flex-direction: row;
+    align-items: center;
+    min-height: 4.4rem; /* rahat dokunma alani */
+}
+.main-menu .main-menu__link {
+    height: auto;
+    line-height: 1.15;
+}
+/* Hover animasyonu yazinin ikinci kopyasini bir satir asagida tutar; kutu tam bir satir olmali */
+.main-menu .main-menu__link .btn-caption {
+    height: 1.15em;
+    line-height: 1.15em;
+    overflow: hidden;
+}
+.mxd-menu__wrapper .mxd-menu__caption {
+    margin-bottom: clamp(1.6rem, 4.5vh, 4.4rem);
+}
+.main-menu .main-menu__link {
+    font-size: clamp(2.4rem, 4.6vh, 5.6rem); /* container query desteklemeyen tarayicilar icin */
+    font-size: clamp(2.4rem, min(70cqh, 14cqw), 7.2rem);
+}
+/* Aktif sayfa: vurgu renginde nokta (+ aria-current) */
+.main-menu__item.is-active::after {
+    content: "";
+    flex-shrink: 0;
+    width: clamp(0.9rem, 18cqh, 1.4rem);
+    height: clamp(0.9rem, 18cqh, 1.4rem);
+    margin-left: 1.4rem;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 2px var(--t-opp-bright);
+}
+.main-menu__accordion {
+    gap: clamp(0.4rem, 1.1vh, 1.6rem);
+}
+
+/* Iletisim ve Sosyal Medya sutunlari */
+.menu-iletisim__liste,
+.menu-sosyal__liste {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+.menu-iletisim__liste {
+    display: grid;
+    gap: 1.2rem;
+}
+.menu-iletisim__kutu {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    padding: 1.6rem 2rem;
+    border: 1px solid color-mix(in srgb, var(--t-opp-bright) 14%, transparent);
+    border-radius: 1.6rem;
+    color: var(--t-opp-bright);
+    font-size: 1.5rem;
+    line-height: 1.4;
+}
+.menu-iletisim__kutu i {
+    flex-shrink: 0;
+    color: var(--t-opp-medium);
+    font-size: 2rem;
+}
+.menu-iletisim__kutu a {
+    min-width: 0;
+    overflow-wrap: break-word;
+    color: inherit;
+    text-decoration: none;
+}
+.menu-sosyal__liste {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+.menu-sosyal__liste a {
+    color: var(--t-opp-bright);
+    font: normal var(--fw-medium-opp) clamp(1.8rem, 2.6vh, 2.6rem) / 1.3 var(--_font-accent);
+    text-decoration: none;
+}
+.menu-iletisim__kutu a:hover,
+.menu-sosyal__liste a:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.3rem;
+}
+.mxd-menu__right .menu-promo {
+    height: auto;
+    padding: 0;
+    text-align: left;
+}
+.mxd-menu__right .menu-promo__content {
+    position: static;
+    align-items: flex-start;
+    width: auto;
+    padding: 0;
+}
+/* Kaydirma gerekiyorsa gorunur olsun (tema cubugu tamamen gizliyordu) */
+.mxd-menu__inner,
+.mxd-menu__left {
+    scrollbar-width: thin;
+    scrollbar-color: var(--t-opp-muted) transparent;
+}
+.mxd-menu__inner::-webkit-scrollbar,
+.mxd-menu__left::-webkit-scrollbar {
+    display: block !important;
+    width: 6px !important;
+}
+.mxd-menu__inner::-webkit-scrollbar-thumb,
+.mxd-menu__left::-webkit-scrollbar-thumb {
+    border-radius: 3px;
+    background: var(--t-opp-muted);
+}
+
+/* Mobil ve tablet (tek sutun): madde yuksekligi ekran yuksekligine gore */
+@media only screen and (max-width: 1199.98px) {
+    .main-menu__item {
+        height: clamp(4.4rem, 6.4vh, 5.6rem);
+    }
+    .mxd-menu__right {
+        display: grid;
+        gap: 3.2rem;
+        padding: 4.4rem 3rem 0;
+    }
+    .mxd-menu__right .mxd-menu__caption {
+        margin-bottom: 1.6rem;
+    }
+    .menu-sosyal__liste {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 0.8rem 2.4rem;
+    }
+    .menu-sosyal .menu-promo {
+        margin-top: 2.4rem;
+    }
+}
+@media only screen and (min-width: 768px) and (max-width: 1199.98px) {
+    .mxd-menu__right {
+        grid-template-columns: 1fr 1fr;
+        padding: 4.4rem 4rem 0;
+    }
+}
+
+/* Masaustu: sol menu, orta iletisim, sag sosyal medya; ust ve alt cizgileri ayni */
+@media only screen and (min-width: 1200px) {
+    .mxd-menu__left {
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
+    }
+    .mxd-menu__left .main-menu,
+    .mxd-menu__left .main-menu__content {
+        display: flex;
+        flex-direction: column;
+        flex: 1 0 auto;
+    }
+    .mxd-menu__left .main-menu__accordion {
+        flex: 1 0 auto;
+    }
+    .mxd-menu__left .main-menu__item {
+        flex: 1 1 0;
+        min-height: 4rem; /* fare ile kullanilan genis ekran; dokunmatikte 4.4rem kalir */
+    }
+    .mxd-menu__right {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 4rem;
+        /* sagdaki 9rem: kapatma dugmesinin altina hicbir sey girmesin */
+        padding: 4rem 9rem 0 0;
+        overflow-y: auto;
+    }
+    .menu-iletisim,
+    .menu-sosyal {
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+    }
+    /* Sol sutundaki iki satirlik baslikla ayni hizada baslasin */
+    .mxd-menu__right .mxd-menu__caption {
+        min-height: 2lh;
+    }
+    .menu-sosyal .menu-promo {
+        margin-top: auto;
+        padding-top: 2.4rem;
+    }
+}
+@media only screen and (min-width: 1600px) {
+    .mxd-menu__right {
+        padding: 6rem 11rem 0 0;
+    }
+}

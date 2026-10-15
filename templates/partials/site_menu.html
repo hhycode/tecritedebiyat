@@ -1,0 +1,80 @@
+{% comment %}
+Tam ekran site menusu (hamburger). Maddeler core/context_processors.py SITE_MENUSU'nda tanimli.
+Duzen ve olcekleme: static/css/custom.css "Tam ekran menu" bolumu.
+{% endcomment %}
+<nav class="mxd-nav__wrap" data-lenis-prevent="">
+  <div class="mxd-nav__contain loading__fade">
+    <a href="#0" class="mxd-nav__hamburger" aria-label="Menüyü aç/kapat">
+      <div class="hamburger__base"></div>
+      <div class="hamburger__line"></div>
+      <div class="hamburger__line"></div>
+    </a>
+  </div>
+
+  <div class="mxd-menu__wrapper">
+    <div class="mxd-menu__base"></div>
+
+    <div class="mxd-menu__contain">
+      <div class="mxd-menu__inner">
+
+        <div class="mxd-menu__left">
+          <p class="mxd-menu__caption menu-fade-in">
+            Tecrit Edebiyat<br>
+            Kitabınızı okurla buluşturun.
+          </p>
+
+          <div class="main-menu">
+            <nav class="main-menu__content" aria-label="Site menüsü">
+              <ul id="main-menu" class="main-menu__accordion">
+                {% for madde in site_menusu %}
+                <li class="main-menu__item{% if madde.aktif %} is-active{% endif %}">
+                  <a class="main-menu__link btn btn-anim" href="{{ madde.url }}"{% if madde.aktif %} aria-current="page"{% endif %}>
+                    <span class="btn-caption">{{ madde.etiket }}</span>
+                  </a>
+                </li>
+                {% endfor %}
+              </ul>
+            </nav>
+          </div>
+        </div>
+
+        <div class="mxd-menu__right">
+          <div class="menu-iletisim menu-fade-in">
+            <p class="mxd-menu__caption">İletişim</p>
+            <ul class="menu-iletisim__liste">
+              <li class="menu-iletisim__kutu"><i class="ph ph-envelope-simple" aria-hidden="true"></i><a href="mailto:iletisim@tecritedebiyat.com">iletisim@<wbr>tecritedebiyat.com</a></li>
+              <li class="menu-iletisim__kutu"><i class="ph ph-phone" aria-hidden="true"></i><a href="tel:+905537591627">+90 553 759 16 27</a></li>
+              <li class="menu-iletisim__kutu"><i class="ph ph-map-pin" aria-hidden="true"></i><a href="https://maps.google.com/?q=Cağaloğlu, İstanbul" target="_blank" rel="noopener">Cağaloğlu, İstanbul</a></li>
+            </ul>
+          </div>
+
+          <div class="menu-sosyal menu-fade-in">
+            <p class="mxd-menu__caption">Sosyal Medya</p>
+            <ul class="menu-sosyal__liste">
+              <li><a href="https://www.instagram.com/tecritdergi/" target="_blank" rel="noopener">Instagram</a></li>
+              <li><a href="https://x.com/tecritedebiyat" target="_blank" rel="noopener">X (Twitter)</a></li>
+              <li><a href="https://www.facebook.com/profile.php?id=61571147760041" target="_blank" rel="noopener">Facebook</a></li>
+              <li><a href="https://www.youtube.com/@TecritEdebiyat" target="_blank" rel="noopener">YouTube</a></li>
+            </ul>
+            <div class="menu-promo">
+              <div class="menu-promo__content">
+                <p class="menu-promo__caption">
+                  Kitap basımı, editörlük ve yayın danışmanlığı için
+                  Tecrit Edebiyat yanınızda.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mxd-menu__data menu-fade-in">
+          <p class="t-xsmall">© 2026 Tecrit Edebiyat</p>
+          <p class="t-xsmall">
+            <a href="mailto:iletisim@tecritedebiyat.com">iletisim@tecritedebiyat.com</a>
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</nav>
