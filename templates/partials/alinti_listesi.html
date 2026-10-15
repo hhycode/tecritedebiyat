@@ -1,8 +1,7 @@
 {% comment %}Alinti kartlari izgarasi + sayfalama. sayfa_nesnesi, sayfalandirildi_mi, bos_metin, [yorum_goster]{% endcomment %}
 <div class="te-alinti-izgara">
     {% for alinti in sayfa_nesnesi.object_list %}
-    {% cycle 'sari' 'mor' 'beyaz' as renk silent %}
-    {% include "partials/alinti_karti.html" with alinti=alinti renk=renk yorum_goster=yorum_goster %}
+    {% include "partials/alinti_karti.html" with alinti=alinti yorum_goster=yorum_goster %}
     {% empty %}
     <p class="te-alinti-bos">{{ bos_metin|default:"Henüz görüntülenecek alıntı bulunmuyor." }}</p>
     {% endfor %}

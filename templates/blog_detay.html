@@ -16,7 +16,7 @@
 
 {% block extra_css %}
 {% if yazi.medyalar.all %}<link rel="stylesheet" href="{% static 'css/medya.css' %}?v=1">{% endif %}
-{% if yazi.yayindaki_alintilar %}<link rel="stylesheet" href="{% static 'css/alinti.css' %}?v=1">{% endif %}
+{% if yazi.yayindaki_alintilar %}<link rel="stylesheet" href="{% static 'css/alinti.css' %}?v=2">{% endif %}
 <style>
     .article-content-rich img {
         max-width: 100%;
@@ -140,10 +140,9 @@
                             {% if yazi.yayindaki_alintilar %}
                             <section class="te-yazi-alintilar" aria-labelledby="yazi-alintilar-baslik">
                                 <h2 class="te-alinti-baslik" id="yazi-alintilar-baslik">Bu yazıdaki alıntılar</h2>
-                                <div class="te-alinti-izgara">
+                                <div class="te-alinti-izgara te-alinti-izgara--tek">
                                     {% for alinti in yazi.yayindaki_alintilar %}
-                                    {% cycle 'sari' 'mor' 'beyaz' as renk silent %}
-                                    {% include "partials/alinti_karti.html" with alinti=alinti renk=renk %}
+                                    {% include "partials/alinti_karti.html" with alinti=alinti %}
                                     {% endfor %}
                                 </div>
                             </section>

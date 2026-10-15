@@ -1,8 +1,9 @@
 {% comment %}
 Alinti karti; kaynak (kitap, yazar, sayfa) her zaman gorunur.
-Kullanim: {% include "partials/alinti_karti.html" with alinti=alinti renk="sari|mor|beyaz" yorum_goster=True %}
+Kullanim: {% include "partials/alinti_karti.html" with alinti=alinti yorum_goster=True %}
+Kart rengi CSS'te, izgaradaki sirasina gore verilir (static/css/alinti.css).
 {% endcomment %}
-<figure class="te-alinti te-alinti--{{ renk|default:'beyaz' }}">
+<figure class="te-alinti">
     <span class="te-alinti__isaret" aria-hidden="true">&ldquo;</span>
     <blockquote class="te-alinti__metin"{% if alinti.kaynak_id %} cite="{{ request.scheme }}://{{ request.get_host }}{{ alinti.kaynak.get_absolute_url }}"{% endif %}>
         <p>{{ alinti.metin|linebreaksbr }}</p>

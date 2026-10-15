@@ -14,9 +14,24 @@
     border-radius: 2.4rem;
     color: #171717;
 }
-.te-alinti--sari { background: #ddf160; }
-.te-alinti--mor { background: #9f8be7; color: #fff; }
-.te-alinti--beyaz { background: #fff; }
+/* Renk dagilimi: sari, mor, beyaz; komsu (yan yana ve alt alta) iki kart asla ayni renkte olmaz.
+   1 ve 2 sutunda 3'lu sira yeterli (i, i+1 ve i+2 hep farkli). 3 sutunda her satir bir kaydirilir
+   (S M B / M B S / B S M), boylece sutunlar tek renk kalmaz. Her renk kartlarin ucte biri.
+   Mor kartta da metin koyu: beyaz metin 2,9:1 ile okunabilirlik esiginin altindaydi (koyu: 6,3:1). */
+.te-alinti-izgara > .te-alinti:nth-child(3n+1) { background: #ddf160; }
+.te-alinti-izgara > .te-alinti:nth-child(3n+2) { background: #9f8be7; }
+.te-alinti-izgara > .te-alinti:nth-child(3n+3) { background: #fff; }
+@media (min-width: 1200px) {
+    .te-alinti-izgara:not(.te-alinti-izgara--tek) > .te-alinti:nth-child(9n+1),
+    .te-alinti-izgara:not(.te-alinti-izgara--tek) > .te-alinti:nth-child(9n+6),
+    .te-alinti-izgara:not(.te-alinti-izgara--tek) > .te-alinti:nth-child(9n+8) { background: #ddf160; }
+    .te-alinti-izgara:not(.te-alinti-izgara--tek) > .te-alinti:nth-child(9n+2),
+    .te-alinti-izgara:not(.te-alinti-izgara--tek) > .te-alinti:nth-child(9n+4),
+    .te-alinti-izgara:not(.te-alinti-izgara--tek) > .te-alinti:nth-child(9n+9) { background: #9f8be7; }
+    .te-alinti-izgara:not(.te-alinti-izgara--tek) > .te-alinti:nth-child(9n+3),
+    .te-alinti-izgara:not(.te-alinti-izgara--tek) > .te-alinti:nth-child(9n+5),
+    .te-alinti-izgara:not(.te-alinti-izgara--tek) > .te-alinti:nth-child(9n+7) { background: #fff; }
+}
 .te-alinti a {
     color: inherit;
     text-decoration: underline;
@@ -56,9 +71,6 @@
     padding-top: 1.8rem;
     border-top: 1px solid rgba(23, 23, 23, .12);
     font-size: 1.4rem;
-}
-.te-alinti--mor .te-alinti__kaynak {
-    border-top-color: rgba(255, 255, 255, .28);
 }
 .te-alinti__yazar {
     font-size: 1.6rem;
@@ -156,6 +168,7 @@
 .te-yazi-alintilar {
     margin: 4rem 0 0;
 }
+.te-alinti-izgara.te-alinti-izgara--tek,
 .te-yazi-alintilar .te-alinti-izgara {
     grid-template-columns: minmax(0, 1fr);
 }
