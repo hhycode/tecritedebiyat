@@ -1,5 +1,7 @@
 {% extends "superadmin/base.html" %}
-{% load icerik %}
+{% load icerik static %}
+
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/medya.css' %}?v=1">{% endblock %}
 
 {% block sayfa_ust_etiket %}Yazı{% endblock %}
 {% block sayfa_aciklamasi %}{{ yazi.yazar.ad_soyad }} · {{ yazi.kategori.ad|default:"-" }} · {{ yazi.created_at|date:"d.m.Y H:i" }}{% endblock %}
@@ -48,6 +50,8 @@
                     <div>{{ yazi.ozet }}</div>
                 </div>
                 {% endif %}
+
+                {% include "partials/medya_oynatici.html" with medyalar=yazi.medyalar.all %}
 
                 {% if yazi.gorsel %}
                 <div class="mb-4">

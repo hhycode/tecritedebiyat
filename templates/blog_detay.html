@@ -15,6 +15,7 @@
 {% block page_main_class %} inner-page-content blog-detail-page{% endblock %}
 
 {% block extra_css %}
+{% if yazi.medyalar.all %}<link rel="stylesheet" href="{% static 'css/medya.css' %}?v=1">{% endif %}
 <style>
     .article-content-rich img {
         max-width: 100%;
@@ -118,6 +119,8 @@
                             {% if yazi.ozet %}
                             <p class="t-large mxd-article__excerpt">{{ yazi.ozet|striptags }}</p>
                             {% endif %}
+
+                            {% include "partials/medya_oynatici.html" with medyalar=yazi.medyalar.all %}
 
                             <style>
                                 .blog-detail-page .blog-detail-richtext,

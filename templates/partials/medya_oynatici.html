@@ -1,0 +1,46 @@
+{% comment %}
+Yazinin ses/video ogeleri. Kullanim: {% include "partials/medya_oynatici.html" with medyalar=yazi.medyalar.all %}
+Sitede (blog_detay) ve yonetim panelinde (yazi detayi) ayni gorunum; stiller static/css/medya.css.
+{% endcomment %}
+{% if medyalar %}
+<section class="te-medya" aria-label="Ses ve video">
+    {% for m in medyalar %}
+    <figure class="te-medya__oge te-medya__oge--{{ m.tur }}">
+        <div class="te-medya__etiket">
+            <i class="ph {% if m.tur == 'video' %}ph-film-strip{% else %}ph-headphones{% endif %}" aria-hidden="true"></i>
+            {% if m.tur == "video" %}İzleyin{% else %}Dinleyin{% endif %}{% if m.saglayici %} · {{ m.get_saglayici_display }}{% endif %}
+        </div>
+        {% if m.kaynak == "dosya" %}
+            {% if m.tur == "video" %}
+            <video class="te-medya__video" controls playsinline preload="metadata" src="{{ m.dosya.url }}"{% if m.aciklama %} aria-describedby="medya-metin-{{ m.pk }}"{% endif %}>
+                Tarayıcınız bu videoyu oynatamıyor. <a href="{{ m.dosya.url }}" download>Videoyu indirin</a>.
+            </video>
+            {% else %}
+            <audio class="te-medya__ses" controls preload="metadata" src="{{ m.dosya.url }}"{% if m.aciklama %} aria-describedby="medya-metin-{{ m.pk }}"{% endif %}>
+                Tarayıcınız bu ses dosyasını oynatamıyor. <a href="{{ m.dosya.url }}" download>Dosyayı indirin</a>.
+            </audio>
+            {% endif %}
+        {% elif m.gomme_yuksekligi %}
+            <iframe class="te-medya__gomulu" src="{{ m.gomme_adresi }}" height="{{ m.gomme_yuksekligi }}" title="{{ m.get_saglayici_display }} oynatıcısı" loading="lazy"
+                    allow="autoplay; encrypted-media; fullscreen; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+        {% else %}
+            <div class="te-medya__oran">
+                <iframe src="{{ m.gomme_adresi }}" title="{{ m.get_saglayici_display }} oynatıcısı" loading="lazy"
+                        allow="autoplay; encrypted-media; fullscreen; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+            </div>
+        {% endif %}
+        {% if m.aciklama or m.kaynak_adresi %}
+        <figcaption class="te-medya__alt">
+            {% if m.aciklama %}
+            <details class="te-medya__metin" id="medya-metin-{{ m.pk }}">
+                <summary>Açıklama ve metin</summary>
+                <div>{{ m.aciklama|linebreaks }}</div>
+            </details>
+            {% endif %}
+            {% if m.kaynak_adresi %}<a class="te-medya__kaynak" href="{{ m.kaynak_adresi }}" target="_blank" rel="noopener noreferrer">{{ m.get_saglayici_display }}'da aç</a>{% endif %}
+        </figcaption>
+        {% endif %}
+    </figure>
+    {% endfor %}
+</section>
+{% endif %}
