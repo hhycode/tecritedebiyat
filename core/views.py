@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib import messages
-from django.contrib.admin.models import LogEntry
+from django.contrib.admin.models import ADDITION, CHANGE, DELETION, LogEntry
 from django.contrib.auth.models import Group, User
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
@@ -9,6 +9,7 @@ from django.contrib.auth.tokens import default_token_generator
 from django.conf import settings
 from django.core.mail import EmailMessage
 from django.core.paginator import Paginator
+from django.db import transaction
 from django.db.models import Count, Q
 from django.db.models.deletion import ProtectedError
 from django.shortcuts import get_object_or_404, redirect, render
@@ -232,6 +233,22 @@ CONTENT_MODEL_CONFIG = {
         "select_related": ["user"],
     },
 }
+
+
+def islem_kaydet(request, nesne, eylem, mesaj=""):
+    """Panel islemini Django'nun LogEntry tablosuna yazar (kontrol panelindeki "Son aktiviteler" icin)."""
+    LogEntry.objects.log_actions(
+        user_id=request.user.pk,
+        queryset=[nesne],
+        action_flag=eylem,
+        change_message=mesaj,
+        single_object=True,
+    )
+
+
+def degisen_alanlar_mesaji(form):
+    etiketler = [str(form.fields[ad].label) for ad in form.changed_data if ad in form.fields]
+    return f"Değişen alanlar: {', '.join(etiketler)}" if etiketler else "Değişiklik yok"
 
 
 def get_content_model_config(model_key):
@@ -500,6 +517,7 @@ def superadmin_yazi_durum_guncelle(request, pk):
                 else:
                     yazi.onaylayan = request.user
             yazi.save()
+            islem_kaydet(request, yazi, CHANGE, f"Durum: {yazi.get_durum_display()}")
             messages.success(request, f'"{yazi.baslik}" için durum güncellendi.')
     return redirect("superadmin_yazilar")
 
@@ -552,7 +570,9 @@ def superadmin_iletisim_sil(request, pk):
     basvuru = get_object_or_404(IletisimBasvurusu, pk=pk)
     if request.method == "POST":
         try:
-            basvuru.delete()
+            with transaction.atomic():
+                islem_kaydet(request, basvuru, DELETION, "İletişim başvurusu silindi")
+                basvuru.delete()
             messages.success(request, "İletişim başvurusu silindi.")
             return redirect("superadmin_iletisim")
         except Exception:
@@ -580,6 +600,7 @@ def superadmin_iletisim_durum_guncelle(request, pk):
     if request.method == "POST":
         basvuru.incelendi = request.POST.get("incelendi") == "1"
         basvuru.save(update_fields=["incelendi"])
+        islem_kaydet(request, basvuru, CHANGE, "Okundu olarak işaretlendi" if basvuru.incelendi else "Okunmadı olarak işaretlendi")
         messages.success(request, "Başvuru durumu güncellendi.")
     return redirect("superadmin_iletisim")
 
@@ -631,6 +652,7 @@ def superadmin_kitap_maliyeti_ayarlari(request):
         form = SuperadminKitapMaliyetiForm(request.POST, instance=ayarlar)
         if form.is_valid():
             form.save()
+            islem_kaydet(request, ayarlar, CHANGE, degisen_alanlar_mesaji(form))
             messages.success(request, "Kitap maliyeti hesaplama ayarları güncellendi.")
             return redirect("superadmin_kitap_maliyeti_ayarlari")
     else:
@@ -684,6 +706,7 @@ def superadmin_kitap_maliyeti_ayarlari(request):
 def superadmin_kitap_maliyeti_istatistik_sifirla(request):
     if request.method == "POST":
         KitapMaliyetiHesaplamaKaydi.objects.all().delete()
+        islem_kaydet(request, KitapMaliyetiAyarlari.get_ayarlar(), CHANGE, "Kullanım istatistiği sıfırlandı")
         messages.success(request, "Kullanım istatistiği sıfırlandı.")
         return redirect("superadmin_kitap_maliyeti_ayarlari")
 
@@ -806,6 +829,7 @@ def superadmin_icerik_model_yeni(request, model_key):
             nesne.save()
             if hasattr(form, "save_m2m"):
                 form.save_m2m()
+            islem_kaydet(request, nesne, ADDITION, f"{config['singular']} eklendi")
             messages.success(request, f"{config['singular']} oluşturuldu.")
             return redirect("superadmin_icerik_model_duzenle", model_key=model_key, pk=nesne.pk)
     else:
@@ -851,6 +875,7 @@ def superadmin_icerik_model_duzenle(request, model_key, pk):
             nesne.save()
             if hasattr(form, "save_m2m"):
                 form.save_m2m()
+            islem_kaydet(request, nesne, CHANGE, degisen_alanlar_mesaji(form))
             messages.success(request, f"{config['singular']} güncellendi.")
             return redirect("superadmin_icerik_model_duzenle", model_key=model_key, pk=nesne.pk)
     else:
@@ -886,7 +911,9 @@ def superadmin_icerik_model_sil(request, model_key, pk):
     if request.method == "POST":
         nesne_etiketi = str(nesne)
         try:
-            nesne.delete()
+            with transaction.atomic():
+                islem_kaydet(request, nesne, DELETION, f"{config['singular']} silindi")
+                nesne.delete()
             messages.success(request, f"{config['singular']} silindi: {nesne_etiketi}")
             return redirect(back_url)
         except ProtectedError:
@@ -949,6 +976,7 @@ def superadmin_kullanici_yeni(request):
             kullanici = form.save(commit=False)
             kullanici.set_unusable_password()
             kullanici.save()
+            islem_kaydet(request, kullanici, ADDITION, "Kullanıcı eklendi")
             messages.success(request, "Kullanıcı oluşturuldu. Şimdi şifresini belirle.")
             return redirect("superadmin_kullanici_sifre", pk=kullanici.pk)
     else:
@@ -990,6 +1018,7 @@ def superadmin_kullanici_duzenle(request, pk):
                 form.add_error(None, "Kendi hesabının erişimini bu ekrandan kısıtlayamazsın.")
             else:
                 form.save()
+                islem_kaydet(request, kullanici, CHANGE, degisen_alanlar_mesaji(form))
                 messages.success(request, "Kullanıcı güncellendi.")
                 return redirect("superadmin_kullanici_duzenle", pk=pk)
     else:
@@ -1023,6 +1052,7 @@ def superadmin_kullanici_sifre(request, pk):
             kullanici.save(update_fields=["password"])
             if kullanici.pk == request.user.pk:
                 update_session_auth_hash(request, kullanici)
+            islem_kaydet(request, kullanici, CHANGE, "Şifre değiştirildi")
             messages.success(request, f"{kullanici.username} için şifre güncellendi.")
             return redirect("superadmin_kullanici_duzenle", pk=pk)
     else:
@@ -2040,6 +2070,7 @@ def yazar_panel_yeni_yazi(request):
                 yazi.yayin_tarihi = None
             yazi.save()
             form.save_m2m()
+            islem_kaydet(request, yazi, ADDITION, f"Yazar panelinden eklendi ({yazi.get_durum_display()})")
             if is_superadmin and yazi.durum == BlogYazisi.DurumSecenekleri.YAYINDA:
                 messages.success(request, "Yazın doğrudan yayına alındı.")
             elif is_superadmin:
@@ -2106,6 +2137,7 @@ def yazar_panel_yazi_duzenle(request, pk):
 
             yazi.save()
             form.save_m2m()
+            islem_kaydet(request, yazi, CHANGE, f"Yazar panelinden güncellendi ({yazi.get_durum_display()})")
 
             if is_superadmin and yazi.durum == BlogYazisi.DurumSecenekleri.YAYINDA:
                 messages.success(request, "Yazın güncellendi ve yayında tutuldu.")
@@ -2140,7 +2172,9 @@ def yazar_panel_yazi_sil(request, pk):
 
     if request.method == "POST":
         yazi_baslik = yazi.baslik
-        yazi.delete()
+        with transaction.atomic():
+            islem_kaydet(request, yazi, DELETION, "Yazar panelinden silindi")
+            yazi.delete()
         messages.success(request, f'"{yazi_baslik}" başlıklı yazı silindi.')
         return redirect("yazar_paneli")
 
