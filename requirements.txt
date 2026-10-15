@@ -3,6 +3,7 @@ Django==5.2.13
 django-admin-interface==0.32.0
 django-colorfield==0.14.0
 gunicorn==25.3.0
+nh3==0.3.0
 packaging==26.1
 pillow==12.2.0
 python-slugify==8.0.4

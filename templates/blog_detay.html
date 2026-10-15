@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static icerik %}
 
 {% block title %}{{ yazi.meta_title|default:page_title|default:yazi.baslik }}{% endblock %}
 {% block meta_description %}{{ yazi.meta_description|default:yazi.ozet|default:yazi.baslik|striptags|truncatewords:26 }}{% endblock %}
@@ -130,7 +130,7 @@
                                 }
                             </style>
                             <div class="ckeditor-content article-content-rich blog-detail-richtext">
-                                {{ yazi.icerik|safe }}
+                                {{ yazi.icerik|temiz_html }}
                             </div>
                         </div>
                     </div>

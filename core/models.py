@@ -291,6 +291,9 @@ class BlogYazisi(models.Model):
     def save(self, *args, **kwargs):
         from django.utils import timezone
 
+        from .html_temizleme import temiz_html
+
+        self.icerik = temiz_html(self.icerik)
         if not self.slug:
             self.slug = unique_slugify(self, self.baslik)
         if not self.meta_title:

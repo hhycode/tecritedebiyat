@@ -1,4 +1,5 @@
 {% extends "superadmin/base.html" %}
+{% load icerik %}
 
 {% block superadmin_content %}
 <div class="row g-4">
@@ -52,7 +53,7 @@
 
                 <div class="border rounded-4 p-4 bg-light-subtle">
                     <div class="sa-muted small mb-2">İçerik</div>
-                    <div class="fs-5">{{ yazi.icerik|safe }}</div>
+                    <div class="fs-5">{{ yazi.icerik|temiz_html }}</div>
                 </div>
 
                 {% if yazi.admin_notu %}
