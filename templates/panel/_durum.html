@@ -1,0 +1,6 @@
+{% comment %}Yazi durum etiketi (yazarin gordugu adlarla){% endcomment %}
+{% if yazi.durum == "yayinda" %}<span class="sa-pill sa-pill--success">Yayında</span>
+{% elif yazi.durum == "incelemede" %}<span class="sa-pill sa-pill--warning">İncelemede</span>
+{% elif yazi.durum == "duzeltme" %}<span class="sa-pill sa-pill--danger">Düzeltme istendi</span>
+{% elif yazi.durum == "reddedildi" %}<span class="sa-pill sa-pill--danger">Reddedildi</span>
+{% else %}<span class="sa-pill">Taslak</span>{% endif %}

@@ -10,7 +10,7 @@ from django.conf import settings
 from django.core.mail import EmailMessage
 from django.core.paginator import Paginator
 from django.db import transaction
-from django.db.models import Count, F, Q
+from django.db.models import Count, F, Q, Sum
 from django.db.models.deletion import ProtectedError
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import NoReverseMatch, reverse, reverse_lazy
@@ -1967,23 +1967,93 @@ def cikis(request):
     return redirect("anasayfa")
 
 
+# Yazar panelinde durum filtresi -> veritabani durumlari. "duzeltme" editorun geri cevirdigi yazilardir.
+PANEL_DURUM_FILTRELERI = {
+    "taslak": [BlogYazisi.DurumSecenekleri.TASLAK],
+    "incelemede": [BlogYazisi.DurumSecenekleri.INCELEMEDE],
+    "yayinda": [BlogYazisi.DurumSecenekleri.YAYINDA],
+    "duzeltme": [BlogYazisi.DurumSecenekleri.REDDEDILDI],
+}
+PANEL_SAYFA_BOYUTU = 10
+
+
+def yazar_panel_ozeti(profil):
+    """Yazarin yazi sayilari ve okunma toplami (tek sorgu)."""
+    D = BlogYazisi.DurumSecenekleri
+    sayilar = BlogYazisi.objects.filter(yazar=profil).aggregate(
+        toplam=Count("id"),
+        yayinda=Count("id", filter=Q(durum=D.YAYINDA)),
+        taslak=Count("id", filter=Q(durum=D.TASLAK)),
+        incelemede=Count("id", filter=Q(durum=D.INCELEMEDE)),
+        duzeltme=Count("id", filter=Q(durum__in=PANEL_DURUM_FILTRELERI["duzeltme"])),
+        okunma=Sum("okunma_sayisi", filter=Q(durum=D.YAYINDA)),
+    )
+    sayilar["okunma"] = sayilar["okunma"] or 0
+    return sayilar
+
+
+def yazar_panel_karsilama(sayilar, kitap_sayisi):
+    """Karsilama alanindaki kisa durum ozeti; yalnizca gercek sayilardan cumle kurar."""
+    if not sayilar["toplam"]:
+        return ["Panelinize hoş geldiniz. İlk yazınızı gönderdiğinizde durumunu buradan takip edebilirsiniz."]
+    cumleler = []
+    if sayilar["duzeltme"]:
+        cumleler.append(f"{sayilar['duzeltme']} yazınız için editörden geri bildirim var.")
+    if sayilar["incelemede"]:
+        cumleler.append(f"{sayilar['incelemede']} yazınız editör incelemesinde.")
+    if sayilar["taslak"]:
+        cumleler.append(f"{sayilar['taslak']} taslağınız sizi bekliyor.")
+    if not cumleler:
+        cumleler.append("Bekleyen bir işiniz yok; tüm yazılarınız yayında.")
+    if sayilar["okunma"]:
+        cumleler.append(f"Yayındaki yazılarınız 15 Ekim 2026'dan bu yana {sayilar['okunma']} kez okundu.")
+    if kitap_sayisi:
+        cumleler.append(f"Yayınevimizde {kitap_sayisi} kitabınız yayında.")
+    return cumleler
+
+
 @login_required(login_url="giris")
 def yazar_paneli(request):
     profil = get_or_create_user_profile(request.user)
-    stats = build_panel_stats(profil)
+    sayilar = yazar_panel_ozeti(profil)
+    kitap_sayisi = Kitap.objects.filter(Q(yazar=profil) | Q(ikinci_yazar=profil), yayinda=True).count()
+
+    durum = request.GET.get("durum", "")
+    if durum not in PANEL_DURUM_FILTRELERI:
+        durum = ""
+    yazilar = (
+        BlogYazisi.objects.filter(yazar=profil)
+        .select_related("kategori")
+        .only("baslik", "slug", "durum", "kategori__ad", "okunma_sayisi", "admin_notu", "yayin_tarihi", "created_at", "updated_at")
+        .order_by(F("updated_at").desc(nulls_last=True), "-id")
+    )
+    if durum:
+        yazilar = yazilar.filter(durum__in=PANEL_DURUM_FILTRELERI[durum])
+    page_obj, sayfa_sorgusu = sayfala(request, yazilar, PANEL_SAYFA_BOYUTU)
+
+    profil_eksikleri = [ad for ad, dolu in (("fotoğraf", profil.fotograf), ("biyografi", profil.biyografi.strip())) if not dolu]
 
     return render(
         request,
-        "admin/ozel_admin_panel.html",
-        {
-            "profil": profil,
-            "stats": stats,
-            **seo_context(
-                "Yazar Paneli | Tecrit Edebiyat",
-                "Yazara ozel panel, yayin durumu ve icerik istatistikleri.",
-                request.build_absolute_uri(),
-            ),
-        },
+        "panel/dashboard.html",
+        panel_baglami(
+            request,
+            profil,
+            "panel",
+            sayilar=sayilar,
+            karsilama=yazar_panel_karsilama(sayilar, kitap_sayisi),
+            durum=durum,
+            durum_sekmeleri=[
+                ("", "Tümü", sayilar["toplam"]),
+                ("taslak", "Taslak", sayilar["taslak"]),
+                ("incelemede", "İncelemede", sayilar["incelemede"]),
+                ("yayinda", "Yayında", sayilar["yayinda"]),
+                ("duzeltme", "Düzeltme / ret", sayilar["duzeltme"]),
+            ],
+            page_obj=page_obj,
+            sayfa_sorgusu=sayfa_sorgusu,
+            profil_eksikleri=profil_eksikleri,
+        ),
     )
 
 
