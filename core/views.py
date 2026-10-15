@@ -12,7 +12,9 @@ from django.core.paginator import Paginator
 from django.db import transaction
 from django.db.models import Count, F, Q, Sum
 from django.db.models.deletion import ProtectedError
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.http import require_POST
 from django.urls import NoReverseMatch, reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.encoding import force_bytes
@@ -20,6 +22,7 @@ from django.utils.html import strip_tags
 from django.utils.http import url_has_allowed_host_and_scheme, urlsafe_base64_decode, urlsafe_base64_encode
 from functools import wraps
 import mimetypes
+import uuid
 import os
 import math
 from urllib.parse import urlencode
@@ -68,7 +71,10 @@ from .models import (
     Slider,
     SSS,
     YazarProfil,
+    YaziMedyasi,
 )
+from . import medya as medya_kurallari
+from .medya import MedyaHatasi
 
 
 def seo_context(title, description, canonical=""):
@@ -465,7 +471,7 @@ def superadmin_yazilar(request):
 @superadmin_required
 def superadmin_yazi_detay(request, pk):
     yazi = get_object_or_404(
-        BlogYazisi.objects.select_related("yazar", "kategori", "onaylayan").prefetch_related("kategoriler"),
+        BlogYazisi.objects.select_related("yazar", "kategori", "onaylayan").prefetch_related("kategoriler", "medyalar"),
         pk=pk,
     )
     context = build_superadmin_context(request)
@@ -1353,7 +1359,7 @@ def okunma_sayilmali_mi(request):
 
 def blog_detay(request, slug):
     yazi = get_object_or_404(
-        BlogYazisi.objects.select_related("yazar__user", "kategori").prefetch_related("kategoriler"),
+        BlogYazisi.objects.select_related("yazar__user", "kategori").prefetch_related("kategoriler", "medyalar"),
         slug=slug,
         durum=BlogYazisi.DurumSecenekleri.YAYINDA,
     )
@@ -2148,6 +2154,122 @@ def yazar_panel_sifre(request):
     return render(request, "panel/sifre.html", panel_baglami(request, profil, "guvenlik", form=form))
 
 
+def medya_ozeti(medya):
+    """Panelde medya karti icin JSON."""
+    return {
+        "id": medya.pk,
+        "tur": medya.tur,
+        "kaynak": medya.kaynak,
+        "ad": str(medya),
+        "boyut": medya.boyut_metni,
+        "url": medya.dosya.url if medya.dosya else "",
+        "mime": medya.mime,
+        "saglayici": medya.get_saglayici_display() if medya.saglayici else "",
+        "gomme": medya.gomme_adresi,
+        "yukseklik": medya.gomme_yuksekligi,
+    }
+
+
+def medya_json_hatasi(mesaj, durum=400):
+    return JsonResponse({"hata": mesaj}, status=durum)
+
+
+# Yaziya baglanmamis yuklemeler icin ust sinir (toplu otomatik isteklere karsi; boyutu kota sinirlar)
+BEKLEYEN_MEDYA_SINIRI = 30
+
+
+def bekleyen_medya_siniri_asildi(user):
+    return YaziMedyasi.objects.filter(yukleyen=user, yazi__isnull=True).count() >= BEKLEYEN_MEDYA_SINIRI
+
+
+@login_required(login_url="giris")
+@require_POST
+def yazar_panel_medya_yukle(request):
+    dosya = request.FILES.get("dosya")
+    if not dosya:
+        return medya_json_hatasi("Dosya alınamadı. Lütfen yeniden deneyin.")
+    if bekleyen_medya_siniri_asildi(request.user):
+        return medya_json_hatasi("Kaydedilmemiş çok fazla yükleme var. Önce yazınızı kaydedin.")
+    try:
+        tur, uzanti, mime = medya_kurallari.dosyayi_dogrula(dosya, request.POST.get("tur", ""))
+    except MedyaHatasi as hata:
+        return medya_json_hatasi(str(hata))
+    kullanilan = YaziMedyasi.objects.filter(yukleyen=request.user).aggregate(t=Sum("boyut"))["t"] or 0
+    if kullanilan + dosya.size > medya_kurallari.KULLANICI_KOTASI:
+        return medya_json_hatasi(
+            f"Yükleme alanınız doldu: toplam {medya_kurallari.KULLANICI_KOTASI // medya_kurallari.MB} MB'ın "
+            f"{medya_kurallari.boyut_metni(kullanilan)} kadarını kullanıyorsunuz. Eski yazılarınızdan medya kaldırabilirsiniz."
+        )
+    medya = YaziMedyasi(
+        yukleyen=request.user,
+        tur=tur,
+        kaynak=YaziMedyasi.Kaynak.DOSYA,
+        orijinal_ad=os.path.basename(dosya.name)[:255],
+        mime=mime,
+        boyut=dosya.size,
+    )
+    # Diskteki ad sunucuda uretilir; kullanicinin dosya adi yalnizca gosterim icin saklanir
+    medya.dosya.save(f"{uuid.uuid4().hex}.{uzanti}", dosya, save=False)
+    medya.save()
+    return JsonResponse(medya_ozeti(medya), status=201)
+
+
+@login_required(login_url="giris")
+@require_POST
+def yazar_panel_medya_baglanti(request):
+    if bekleyen_medya_siniri_asildi(request.user):
+        return medya_json_hatasi("Kaydedilmemiş çok fazla medya var. Önce yazınızı kaydedin.")
+    adres = request.POST.get("adres", "").strip()[:500]
+    try:
+        bilgi = medya_kurallari.baglantiyi_coz(adres)
+    except MedyaHatasi as hata:
+        return medya_json_hatasi(str(hata))
+    medya = YaziMedyasi.objects.create(
+        yukleyen=request.user,
+        tur=bilgi["tur"],
+        kaynak=YaziMedyasi.Kaynak.BAGLANTI,
+        saglayici=bilgi["saglayici"],
+        gomme_kimligi=bilgi["kimlik"],
+        baglanti=medya_kurallari.kaynak_adresi(bilgi["saglayici"], bilgi["kimlik"]),
+    )
+    return JsonResponse(medya_ozeti(medya), status=201)
+
+
+@login_required(login_url="giris")
+@require_POST
+def yazar_panel_medya_sil(request, pk):
+    # Yalnizca henuz yaziya baglanmamis kendi yuklemesi; bagli medya yazi kaydedilirken kaldirilir
+    medya = get_object_or_404(YaziMedyasi, pk=pk, yukleyen=request.user, yazi__isnull=True)
+    medya.delete()
+    return JsonResponse({"silindi": pk})
+
+
+def yazi_medya_secimi(request, yazi):
+    """Formdan gelen medya siralamasi: kullanicinin bekleyen yuklemeleri + bu yazinin mevcut medyasi."""
+    kimlikler = []
+    for deger in request.POST.getlist("medya"):
+        if deger.isdigit() and int(deger) not in kimlikler:
+            kimlikler.append(int(deger))
+    uygun = Q(yazi__isnull=True, yukleyen=request.user)
+    if yazi is not None and yazi.pk:
+        uygun |= Q(yazi=yazi)
+    bulunan = {m.pk: m for m in YaziMedyasi.objects.filter(uygun, pk__in=kimlikler)}
+    secili = [bulunan[k] for k in kimlikler if k in bulunan]
+    for medya in secili:
+        medya.aciklama = request.POST.get(f"medya_aciklama_{medya.pk}", "").strip()[: medya_kurallari.ACIKLAMA_SINIRI]
+    return secili
+
+
+def yazi_medyasini_kaydet(yazi, secili):
+    with transaction.atomic():
+        for sira, medya in enumerate(secili):
+            medya.yazi = yazi
+            medya.sira = sira
+            medya.save(update_fields=["yazi", "sira", "aciklama"])
+        for kaldirilan in yazi.medyalar.exclude(pk__in=[m.pk for m in secili]):
+            kaldirilan.delete()
+
+
 def yazar_yazi_formu(request, profil, yazi=None):
     """Yeni yazi ve duzenleme ortak akisi.
 
@@ -2170,7 +2292,12 @@ def yazar_yazi_formu(request, profil, yazi=None):
             post_data["durum"] = D.TASLAK if taslak_mi else D.INCELEMEDE
 
         form = PanelBlogYazisiForm(post_data, request.FILES, instance=yazi, is_superadmin=is_superadmin, panel_gorunumu=True)
-        if form.is_valid():
+        medya_listesi = yazi_medya_secimi(request, yazi)
+        gecerli = form.is_valid()
+        if len(medya_listesi) > medya_kurallari.YAZI_BASINA_MEDYA:
+            form.add_error(None, f"Bir yazıya en fazla {medya_kurallari.YAZI_BASINA_MEDYA} ses ya da video ekleyebilirsiniz.")
+            gecerli = False
+        if gecerli:
             yazi = form.save(commit=False)
             if gorsel_temizle and not yeni_gorsel:
                 if mevcut_gorsel:
@@ -2188,6 +2315,7 @@ def yazar_yazi_formu(request, profil, yazi=None):
                 yazi.onaylayan = None
             yazi.save()
             form.save_m2m()
+            yazi_medyasini_kaydet(yazi, medya_listesi)
             islem_kaydet(
                 request,
                 yazi,
@@ -2209,6 +2337,7 @@ def yazar_yazi_formu(request, profil, yazi=None):
         messages.error(request, "Yazınız kaydedilmedi. Lütfen işaretli alanları düzeltin.")
     else:
         form = PanelBlogYazisiForm(instance=yazi, is_superadmin=is_superadmin, panel_gorunumu=True)
+        medya_listesi = list(yazi.medyalar.all()) if yazi else []
 
     if yazi is not None and request.method == "POST":
         # Gecersiz gonderimde form, nesneyi kaydedilmemis degerlerle doldurur; sayfada kayitli hali gosterilir
@@ -2225,6 +2354,8 @@ def yazar_yazi_formu(request, profil, yazi=None):
             yazi=yazi,
             onceki_durum=onceki_durum,
             is_superadmin=is_superadmin,
+            medya_listesi=medya_listesi,
+            medya_kurallari=medya_kurallari,
         ),
     )
 

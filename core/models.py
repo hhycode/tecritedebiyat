@@ -4,7 +4,7 @@ from decimal import Decimal
 
 from django.contrib.auth.models import User
 from django.core.validators import FileExtensionValidator
-from django.db import models
+from django.db import models, transaction
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
 from django.template.defaultfilters import slugify
@@ -426,7 +426,9 @@ class YaziMedyasi(models.Model):
 def medya_dosyasini_sil(sender, instance, **kwargs):
     """Kayit (yaziyla birlikte toplu silinme dahil) silinince dosyasi diskte yetim kalmasin."""
     if instance.dosya:
-        instance.dosya.storage.delete(instance.dosya.name)
+        depo, ad = instance.dosya.storage, instance.dosya.name
+        # Islem geri alinirsa dosya silinmesin
+        transaction.on_commit(lambda: depo.delete(ad))
 
 
 class BlogReklam(models.Model):

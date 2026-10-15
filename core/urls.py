@@ -28,4 +28,7 @@ urlpatterns = [
     path("panel/yazi/yeni/", views.yazar_panel_yeni_yazi, name="yazar_panel_yeni_yazi"),
     path("panel/yazi/<int:pk>/duzenle/", views.yazar_panel_yazi_duzenle, name="yazar_panel_yazi_duzenle"),
     path("panel/yazi/<int:pk>/sil/", views.yazar_panel_yazi_sil, name="yazar_panel_yazi_sil"),
+    path("panel/medya/yukle/", views.yazar_panel_medya_yukle, name="yazar_panel_medya_yukle"),
+    path("panel/medya/baglanti/", views.yazar_panel_medya_baglanti, name="yazar_panel_medya_baglanti"),
+    path("panel/medya/<int:pk>/sil/", views.yazar_panel_medya_sil, name="yazar_panel_medya_sil"),
 ]
