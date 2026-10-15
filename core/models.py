@@ -5,6 +5,8 @@ from decimal import Decimal
 from django.contrib.auth.models import User
 from django.core.validators import FileExtensionValidator
 from django.db import models
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
 from django.template.defaultfilters import slugify
 from django.urls import reverse
 from django.utils import timezone
@@ -346,6 +348,85 @@ class BlogYazisi(models.Model):
         if not self.pk:
             return ""
         return ", ".join(self.etiketler.order_by("ad").values_list("ad", flat=True))
+
+
+class YaziMedyasi(models.Model):
+    """Yaziya eklenen ses/video: yuklenen dosya ya da gomulu baglanti (YouTube, Vimeo, SoundCloud, Spotify).
+
+    Dosya once yazidan bagimsiz yuklenir (yazi bos); yazi kaydedilince yaziya baglanir. 24 saat icinde
+    baglanmayanlar ve silinen kayitlarin dosyalari yetim_medya_temizle komutu / post_delete ile silinir.
+    """
+
+    class Tur(models.TextChoices):
+        SES = "ses", "Ses"
+        VIDEO = "video", "Video"
+
+    class Kaynak(models.TextChoices):
+        DOSYA = "dosya", "Dosya"
+        BAGLANTI = "baglanti", "Bağlantı"
+
+    class Saglayici(models.TextChoices):
+        YOUTUBE = "youtube", "YouTube"
+        VIMEO = "vimeo", "Vimeo"
+        SOUNDCLOUD = "soundcloud", "SoundCloud"
+        SPOTIFY = "spotify", "Spotify"
+
+    yazi = models.ForeignKey(BlogYazisi, on_delete=models.CASCADE, null=True, blank=True, related_name="medyalar")
+    yukleyen = models.ForeignKey(User, on_delete=models.CASCADE, related_name="yazi_medyalari")
+    tur = models.CharField(max_length=10, choices=Tur.choices)
+    kaynak = models.CharField(max_length=10, choices=Kaynak.choices)
+    dosya = models.FileField(upload_to="medya/%Y/%m/", blank=True)
+    orijinal_ad = models.CharField(max_length=255, blank=True, default="")
+    mime = models.CharField(max_length=50, blank=True, default="")
+    boyut = models.PositiveBigIntegerField(default=0)
+    saglayici = models.CharField(max_length=20, choices=Saglayici.choices, blank=True, default="")
+    gomme_kimligi = models.CharField(max_length=200, blank=True, default="")
+    baglanti = models.URLField(max_length=500, blank=True, default="")
+    aciklama = models.TextField("Açıklama / transkript", blank=True, default="")
+    sira = models.PositiveSmallIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["sira", "id"]
+        verbose_name = "Yazı medyası"
+        verbose_name_plural = "Yazı medyaları"
+
+    def __str__(self):
+        return self.orijinal_ad or self.get_saglayici_display() or f"Medya {self.pk}"
+
+    @property
+    def gomme_adresi(self):
+        from .medya import gomme_adresi
+
+        return gomme_adresi(self.saglayici, self.gomme_kimligi)
+
+    @property
+    def kaynak_adresi(self):
+        from .medya import kaynak_adresi
+
+        return kaynak_adresi(self.saglayici, self.gomme_kimligi)
+
+    @property
+    def boyut_metni(self):
+        from .medya import boyut_metni
+
+        return boyut_metni(self.boyut) if self.boyut else ""
+
+    @property
+    def gomme_yuksekligi(self):
+        """Ses oynaticilari icin sabit yukseklik (video oynaticilari 16:9 olcekler)."""
+        if self.saglayici == self.Saglayici.SOUNDCLOUD:
+            return 166
+        if self.saglayici == self.Saglayici.SPOTIFY:
+            return 152 if self.gomme_kimligi.split("/")[0] in ("track", "episode") else 352
+        return 0
+
+
+@receiver(post_delete, sender=YaziMedyasi)
+def medya_dosyasini_sil(sender, instance, **kwargs):
+    """Kayit (yaziyla birlikte toplu silinme dahil) silinince dosyasi diskte yetim kalmasin."""
+    if instance.dosya:
+        instance.dosya.storage.delete(instance.dosya.name)
 
 
 class BlogReklam(models.Model):
