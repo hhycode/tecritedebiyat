@@ -17,7 +17,7 @@ from django.urls import NoReverseMatch, reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.encoding import force_bytes
 from django.utils.html import strip_tags
-from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
+from django.utils.http import url_has_allowed_host_and_scheme, urlsafe_base64_decode, urlsafe_base64_encode
 from functools import wraps
 import mimetypes
 import os
@@ -297,7 +297,7 @@ def superadmin_required(view_func):
     def _wrapped(request, *args, **kwargs):
         profil = get_or_create_user_profile(request.user)
         if not panel_yoneticisi_mi(request.user, profil):
-            messages.error(request, "Bu alana sadece süper admin erişebilir.")
+            messages.error(request, "Bu sayfaya yalnızca yöneticiler erişebilir.")
             return redirect("yazar_paneli")
 
         request.superadmin_profil = profil
@@ -1844,11 +1844,11 @@ def kayit(request):
             user = form.save()
             YazarProfil.objects.get_or_create(user=user)
             login(request, user)
-            messages.success(request, "Hesabiniz basariyla olusturuldu!")
+            messages.success(request, "Hesabınız oluşturuldu. Yazar panelinize hoş geldiniz!")
             return redirect("yazar_paneli")
     else:
         form = UserCreationForm()
-    return render(request, "kayit.html", {"form": form, **seo_context("Kayit Ol", "Tecrit Edebiyat yazar veya okur hesabi olusturma sayfasi.")})
+    return render(request, "kayit.html", {"form": form, **seo_context("Kayıt Ol", "Tecrit Edebiyat yazar veya okur hesabı oluşturma sayfası.")})
 
 
 def giris(request):
@@ -1858,12 +1858,16 @@ def giris(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
+            # Oturum gerektiren bir sayfadan gelindiyse oraya donulur (yalnizca site ici adresler)
+            hedef = request.GET.get("next", "")
+            if hedef and url_has_allowed_host_and_scheme(hedef, allowed_hosts={request.get_host()}, require_https=request.is_secure()):
+                return redirect(hedef)
             return redirect("yazar_paneli")
         if giris_kilitli_mi(request, username):
             messages.error(request, "Çok fazla hatalı deneme yapıldı. Lütfen 15 dakika sonra tekrar deneyin.")
         else:
-            messages.error(request, "Kullanici adi veya sifre hatali.")
-    return render(request, "giris.html", seo_context("Giris Yap", "Tecrit Edebiyat hesabina giris yapma sayfasi."))
+            messages.error(request, "Kullanıcı adı veya şifre hatalı.")
+    return render(request, "giris.html", seo_context("Giriş Yap", "Tecrit Edebiyat hesabına giriş yapma sayfası."))
 
 
 def sifremi_unuttum(request):
@@ -2247,7 +2251,7 @@ def yazar_panel_yazi_sil(request, pk):
         with transaction.atomic():
             islem_kaydet(request, yazi, DELETION, "Yazar panelinden silindi")
             yazi.delete()
-        messages.success(request, f'"{yazi_baslik}" başlıklı yazı silindi.')
+        messages.success(request, f"“{yazi_baslik}” yazınız silindi.")
         return redirect("yazar_paneli")
 
     return redirect("yazar_panel_yazi_duzenle", pk=pk)
