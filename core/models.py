@@ -280,6 +280,8 @@ class BlogYazisi(models.Model):
     meta_description = models.CharField(max_length=320, blank=True, default="")
     seo_keywords = models.CharField(max_length=320, blank=True, default="")
     yayin_tarihi = models.DateTimeField(blank=True, null=True)
+    # Blog sayfasinin goruntulenme sayisi (botlar ve panel kullanicilari haric); 15.10.2026'dan itibaren
+    okunma_sayisi = models.PositiveIntegerField("Okunma sayısı", default=0, editable=False)
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
 

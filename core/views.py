@@ -10,7 +10,7 @@ from django.conf import settings
 from django.core.mail import EmailMessage
 from django.core.paginator import Paginator
 from django.db import transaction
-from django.db.models import Count, Q
+from django.db.models import Count, F, Q
 from django.db.models.deletion import ProtectedError
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import NoReverseMatch, reverse, reverse_lazy
@@ -1376,12 +1376,25 @@ def blog(request):
     )
 
 
+BOT_IZLERI = ("bot", "crawl", "spider", "slurp", "preview", "facebookexternalhit", "headless", "curl", "wget", "python-requests")
+
+
+def okunma_sayilmali_mi(request):
+    if request.method != "GET" or request.user.is_staff:
+        return False
+    tarayici = request.META.get("HTTP_USER_AGENT", "").lower()
+    return bool(tarayici) and not any(iz in tarayici for iz in BOT_IZLERI)
+
+
 def blog_detay(request, slug):
     yazi = get_object_or_404(
         BlogYazisi.objects.select_related("yazar__user", "kategori").prefetch_related("kategoriler"),
         slug=slug,
         durum=BlogYazisi.DurumSecenekleri.YAYINDA,
     )
+    if okunma_sayilmali_mi(request):
+        # save() cagirmadan atomik artis: updated_at ve icerik temizligi etkilenmez
+        BlogYazisi.objects.filter(pk=yazi.pk).update(okunma_sayisi=F("okunma_sayisi") + 1)
     sirali_yazilar = list(
         BlogYazisi.objects.select_related("yazar__user", "kategori")
         .prefetch_related("kategoriler")
