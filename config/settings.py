@@ -17,11 +17,27 @@ import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
+def _env_dosyasini_yukle(yol):
+    """BASE_DIR/.env icindeki ANAHTAR=deger satirlarini ortam degiskenlerine yukler (var olanlari ezmez)."""
+    if not yol.exists():
+        return
+    for satir in yol.read_text().splitlines():
+        satir = satir.strip()
+        if not satir or satir.startswith("#") or "=" not in satir:
+            continue
+        anahtar, deger = satir.split("=", 1)
+        os.environ.setdefault(anahtar.strip(), deger.strip().strip("'\""))
+
+
+# Gizli degerler (SECRET_KEY, e-posta sifresi) depoda degil, sunucudaki .env dosyasinda
+_env_dosyasini_yukle(BASE_DIR / ".env")
+
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-o&z3cumi%*(953opxgyz%y@&ydjz+l3tuk)=o2i5++u3sakr-h'
+SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
