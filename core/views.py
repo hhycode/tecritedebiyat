@@ -842,23 +842,11 @@ def superadmin_kullanici_sifre(request, pk):
     return render(request, "superadmin/user_password_form.html", context)
 
 
-@superadmin_required
-def superadmin_legacy_core_redirect(request, legacy_path=""):
-    legacy_root = (legacy_path or "").strip("/").split("/", 1)[0]
-    hedefler = {
-        "blogyazisi": "superadmin_yazilar",
-        "iletisimbasvurusu": "superadmin_iletisim",
-        "yazarprofil": "superadmin_yazarlar",
-        "kitap": "superadmin_kitaplar",
-        "theme": "superadmin_icerik_yonetimi",
-        "slider": "superadmin_icerik_yonetimi",
-        "sss": "superadmin_icerik_yonetimi",
-        "kitaptur": "superadmin_icerik_yonetimi",
-        "blogkategori": "superadmin_icerik_yonetimi",
-        "alinti": "superadmin_icerik_yonetimi",
-        "alintikategori": "superadmin_icerik_yonetimi",
-    }
-    return redirect(hedefler.get(legacy_root, "superadmin_dashboard"))
+# Eski Django admin adresleri (/admin/core/<model>/) icin icerik panelinde karsiligi olmayan modellerin hedefleri
+LEGACY_CORE_HEDEFLER = {
+    "iletisimbasvurusu": "superadmin_iletisim",
+    "theme": "superadmin_icerik_yonetimi",
+}
 
 
 @superadmin_required
@@ -870,7 +858,9 @@ def superadmin_legacy_core_model_redirect(request, model_key, pk=None, action=No
             return redirect("superadmin_icerik_model_duzenle", model_key=model_key, pk=pk)
         return redirect("superadmin_icerik_model_liste", model_key=model_key)
 
-    return redirect("superadmin_legacy_core_redirect", legacy_path=model_key)
+    if model_key == "iletisimbasvurusu" and action == "change" and pk is not None:
+        return redirect("superadmin_iletisim_detay", pk=pk)
+    return redirect(LEGACY_CORE_HEDEFLER.get(model_key, "superadmin_dashboard"))
 
 
 def build_panel_stats(profil):
