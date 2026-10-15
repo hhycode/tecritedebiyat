@@ -114,13 +114,6 @@ body {
     flex-wrap: wrap;
     gap: 10px;
 }
-.sa-hero {
-    border: 1px solid var(--sa-border);
-    border-radius: var(--sa-radius);
-    background: #171717;
-    color: #fff;
-    box-shadow: none;
-}
 .sa-card {
     border: 1px solid var(--sa-border);
     border-radius: var(--sa-radius);
@@ -201,6 +194,67 @@ body {
         height: auto;
         position: relative;
     }
+}
+
+/* Sayfa basligi (base.html bloklari: sayfa_ust_etiket, sayfa_basligi, sayfa_aciklamasi, sayfa_aksiyonlari) */
+.sa-page-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+.sa-eyebrow {
+    margin: 0 0 6px;
+    color: var(--sa-muted);
+    font-size: .74rem;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+.sa-page-title {
+    margin: 0;
+    font-size: 1.9rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+.sa-page-desc {
+    max-width: 760px;
+    margin: 8px 0 0;
+    color: var(--sa-muted);
+}
+.sa-page-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+.sa-eyebrow:empty,
+.sa-page-desc:empty,
+.sa-page-actions:empty {
+    display: none;
+}
+
+/* Durum etiketi */
+.sa-pill {
+    display: inline-flex;
+    align-items: center;
+    min-height: 28px;
+    padding: 0 12px;
+    border-radius: 999px;
+    background: #ecebe6;
+    color: var(--sa-text);
+    font-size: .8rem;
+    font-weight: 700;
+}
+.sa-pill--success {
+    background: #dcfce7;
+    color: #166534;
+}
+.sa-pill--warning {
+    background: #fef3c7;
+    color: #92400e;
 }
 
 /* Butonlar */

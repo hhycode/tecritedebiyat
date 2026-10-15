@@ -1,18 +1,10 @@
 {% extends "superadmin/base.html" %}
 
+{% block sayfa_ust_etiket %}Süper Admin{% endblock %}
+{% block sayfa_aciklamasi %}Bekleyen işler, mesajlar ve temel içerik işlemleri.{% endblock %}
+{% block sayfa_aksiyonlari %}<span class="sa-pill">{{ admin_notification_count }} bildirim</span>{% endblock %}
+
 {% block superadmin_content %}
-<div class="card sa-hero mb-3">
-    <div class="card-body p-4">
-        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
-            <div>
-                <p class="text-uppercase small fw-semibold mb-2 text-white-50">Süper Admin</p>
-                <h2 class="h1 fw-bold mb-2">Kontrol Paneli</h2>
-                <p class="mb-0 text-white-50">Bekleyen işler, mesajlar ve temel içerik işlemleri.</p>
-            </div>
-            <span class="badge text-bg-light px-3 py-2">{{ admin_notification_count }} bildirim</span>
-        </div>
-    </div>
-</div>
 
 <div class="row g-3 mb-3">
     <div class="col-6 col-xl-3">

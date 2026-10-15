@@ -1,26 +1,19 @@
 {% extends "superadmin/base.html" %}
 
+{% block sayfa_ust_etiket %}İletişim Başvurusu{% endblock %}
+{% block sayfa_basligi %}{{ basvuru.ad }} {{ basvuru.soyad }}{% endblock %}
+{% block sayfa_aciklamasi %}{{ basvuru.get_amac_display }} · {{ basvuru.created_at|date:"d.m.Y H:i" }}{% endblock %}
+{% block sayfa_aksiyonlari %}
+{% if basvuru.incelendi %}<span class="sa-pill sa-pill--success">İncelendi</span>{% else %}<span class="sa-pill sa-pill--warning">Bekliyor</span>{% endif %}
+<a class="sa-btn sa-btn--danger-outline" href="{% url 'superadmin_iletisim_sil' basvuru.pk %}">Sil</a>
+<a class="sa-btn sa-btn--secondary" href="{% url 'superadmin_iletisim' %}">Listeye Dön</a>
+{% endblock %}
+
 {% block superadmin_content %}
 <div class="row g-4">
     <div class="col-12 col-xl-8">
         <div class="card sa-card">
             <div class="card-body p-4 p-lg-5">
-                <div class="d-flex flex-column flex-lg-row justify-content-between gap-3 mb-4">
-                    <div>
-                        <p class="text-uppercase small fw-semibold sa-muted mb-2">İletişim Başvurusu</p>
-                        <h2 class="h1 mb-2">{{ basvuru.ad }} {{ basvuru.soyad }}</h2>
-                        <div class="sa-muted">{{ basvuru.get_amac_display }} · {{ basvuru.created_at|date:"d.m.Y H:i" }}</div>
-                    </div>
-                    <div class="d-flex flex-wrap gap-2 align-items-start">
-                        {% if basvuru.incelendi %}
-                        <span class="badge text-bg-success">İncelendi</span>
-                        {% else %}
-                        <span class="badge text-bg-warning">Bekliyor</span>
-                        {% endif %}
-                        <a class="sa-btn sa-btn--danger-outline" href="{% url 'superadmin_iletisim_sil' basvuru.pk %}">Sil</a>
-                        <a class="sa-btn sa-btn--secondary" href="{% url 'superadmin_iletisim' %}">Listeye Dön</a>
-                    </div>
-                </div>
 
                 <div class="row g-3 mb-4">
                     <div class="col-12 col-md-6">

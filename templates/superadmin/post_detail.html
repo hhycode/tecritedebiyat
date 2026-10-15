@@ -1,24 +1,18 @@
 {% extends "superadmin/base.html" %}
 {% load icerik %}
 
+{% block sayfa_ust_etiket %}Yazı{% endblock %}
+{% block sayfa_aciklamasi %}{{ yazi.yazar.ad_soyad }} · {{ yazi.kategori.ad|default:"-" }} · {{ yazi.created_at|date:"d.m.Y H:i" }}{% endblock %}
+{% block sayfa_aksiyonlari %}
+<span class="sa-pill">{{ yazi.get_durum_display }}</span>
+<a class="sa-btn sa-btn--secondary" href="{% url 'superadmin_yazilar' %}">Listeye Dön</a>
+{% endblock %}
+
 {% block superadmin_content %}
 <div class="row g-4">
     <div class="col-12 col-xl-8">
         <div class="card sa-card">
             <div class="card-body p-4 p-lg-5">
-                <div class="d-flex flex-column flex-lg-row justify-content-between gap-3 mb-4">
-                    <div>
-                        <p class="text-uppercase small fw-semibold sa-muted mb-2">Yazı</p>
-                        <h2 class="h1 mb-2">{{ yazi.baslik }}</h2>
-                        <div class="sa-muted">
-                            {{ yazi.yazar.ad_soyad }} · {{ yazi.kategori.ad|default:"-" }} · {{ yazi.created_at|date:"d.m.Y H:i" }}
-                        </div>
-                    </div>
-                    <div class="d-flex flex-wrap gap-2 align-items-start">
-                        <span class="badge text-bg-light">{{ yazi.get_durum_display }}</span>
-                        <a class="sa-btn sa-btn--secondary" href="{% url 'superadmin_yazilar' %}">Listeye Dön</a>
-                    </div>
-                </div>
 
                 <div class="d-flex gap-2 flex-wrap mb-4">
                     <form method="post" action="{% url 'superadmin_yazi_durum_guncelle' yazi.pk %}">

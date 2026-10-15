@@ -1,18 +1,14 @@
 {% extends "superadmin/base.html" %}
 
-{% block superadmin_content %}
-<div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
-    <div>
-        <p class="text-uppercase small fw-semibold sa-muted mb-2">İçerik Yönetimi</p>
-        <h2 class="h1 mb-2">{{ content_config.title }}</h2>
-        <p class="sa-muted mb-0">Bu içerik türünü eski Django admin ekranına gitmeden burada listeleyebilir, düzenleyebilir ve yeni kayıt ekleyebilirsin.</p>
-    </div>
-    <div class="d-flex gap-2 flex-wrap">
-        <a class="sa-btn sa-btn--secondary" href="{% url 'superadmin_icerik_yonetimi' %}">Tüm İçerikler</a>
-        <a class="sa-btn sa-btn--secondary" href="{{ add_url }}">Yeni {{ content_config.singular }}</a>
-    </div>
-</div>
+{% block sayfa_ust_etiket %}İçerik Yönetimi{% endblock %}
+{% block sayfa_basligi %}{{ content_config.title }}{% endblock %}
+{% block sayfa_aciklamasi %}Bu içerik türünü eski Django admin ekranına gitmeden burada listeleyebilir, düzenleyebilir ve yeni kayıt ekleyebilirsin.{% endblock %}
+{% block sayfa_aksiyonlari %}
+    <a class="sa-btn sa-btn--secondary" href="{% url 'superadmin_icerik_yonetimi' %}">Tüm İçerikler</a>
+    <a class="sa-btn sa-btn--secondary" href="{{ add_url }}">Yeni {{ content_config.singular }}</a>
+{% endblock %}
 
+{% block superadmin_content %}
 <div class="card sa-card sa-table-card">
     <div class="card-body p-0">
         <div class="table-responsive">

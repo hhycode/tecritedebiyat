@@ -22,15 +22,11 @@
 </style>
 {% endblock %}
 
-{% block superadmin_content %}
-<div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
-    <div>
-        <p class="text-uppercase small fw-semibold sa-muted mb-2">Kitaplar</p>
-        <h2 class="h1 mb-2">Kitap Maliyeti Hesaplama Ayarları</h2>
-        <p class="sa-muted mb-0">Sitedeki "Kitap Maliyeti Hesapla" aracının kullandığı sayfa başı ücret ve sabit hazırlık bedelini burada güncelleyebilirsin. Kitap türüne göre kelime/sayfa oranlarını ise aşağıdaki "Kitap Maliyeti Türleri" ekranından yönetebilirsin. Değişiklik anında siteye yansır.</p>
-    </div>
-</div>
+{% block sayfa_ust_etiket %}Kitaplar{% endblock %}
+{% block sayfa_basligi %}Kitap Maliyeti Hesaplama Ayarları{% endblock %}
+{% block sayfa_aciklamasi %}Sitedeki "Kitap Maliyeti Hesapla" aracının kullandığı sayfa başı ücret ve sabit hazırlık bedelini burada güncelleyebilirsin. Kitap türüne göre kelime/sayfa oranlarını ise aşağıdaki "Kitap Maliyeti Türleri" ekranından yönetebilirsin. Değişiklik anında siteye yansır.{% endblock %}
 
+{% block superadmin_content %}
 <div class="sa-panel-card mb-4">
     <div class="sa-panel-card__header">
         <h3 class="h4 mb-1">Kullanım İstatistiği</h3>

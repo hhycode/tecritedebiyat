@@ -4,26 +4,16 @@
 {{ form.media }}
 {% endblock %}
 
-{% block superadmin_content %}
-<div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
-    <div>
-        <p class="text-uppercase small fw-semibold sa-muted mb-2">İçerik Yönetimi</p>
-        <h2 class="h1 mb-2">{{ form_title }}</h2>
-        <p class="sa-muted mb-0">{{ content_config.title }} için modern içerik formu. Eski admin ekranına gitmeden bu panelden işlem yapabilirsin.</p>
-    </div>
-    <div class="d-flex gap-2 flex-wrap">
-        <a class="sa-btn sa-btn--secondary" href="{{ back_url }}">Listeye Dön</a>
-        <a class="sa-btn sa-btn--secondary" href="{% url 'superadmin_icerik_yonetimi' %}">Tüm İçerikler</a>
-    </div>
-</div>
+{% block sayfa_ust_etiket %}İçerik Yönetimi{% endblock %}
+{% block sayfa_basligi %}{{ form_title }}{% endblock %}
+{% block sayfa_aciklamasi %}{{ content_config.title }} için modern içerik formu. Eski admin ekranına gitmeden bu panelden işlem yapabilirsin.{% if object %} Kayıt #{{ object.pk }}.{% endif %}{% endblock %}
+{% block sayfa_aksiyonlari %}
+    <a class="sa-btn sa-btn--secondary" href="{{ back_url }}">Listeye Dön</a>
+    <a class="sa-btn sa-btn--secondary" href="{% url 'superadmin_icerik_yonetimi' %}">Tüm İçerikler</a>
+{% endblock %}
 
+{% block superadmin_content %}
 <div class="sa-panel-card">
-    <div class="sa-panel-card__header">
-        <h3 class="h4 mb-1">{{ form_title }}</h3>
-        {% if object %}
-        <p class="sa-muted mb-0">Kayıt kimliği: #{{ object.pk }}</p>
-        {% endif %}
-    </div>
     <div class="sa-panel-card__body">
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}

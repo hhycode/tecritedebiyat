@@ -1,20 +1,16 @@
 {% extends "superadmin/base.html" %}
 
-{% block superadmin_content %}
-<div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
-    <div>
-        <p class="text-uppercase small fw-semibold sa-muted mb-2">İçerik Yönetimi</p>
-        <h2 class="h1 mb-2">{{ confirm_title }}</h2>
-        <p class="sa-muted mb-0">Bu işlem geri alınamaz. Silmeden önce içeriğin başka alanlarda kullanılmadığından emin ol.</p>
-    </div>
-    <div class="d-flex gap-2 flex-wrap">
-        <a class="sa-btn sa-btn--secondary" href="{{ back_url }}">Listeye Dön</a>
-        {% if object %}
-        <a class="sa-btn sa-btn--secondary" href="{% url 'superadmin_icerik_model_duzenle' model_key object.pk %}">Düzenlemeye Dön</a>
-        {% endif %}
-    </div>
-</div>
+{% block sayfa_ust_etiket %}İçerik Yönetimi{% endblock %}
+{% block sayfa_basligi %}{{ confirm_title }}{% endblock %}
+{% block sayfa_aciklamasi %}Bu işlem geri alınamaz. Silmeden önce içeriğin başka alanlarda kullanılmadığından emin ol.{% endblock %}
+{% block sayfa_aksiyonlari %}
+    <a class="sa-btn sa-btn--secondary" href="{{ back_url }}">Listeye Dön</a>
+    {% if object %}
+    <a class="sa-btn sa-btn--secondary" href="{% url 'superadmin_icerik_model_duzenle' model_key object.pk %}">Düzenlemeye Dön</a>
+    {% endif %}
+{% endblock %}
 
+{% block superadmin_content %}
 <div class="card sa-card border-danger-subtle">
     <div class="card-body p-4 p-lg-5">
         <div class="alert alert-danger rounded-4 border-0 mb-4">
