@@ -708,6 +708,9 @@ class SuperadminAlintiForm(SuperadminStyledModelForm):
 
 
 class SuperadminKaynakKitapForm(SuperadminStyledModelForm):
+    # Tireli yazim (978-975-...) kabul edilir; kaydederken 10/13 haneye sadelesir
+    isbn = forms.CharField(label="ISBN", max_length=20, required=False)
+
     class Meta:
         model = KaynakKitap
         fields = ["ad", "yazar", "yayinevi", "basim_yili", "isbn", "kapak", "katalog_kitabi", "onayli"]

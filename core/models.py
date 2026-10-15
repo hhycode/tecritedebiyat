@@ -218,6 +218,16 @@ class KaynakYazar(models.Model):
         verbose_name = "Kaynak yazar"
         verbose_name_plural = "Kaynak yazarlar"
 
+    def clean(self):
+        # ad_normal formda olmadigi icin benzersizlik kisiti formda denetlenmez; burada denetlenir
+        from django.core.exceptions import ValidationError
+
+        from .kaynak import normal_anahtar
+
+        self.ad_normal = normal_anahtar(self.ad)
+        if self.ad_normal and KaynakYazar.objects.exclude(pk=self.pk).filter(ad_normal=self.ad_normal).exists():
+            raise ValidationError({"ad": "Bu yazar zaten kayıtlı. Gerekirse iki kaydı birleştirin."})
+
     def save(self, *args, **kwargs):
         from .kaynak import normal_anahtar
 
@@ -262,6 +272,24 @@ class KaynakKitap(models.Model):
             models.UniqueConstraint(fields=["ad_normal", "yazar"], name="kaynak_kitap_ad_yazar_tekil"),
             models.UniqueConstraint(fields=["isbn"], condition=~models.Q(isbn=""), name="kaynak_kitap_isbn_tekil"),
         ]
+
+    def clean(self):
+        # ad_normal formda olmadigi icin (ad + yazar) kisiti formda denetlenmez; burada denetlenir
+        from django.core.exceptions import ValidationError
+
+        from .kaynak import isbn_normal, normal_anahtar
+
+        self.ad_normal = normal_anahtar(self.ad)
+        self.isbn = isbn_normal(self.isbn)
+        hatalar = {}
+        if self.yazar_id and KaynakKitap.objects.exclude(pk=self.pk).filter(ad_normal=self.ad_normal, yazar_id=self.yazar_id).exists():
+            hatalar["ad"] = "Bu yazarın bu adda bir kitabı zaten kayıtlı. Gerekirse iki kaydı birleştirin."
+        if self.isbn:
+            ayni = KaynakKitap.objects.exclude(pk=self.pk).filter(isbn=self.isbn).first()
+            if ayni:
+                hatalar["isbn"] = f"Bu ISBN zaten “{ayni}” kitabına ait."
+        if hatalar:
+            raise ValidationError(hatalar)
 
     def save(self, *args, **kwargs):
         from .kaynak import isbn_normal, normal_anahtar
