@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Tecrit Edebiyat yedegini her Pazar 20:00'de bu Mac'e indirir. Mac o saatte uykudaysa
+     ya da kapaliysa, acildiginda bir kez calisir. Kurulu yeri: ~/Library/LaunchAgents/ -->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.tecritedebiyat.yedek</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>EVDIZINI/Yedekler/tecrit-edebiyat/yedek_indir.sh</string>
+    </array>
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Weekday</key>
+        <integer>0</integer>
+        <key>Hour</key>
+        <integer>20</integer>
+        <key>Minute</key>
+        <integer>0</integer>
+    </dict>
+    <key>StandardOutPath</key>
+    <string>EVDIZINI/Yedekler/tecrit-edebiyat/yedek.log</string>
+    <key>StandardErrorPath</key>
+    <string>EVDIZINI/Yedekler/tecrit-edebiyat/yedek.log</string>
+    <key>ProcessType</key>
+    <string>Background</string>
+</dict>
+</plist>

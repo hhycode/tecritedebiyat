@@ -1,0 +1,10 @@
+[Unit]
+Description=Tecrit Edebiyat: gece yedegi (veritabani + media)
+
+[Service]
+Type=oneshot
+User=hhycode
+Group=hhycode
+Nice=10
+IOSchedulingClass=idle
+ExecStart=/home/hhycode/yayinevim/deploy/yedek/gece_yedegi.sh
