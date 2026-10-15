@@ -25,6 +25,16 @@ from .models import (
 )
 
 
+PANEL_GORSEL_SINIRI = 5 * 1024 * 1024
+
+
+def gorsel_boyutunu_dogrula(dosya):
+    """Panelden yuklenen gorseller 5 MB'i asamaz (yalnizca yeni yuklenen dosya kontrol edilir)."""
+    if dosya and hasattr(dosya, "content_type") and dosya.size > PANEL_GORSEL_SINIRI:
+        raise forms.ValidationError("Görsel en fazla 5 MB olabilir.")
+    return dosya
+
+
 def assign_tag_relations(instance, tag_names):
     tags = []
     for tag_name in tag_names:
@@ -230,6 +240,12 @@ class PanelUserForm(forms.ModelForm):
         for field_name in ("username", "first_name", "last_name", "email"):
             self.fields[field_name].required = True
 
+    def clean_email(self):
+        email = self.cleaned_data["email"].strip()
+        if User.objects.filter(email__iexact=email).exclude(pk=self.instance.pk).exists():
+            raise forms.ValidationError("Bu e-posta adresi başka bir hesapta kullanılıyor.")
+        return email
+
 
 class PanelProfileForm(forms.ModelForm):
     class Meta:
@@ -241,6 +257,9 @@ class PanelProfileForm(forms.ModelForm):
             "x_hesabi": forms.URLInput(attrs={"placeholder": "X bağlantısı"}),
             "websitesi": forms.URLInput(attrs={"placeholder": "Website bağlantısı"}),
         }
+
+    def clean_fotograf(self):
+        return gorsel_boyutunu_dogrula(self.cleaned_data.get("fotograf"))
 
 
 class PanelPasswordForm(PasswordChangeForm):
@@ -332,6 +351,9 @@ class PanelBlogYazisiForm(forms.ModelForm):
                 secili_kategoriler.insert(0, self.instance.kategori_id)
             self.initial["kategoriler"] = secili_kategoriler
             self.initial["etiketler_input"] = self.instance.etiket_listesi
+
+    def clean_gorsel(self):
+        return gorsel_boyutunu_dogrula(self.cleaned_data.get("gorsel"))
 
     def save(self, commit=True):
         yazi = super().save(commit=False)

@@ -275,12 +275,17 @@ def get_or_create_user_profile(user):
     return profil
 
 
+def panel_yoneticisi_mi(user, profil):
+    """Yonetici yetkisi: superadmin_required ile ayni kural (rol veya is_superuser)."""
+    return user.is_superuser or profil.rol == YazarProfil.RolSecenekleri.SUPERADMIN
+
+
 def superadmin_required(view_func):
     @wraps(view_func)
     @login_required(login_url=reverse_lazy("admin:login"))
     def _wrapped(request, *args, **kwargs):
         profil = get_or_create_user_profile(request.user)
-        if not (request.user.is_superuser or profil.rol == YazarProfil.RolSecenekleri.SUPERADMIN):
+        if not panel_yoneticisi_mi(request.user, profil):
             messages.error(request, "Bu alana sadece süper admin erişebilir.")
             return redirect("yazar_paneli")
 
@@ -2028,7 +2033,7 @@ def yazar_panel_sifre(request):
 @login_required(login_url="giris")
 def yazar_panel_yeni_yazi(request):
     profil = get_or_create_user_profile(request.user)
-    is_superadmin = profil.rol == YazarProfil.RolSecenekleri.SUPERADMIN
+    is_superadmin = panel_yoneticisi_mi(request.user, profil)
     if request.method == "POST":
         post_data = request.POST.copy()
         if not is_superadmin:
@@ -2074,7 +2079,7 @@ def yazar_panel_yeni_yazi(request):
 @login_required(login_url="giris")
 def yazar_panel_yazi_duzenle(request, pk):
     profil = get_or_create_user_profile(request.user)
-    is_superadmin = profil.rol == YazarProfil.RolSecenekleri.SUPERADMIN
+    is_superadmin = panel_yoneticisi_mi(request.user, profil)
     yazi = get_object_or_404(BlogYazisi, pk=pk, yazar=profil)
 
     if request.method == "POST":
