@@ -47,6 +47,13 @@ ALLOWED_HOSTS = ['160.153.190.169', 'tecritedebiyat.com', 'www.tecritedebiyat.co
 
 CSRF_TRUSTED_ORIGINS = ['https://tecritedebiyat.com', 'https://www.tecritedebiyat.com']
 
+# HTTPS: nginx X-Forwarded-Proto gonderiyor; cerezler sadece HTTPS uzerinden gider
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+# Tarayiciya 30 gun boyunca siteye sadece HTTPS ile gelmesini soyler (alt alan adlari haric)
+SECURE_HSTS_SECONDS = 60 * 60 * 24 * 30
+
 INSTALLED_APPS = [
     'admin_interface',           # En üste ekle
     'colorfield',                 # Renk seçici için
