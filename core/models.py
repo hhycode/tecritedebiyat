@@ -3,7 +3,7 @@ import mimetypes
 from decimal import Decimal
 
 from django.contrib.auth.models import User
-from django.core.validators import FileExtensionValidator
+from django.core.validators import FileExtensionValidator, MaxLengthValidator
 from django.db import models, transaction
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
@@ -190,10 +190,123 @@ class AlintiKategori(models.Model):
         return self.ad
 
 
+def benzersiz_turkce_slug(instance, metin):
+    """Turkce harfleri koruyarak sadelestirilmis benzersiz slug (sabahattin-ali, sabahattin-ali-2 ...)."""
+    from .kaynak import turkce_slug
+
+    taban = turkce_slug(metin)[:80].strip("-") or "kaynak"
+    slug, sayac = taban, 2
+    while instance.__class__.objects.exclude(pk=instance.pk).filter(slug=slug).exists():
+        slug, sayac = f"{taban}-{sayac}", sayac + 1
+    return slug
+
+
+class KaynakYazar(models.Model):
+    """Alinti yapilan kitabin yazari. Sitenin uyesi olmak zorunda degil; uyeyse yazar_profili ile baglanir."""
+
+    ad = models.CharField("Ad soyad", max_length=150)
+    ad_normal = models.CharField(max_length=150, unique=True, editable=False)
+    slug = models.SlugField(max_length=100, unique=True, blank=True)
+    yazar_profili = models.OneToOneField(
+        YazarProfil, on_delete=models.SET_NULL, null=True, blank=True, related_name="kaynak_yazar",
+        verbose_name="Sitedeki yazar profili",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["ad"]
+        verbose_name = "Kaynak yazar"
+        verbose_name_plural = "Kaynak yazarlar"
+
+    def save(self, *args, **kwargs):
+        from .kaynak import normal_anahtar
+
+        self.ad = " ".join(self.ad.split())
+        self.ad_normal = normal_anahtar(self.ad)
+        if not self.slug:
+            self.slug = benzersiz_turkce_slug(self, self.ad)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.ad
+
+    def get_absolute_url(self):
+        return reverse("alinti_yazar", args=[self.slug])
+
+
+class KaynakKitap(models.Model):
+    """Alinti yapilan kitap (herhangi bir yayinevinden). Katalogdaki kitabimizsa katalog_kitabi ile baglanir."""
+
+    ad = models.CharField("Kitap adı", max_length=200)
+    ad_normal = models.CharField(max_length=200, editable=False, db_index=True)
+    slug = models.SlugField(max_length=100, unique=True, blank=True)
+    yazar = models.ForeignKey(KaynakYazar, on_delete=models.PROTECT, related_name="kitaplar", verbose_name="Yazar")
+    yayinevi = models.CharField("Yayınevi", max_length=150, blank=True, default="")
+    basim_yili = models.PositiveSmallIntegerField("Basım yılı", null=True, blank=True)
+    isbn = models.CharField("ISBN", max_length=13, blank=True, default="")
+    kapak = models.ImageField("Kapak görseli", upload_to="kaynak_kitaplar/", blank=True)
+    katalog_kitabi = models.OneToOneField(
+        Kitap, on_delete=models.SET_NULL, null=True, blank=True, related_name="kaynak",
+        verbose_name="Katalogdaki kitabımız",
+    )
+    # Yazarin ekledigi kitap, ilk alintisi onaylanana kadar sitede listelenmez
+    onayli = models.BooleanField("Onaylı", default=False)
+    ekleyen = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="eklenen_kaynak_kitaplar")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["ad"]
+        verbose_name = "Kaynak kitap"
+        verbose_name_plural = "Kaynak kitaplar"
+        constraints = [
+            models.UniqueConstraint(fields=["ad_normal", "yazar"], name="kaynak_kitap_ad_yazar_tekil"),
+            models.UniqueConstraint(fields=["isbn"], condition=~models.Q(isbn=""), name="kaynak_kitap_isbn_tekil"),
+        ]
+
+    def save(self, *args, **kwargs):
+        from .kaynak import isbn_normal, normal_anahtar
+
+        self.ad = " ".join(self.ad.split())
+        self.ad_normal = normal_anahtar(self.ad)
+        self.isbn = isbn_normal(self.isbn)
+        if not self.slug:
+            self.slug = benzersiz_turkce_slug(self, f"{self.ad} {self.yazar.ad}")
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.ad} — {self.yazar.ad}"
+
+    def get_absolute_url(self):
+        return reverse("alinti_kitap", args=[self.slug])
+
+    @property
+    def kapak_url(self):
+        if self.kapak:
+            return self.kapak.url
+        if self.katalog_kitabi_id and self.katalog_kitabi.kapak_resmi:
+            return self.katalog_kitabi.kapak_resmi.url
+        return ""
+
+
+ALINTI_SINIRI = 1000
+
+
 class Alinti(models.Model):
-    kitap = models.ForeignKey(Kitap, on_delete=models.CASCADE, related_name="alintilar")
-    metin = models.TextField()
-    sayfa_no = models.IntegerField(blank=True, null=True)
+    class DurumSecenekleri(models.TextChoices):
+        TASLAK = "taslak", "Taslak"
+        INCELEMEDE = "incelemede", "İncelemede"
+        DUZELTME = "duzeltme", "Düzeltme istendi"
+        YAYINDA = "yayinda", "Yayında"
+        REDDEDILDI = "reddedildi", "Reddedildi"
+
+    # Eski alan: yalnizca katalog kitaplari. Veri kaynak'a tasindi; son adimda kaldirilacak.
+    kitap = models.ForeignKey(Kitap, on_delete=models.CASCADE, related_name="alintilar", null=True, blank=True)
+    kaynak = models.ForeignKey(
+        KaynakKitap, on_delete=models.PROTECT, related_name="alintilar", null=True, blank=True, verbose_name="Kitap",
+    )
+    metin = models.TextField("Alıntı", validators=[MaxLengthValidator(ALINTI_SINIRI)])
+    sayfa_no = models.PositiveIntegerField("Sayfa", blank=True, null=True)
+    yorum = models.TextField("Kişisel yorum", blank=True, default="", validators=[MaxLengthValidator(ALINTI_SINIRI)])
     kategori = models.ForeignKey(
         AlintiKategori,
         on_delete=models.SET_NULL,
@@ -202,17 +315,34 @@ class Alinti(models.Model):
         related_name="alintilar",
     )
     etiketler = models.ManyToManyField(Etiket, blank=True, related_name="alintilar")
+    paylasan = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True, related_name="paylasilan_alintilar", verbose_name="Paylaşan",
+    )
+    durum = models.CharField(max_length=20, choices=DurumSecenekleri.choices, default=DurumSecenekleri.TASLAK)
+    admin_notu = models.TextField(blank=True, default="")
+    onaylayan = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True, related_name="onaylanan_alintilar",
+    )
     one_cikan = models.BooleanField(default=False)
+    # Eski alan: durum'a tasindi; son adimda kaldirilacak.
     yayinda = models.BooleanField(default=True)
+    yayin_tarihi = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
 
     class Meta:
         ordering = ["-one_cikan", "-created_at"]
-        verbose_name = "Alinti"
-        verbose_name_plural = "Alintilar"
+        verbose_name = "Alıntı"
+        verbose_name_plural = "Alıntılar"
+
+    def save(self, *args, **kwargs):
+        if self.durum == self.DurumSecenekleri.YAYINDA and not self.yayin_tarihi:
+            self.yayin_tarihi = timezone.now()
+        super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.kitap.ad} - {self.metin[:30]}..."
+        kaynak = self.kaynak.ad if self.kaynak_id else "Kaynaksız"
+        return f"{kaynak} - {self.metin[:30]}..."
 
 
 class SSS(models.Model):
@@ -270,6 +400,8 @@ class BlogYazisi(models.Model):
         related_name="blog_yazilari_coklu",
     )
     etiketler = models.ManyToManyField(Etiket, blank=True, related_name="blog_yazilari")
+    # Yaziya iliştirilen alintilar; sitede yalnizca yayindakiler, yazinin sonunda gosterilir
+    alintilar = models.ManyToManyField(Alinti, blank=True, related_name="yazilar")
     durum = models.CharField(max_length=20, choices=DurumSecenekleri.choices, default=DurumSecenekleri.TASLAK)
     # Editorun yazara notu; yazar panelinde "Duzeltme istendi"/"Reddedildi" durumlarinda gosterilir
     admin_notu = models.TextField(blank=True, default="")
