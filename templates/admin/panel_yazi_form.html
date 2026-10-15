@@ -1,0 +1,125 @@
+{% extends "admin/panel_base.html" %}
+{% load static %}
+
+{% block panel_title %}{{ form_title }}{% endblock %}
+{% block panel_heading %}{{ form_title }}{% endblock %}
+
+{% block panel_extra_css %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/ckeditor-styles.css' %}">
+{% endblock %}
+
+{% block panel_extra_js %}
+{{ form.media }}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const fileInput = document.getElementById("{{ form.gorsel.id_for_label }}");
+    const clearInput = document.querySelector('input[name="{{ form.gorsel.html_name }}-clear"]');
+
+    if (!fileInput || !clearInput) {
+        return;
+    }
+
+    fileInput.addEventListener("change", function () {
+        if (fileInput.files.length > 0) {
+            clearInput.checked = false;
+        }
+    });
+
+    clearInput.addEventListener("change", function () {
+        if (clearInput.checked) {
+            fileInput.value = "";
+        }
+    });
+});
+</script>
+{% endblock %}
+
+{% block panel_content %}
+<div class="panel-form-card">
+    <div class="panel-form-card__header">
+        <h3>{{ form_title }}</h3>
+    </div>
+    <div class="panel-form-card__body">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="panel-form-grid">
+                <div class="panel-field full">
+                    <label for="{{ form.baslik.id_for_label }}">Başlık</label>
+                    {{ form.baslik }}
+                    {% if form.baslik.errors %}<p class="panel-errorlist">{{ form.baslik.errors|striptags }}</p>{% endif %}
+                </div>
+                <div class="panel-field full">
+                    <label for="{{ form.ozet.id_for_label }}">Özet</label>
+                    {{ form.ozet }}
+                    {% if form.ozet.errors %}<p class="panel-errorlist">{{ form.ozet.errors|striptags }}</p>{% endif %}
+                </div>
+                <div class="panel-field full">
+                    <label for="{{ form.icerik.id_for_label }}">İçerik</label>
+                    {{ form.icerik }}
+                    {% if form.icerik.errors %}<p class="panel-errorlist">{{ form.icerik.errors|striptags }}</p>{% endif %}
+                </div>
+                <div class="panel-field">
+                    <label for="{{ form.kategoriler.id_for_label }}">Kategori</label>
+                    {{ form.kategoriler }}
+                    {% if not form.fields.kategoriler.queryset %}
+                    <p class="panel-help" style="margin-top: 8px;">Henuz kategori eklenmemis. Once admin panelinden blog kategorisi olusturman gerekiyor.</p>
+                    {% endif %}
+                    <p class="panel-help" style="margin-top: 8px;">Birden fazla kategori secmek icin Mac'te `Command`, Windows'ta `Ctrl` tusunu basili tut.</p>
+                </div>
+                <div class="panel-field">
+                    <label for="{{ form.etiketler_input.id_for_label }}">Etiketler</label>
+                    {{ form.etiketler_input }}
+                    {% if form.etiketler_input.errors %}<p class="panel-errorlist">{{ form.etiketler_input.errors|striptags }}</p>{% endif %}
+                    <p class="panel-help" style="margin-top: 8px;">Virgülle ayırın: seo, web tasarım, dijital pazarlama</p>
+                </div>
+                {% if is_superadmin %}
+                <div class="panel-field">
+                    <label for="{{ form.durum.id_for_label }}">Durum</label>
+                    {{ form.durum }}
+                </div>
+                {% else %}
+                {{ form.durum }}
+                <div class="panel-field">
+                    <label>Durum</label>
+                    <input type="text" value="Editör onayına gönderilecek" disabled>
+                </div>
+                {% endif %}
+                <div class="panel-field full">
+                    <label for="{{ form.gorsel.id_for_label }}">Görsel</label>
+                    {{ form.gorsel }}
+                    {% if form.gorsel.errors %}<p class="panel-errorlist">{{ form.gorsel.errors|striptags }}</p>{% endif %}
+                    <p class="panel-help" style="margin-top: 8px;">Görseli silmek için sadece Temizle kutusunu işaretle. Yeni görsel yüklemek için Temizle işaretini kaldırıp yalnızca dosya seç.</p>
+                </div>
+                <div class="panel-field full">
+                    <label for="{{ form.meta_title.id_for_label }}">SEO başlığı</label>
+                    {{ form.meta_title }}
+                    {% if form.meta_title.errors %}<p class="panel-errorlist">{{ form.meta_title.errors|striptags }}</p>{% endif %}
+                </div>
+                <div class="panel-field full">
+                    <label for="{{ form.meta_description.id_for_label }}">SEO açıklaması</label>
+                    {{ form.meta_description }}
+                    {% if form.meta_description.errors %}<p class="panel-errorlist">{{ form.meta_description.errors|striptags }}</p>{% endif %}
+                </div>
+                <div class="panel-field full">
+                    <label for="{{ form.seo_keywords.id_for_label }}">SEO anahtar kelimeleri</label>
+                    {{ form.seo_keywords }}
+                    {% if form.seo_keywords.errors %}<p class="panel-errorlist">{{ form.seo_keywords.errors|striptags }}</p>{% endif %}
+                    <p class="panel-help" style="margin-top: 8px;">Virgülle ayırın.</p>
+                </div>
+            </div>
+            {% if not is_superadmin %}
+            <p class="panel-help" style="margin-top: 12px;">Yazar hesabından gönderilen yazılar önce incelemeye alınır. Süper admin onayından sonra yayına çıkar.</p>
+            {% endif %}
+            <div class="panel-submit-row">
+                <button class="panel-submit-btn" type="submit">{{ submit_label }}</button>
+            </div>
+        </form>
+        {% if yazi %}
+        <form method="post" action="{% url 'yazar_panel_yazi_sil' yazi.pk %}" onsubmit="return confirm('Bu yazıyı silmek istediğine emin misin?');" style="margin-top:12px;">
+            {% csrf_token %}
+            <button class="panel-submit-btn" type="submit" style="background:#b91c1c;">Yazıyı Sil</button>
+        </form>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

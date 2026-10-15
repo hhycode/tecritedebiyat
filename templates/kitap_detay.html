@@ -1,0 +1,302 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title|default:kitap.ad }}{% endblock %}
+{% block meta_description %}{{ kitap.ad }}{% if kitap.yazar_adi %} - {{ kitap.yazar_adi }}{% endif %}. {{ kitap.aciklama|striptags|truncatewords:24 }}{% endblock %}
+{% block canonical_url %}{{ request.build_absolute_uri }}{% endblock %}
+{% block og_title %}{{ kitap.ad }} | Tecrit Edebiyat{% endblock %}
+{% block og_description %}{{ kitap.aciklama|striptags|truncatewords:24 }}{% endblock %}
+{% block twitter_title %}{{ kitap.ad }} | Tecrit Edebiyat{% endblock %}
+{% block twitter_description %}{{ kitap.aciklama|striptags|truncatewords:24 }}{% endblock %}
+{% block og_image %}{% if kitap.kapak_resmi %}{{ request.scheme }}://{{ request.get_host }}{{ kitap.kapak_resmi.url }}{% else %}https://www.tecritedebiyat.com/static/img/logo-og.jpg{% endif %}{% endblock %}
+{% block twitter_image %}{% if kitap.kapak_resmi %}{{ request.scheme }}://{{ request.get_host }}{{ kitap.kapak_resmi.url }}{% else %}https://www.tecritedebiyat.com/static/img/logo-og.jpg{% endif %}{% endblock %}
+
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Book",
+  "name": "{{ kitap.ad|escapejs }}",
+  "url": "{{ request.build_absolute_uri }}",
+  "description": "{{ kitap.aciklama|striptags|escapejs }}",
+  {% if kitap.yazar_adi %}"author": {"@type": "Person", "name": "{{ kitap.yazar_adi|escapejs }}"},{% endif %}
+  {% if kitap.kapak_resmi %}"image": "{{ request.scheme }}://{{ request.get_host }}{{ kitap.kapak_resmi.url }}",{% endif %}
+  {% if kitap.yayin_tarihi %}"datePublished": "{{ kitap.yayin_tarihi|date:'Y-m-d' }}",{% endif %}
+  "publisher": {"@type": "Organization", "name": "Tecrit Edebiyat"},
+  "inLanguage": "tr"
+}
+</script>
+{% endblock %}
+
+{% block page_main_class %} inner-page-content kitap-detail-page{% endblock %}
+
+{% block content %}
+
+
+<div class="mxd-section mxd-section-inner-headline padding-default kitap-detail-head">
+    <div class="mxd-container grid-container">
+        <div class="mxd-block loading-wrap">
+            <div class="container-fluid px-0">
+                <div class="row gx-0">
+                    <div class="col-12 col-xl-2 mxd-grid-item no-margin">
+                        <div class="mxd-block__name name-project-link loading__fade">
+                            <a class="btn btn-anim btn-line-small btn-muted slide-right-up" href="{% url 'kitaplar' %}">
+                                <span class="btn-caption">Kitap Sayfası</span>
+                                <i class="ph ph-arrow-up-right"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-xl-10 mxd-grid-item no-margin">
+                        <div class="mxd-block__content">
+                            <div class="mxd-block__inner-headline loading__item">
+                                <h1 class="inner-headline__title">{{ kitap.ad }}</h1>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12"></div>
+                </div>
+
+                <div class="row g-0">
+                    <div class="col-12 col-xl-2"></div>
+
+                    <div class="col-12 col-xl-6 mxd-grid-item no-margin kitap-detail-meta-column">
+                        <div class="inner-headline__paragraph loading__item">
+                            <p>{{ kitap.aciklama|linebreaksbr }}</p>
+                        </div>
+
+                        <div class="inner-headline__data kitap-detail-meta-card">
+                            <div class="mxd-data-list">
+                                <div class="container-fluid p-0">
+                                    <div class="row g-0">
+                                        <div class="col-12 col-md-6 col-xl-5 mxd-data-list__column loading__item">
+                                            <div class="mxd-data-list__item">
+                                                <p class="mxd-data-list__name">Yazar</p>
+                                                <p class="mxd-data-list__content">
+                                                    {% for y in kitap.yazarlar_listesi %}{{ y.ad_soyad }}{% if not forloop.last %}<br>{% endif %}{% empty %}{{ kitap.yazar_adi }}{% endfor %}
+                                                </p>
+                                            </div>
+                                            <div class="mxd-data-list__item">
+                                                <p class="mxd-data-list__name">Satış</p>
+                                                <p class="mxd-data-list__content kitap-detail-sales-list">
+                                                    {% if kitap.kitapyurdu_link %}<a href="{{ kitap.kitapyurdu_link }}" target="_blank" rel="noopener">Kitapyurdu</a>{% endif %}
+                                                    {% if kitap.dr_link %}<a href="{{ kitap.dr_link }}" target="_blank" rel="noopener">D&amp;R</a>{% endif %}
+                                                    {% if kitap.trendyol_link %}<a href="{{ kitap.trendyol_link }}" target="_blank" rel="noopener">Trendyol</a>{% endif %}
+                                                    {% if kitap.shopier_link %}<a href="{{ kitap.shopier_link }}" target="_blank" rel="noopener">Shopier</a>{% endif %}
+                                                    {% if not kitap.kitapyurdu_link and not kitap.dr_link and not kitap.trendyol_link and not kitap.shopier_link %}Yakında{% endif %}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-12 col-md-6 col-xl-5 mxd-data-list__column loading__item">
+                                            <div class="mxd-data-list__item">
+                                                <p class="mxd-data-list__name">Kategori</p>
+                                                <p class="mxd-data-list__content">
+                                                    {% for tur in kitap.turler.all %}
+                                                        {{ tur.ad }}{% if not forloop.last %}, {% endif %}
+                                                    {% empty %}
+                                                        Genel Yayın
+                                                    {% endfor %}
+                                                </p>
+                                            </div>
+                                            <div class="mxd-data-list__item">
+                                                <p class="mxd-data-list__name">Tarih</p>
+                                                <p class="mxd-data-list__content">
+                                                    {% if kitap.yayin_tarihi %}
+                                                        {{ kitap.yayin_tarihi|date:"F Y" }}
+                                                    {% else %}
+                                                        Yakında
+                                                    {% endif %}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-xl-4 mxd-grid-item no-margin kitap-detail-cover-column">
+                        <div class="kitap-detail-cover-card loading__fade">
+                            {% if kitap.kapak_resmi %}
+                                <img src="{{ kitap.kapak_resmi.url }}" alt="{{ kitap.ad }}">
+                            {% else %}
+                                <img src="{% static 'img/default-blog.jpg' %}" alt="{{ kitap.ad }}">
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+       <!-- <div class="mxd-section mxd-project overflow-hidden kitap-detail-story">
+    <div class="mxd-container grid-container">
+        <div class="mxd-project__block kitap-detail-info-block">
+            <div class="container-fluid px-0">
+                <div class="row gx-0">
+                    <div class="col-12 col-xl-5 mxd-grid-item no-margin">
+                        <div class="mxd-project__subtitle">
+                            <h2 class="reveal-type anim-uni-in-up">Kitap<br>Hakkında</h2>
+                        </div>
+                    </div>
+                    <div class="col-12 col-xl-6 mxd-grid-item no-margin">
+                        <div class="mxd-project__content">
+                            <div class="mxd-project__paragraph medium-text">
+                                <p class="anim-uni-in-up">{{ kitap.aciklama|truncatewords:40 }}</p>
+                                <p class="anim-uni-in-up">
+                                    {{ kitap.yazar_adi }} imzalı bu kitap
+                                    {% if kitap.yayin_tarihi %}
+                                        {{ kitap.yayin_tarihi|date:"d F Y" }} tarihinde yayımlandı
+                                    {% else %}
+                                        yayınevi arşivinde hazırlık sürecinde yer alıyor
+                                    {% endif %}
+                                    ve
+                                    {% for tur in kitap.turler.all %}
+                                        {{ tur.ad|lower }}{% if not forloop.last %}, {% endif %}
+                                    {% empty %}
+                                        edebiyat
+                                    {% endfor %}
+                                    odağında okurla buluşuyor.
+                                </p>
+                                <div class="kitap-detail-action-row anim-uni-in-up">
+                                    {% if kitap.kitapyurdu_link %}
+                                        <a class="btn btn-anim btn-default btn-outline slide-right-up" href="{{ kitap.kitapyurdu_link }}" target="_blank" rel="noopener">
+                                            <span class="btn-caption">Kitapyurdu</span>
+                                            <i class="ph-bold ph-arrow-up-right"></i>
+                                        </a>
+                                    {% endif %}
+                                    {% if kitap.dr_link %}
+                                        <a class="btn btn-anim btn-default btn-outline slide-right-up" href="{{ kitap.dr_link }}" target="_blank" rel="noopener">
+                                            <span class="btn-caption">D&amp;R</span>
+                                            <i class="ph-bold ph-arrow-up-right"></i>
+                                        </a>
+                                    {% endif %}
+                                    {% if kitap.trendyol_link %}
+                                        <a class="btn btn-anim btn-default btn-outline slide-right-up" href="{{ kitap.trendyol_link }}" target="_blank" rel="noopener">
+                                            <span class="btn-caption">Trendyol</span>
+                                            <i class="ph-bold ph-arrow-up-right"></i>
+                                        </a>
+                                    {% endif %}
+                                    {% if kitap.shopier_link %}
+                                        <a class="btn btn-anim btn-default btn-outline slide-right-up" href="{{ kitap.shopier_link }}" target="_blank" rel="noopener">
+                                            <span class="btn-caption">Shopier</span>
+                                            <i class="ph-bold ph-arrow-up-right"></i>
+                                        </a>
+                                    {% endif %}
+                                </div>
+                                {% if not kitap.kitapyurdu_link and not kitap.dr_link and not kitap.trendyol_link and not kitap.shopier_link %}
+                                    <p class="kitap-detail-inline-note anim-uni-in-up">Satış bağlantıları eklendiğinde burada buton olarak görünecek.</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div> -->
+
+       <!-- <div class="mxd-project__block no-margin">
+            <div class="mxd-project__nav kitap-detail-nav">
+                <div class="mxd-project__divider anim-uni-in-up"></div>
+                <div class="container-fluid p-0">
+                    <div class="row g-0">
+                        <div class="col-6 mxd-project__navitem left mxd-grid-item no-margin anim-uni-in-up">
+                            {% if onceki_kitap %}
+                                <a class="btn btn-anim btn-line-small btn-muted anim-no-delay slide-left" href="{{ onceki_kitap.get_absolute_url }}">
+                                    <i class="ph ph-arrow-left"></i>
+                                    <span class="btn-caption">Önceki</span>
+                                </a>
+                                <a class="mxd-project__link anim-uni-in-up" href="{{ onceki_kitap.get_absolute_url }}">
+                                    <span>{{ onceki_kitap.ad }}</span>
+                                </a>
+                            {% else %}
+                                <a class="btn btn-anim btn-line-small btn-muted anim-no-delay slide-left" href="{% url 'yazarlar' %}">
+                                    <i class="ph ph-arrow-left"></i>
+                                    <span class="btn-caption">Yazarlar</span>
+                                </a>
+                                <a class="mxd-project__link anim-uni-in-up" href="{% url 'yazarlar' %}">
+                                    <span>{{ kitap.yazar_adi }}</span>
+                                </a>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-6 mxd-project__navitem right mxd-grid-item no-margin anim-uni-in-up">
+                            {% if sonraki_kitap %}
+                                <a class="btn btn-anim btn-line-small btn-muted anim-no-delay slide-right" href="{{ sonraki_kitap.get_absolute_url }}">
+                                    <span class="btn-caption">Sonraki</span>
+                                    <i class="ph ph-arrow-right"></i>
+                                </a>
+                                <a class="mxd-project__link anim-uni-in-up" href="{{ sonraki_kitap.get_absolute_url }}">
+                                    <span>{{ sonraki_kitap.ad }}</span>
+                                </a>
+                            {% else %}
+                                <a class="btn btn-anim btn-line-small btn-muted anim-no-delay slide-right" href="{% url 'kitaplar' %}">
+                                    <span class="btn-caption">Tüm Kitaplar</span>
+                                    <i class="ph ph-arrow-right"></i>
+                                </a>
+                                <a class="mxd-project__link anim-uni-in-up" href="{% url 'kitaplar' %}">
+                                    <span>Kitap vitrini</span>
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>-->
+    </div>
+</div>
+
+
+
+
+<!-- Section - CTA Start -->
+<div class="mxd-section overflow-hidden cta-footer-gap home-cta-block">
+    <div class="mxd-container">
+        <div class="mxd-block">
+            <div class="mxd-promo">
+                <div class="mxd-promo__inner anim-zoom-out-container" style="background: var(--base-opp);">
+                    <div class="mxd-promo__content" style="text-align: left; display: flex; flex-direction: column; align-items: flex-start;">
+                        <p class="mxd-promo__title anim-uni-in-up">
+                            <span class="mxd-promo__caption reveal-type" style="color: var(--t-opp-bright);">Edebiyat Dolu Bir Yolculuğa Hazır Mısın?</span>
+                        </p>
+                        <p class="t-large anim-uni-in-up" style="color: var(--t-opp-medium); max-width: 64rem; margin: 0 0 2rem 0;">
+                            Kitap çıkarmak, dosyanızı değerlendirmeye göndermek ya da yayın süreci hakkında bilgi almak istiyorsanız size uygun başvuru akışı iletişim sayfasında hazır.
+                        </p>
+                        <div class="mxd-promo__controls anim-uni-in-up" style="width: 100%; display: flex; justify-content: flex-start; gap: 1.2rem; flex-wrap: wrap;">
+
+
+<a class="btn btn-anim btn-default btn-large slide-right-up"
+   style="background:#DBEE5F; color:#000;"
+   href="{% url 'kitap_maliyeti_hesapla' %}">
+    <span class="btn-caption">Maliyeti Hesapla</span>
+    <i class="ph-bold ph-arrow-up-right"></i>
+</a>
+                             <a class="btn btn-anim btn-default btn-large btn-additional slide-right-up" href="{% url 'iletisim' %}">
+                                <span class="btn-caption">Kitap Başvurusu Yap</span>
+                                <i class="ph-bold ph-arrow-up-right"></i>
+                            </a>
+
+
+
+
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Section - CTA End -->
+
+
+
+
+
+
+
+
+{% endblock %}

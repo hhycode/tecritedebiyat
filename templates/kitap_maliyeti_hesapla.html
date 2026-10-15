@@ -1,0 +1,318 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Kitap Maliyeti Hesaplama | Kitap Basım Ücreti Hesaplayıcı | Tecrit Edebiyat{% endblock %}
+{% block meta_description %}Kitap maliyeti hesaplama aracıyla kitap türünüzü ve kelime sayınızı girin, kitap basım ücretini saniyeler içinde öğrenin. Roman, şiir, öykü ve deneme için ayrı hesaplama.{% endblock %}
+{% block meta_keywords %}kitap maliyeti hesaplama, kitap basım maliyeti hesaplama, kitap basım ücreti, kitap bastırma fiyatı, kitap basım fiyat hesaplama, kelime başı kitap maliyeti{% endblock %}
+{% block canonical_url %}https://www.tecritedebiyat.com/kitap-maliyeti-hesapla/{% endblock %}
+{% block og_title %}Kitap Maliyeti Hesaplama | Tecrit Edebiyat{% endblock %}
+{% block og_description %}Kelime sayınızı girin, kitap basım maliyetini anında görün.{% endblock %}
+{% block twitter_title %}Kitap Maliyeti Hesaplama | Tecrit Edebiyat{% endblock %}
+{% block twitter_description %}Kelime sayınızı girerek toplam kitap basım maliyetini hesaplayın.{% endblock %}
+
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Kitap maliyeti nasıl hesaplanır?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Kitap basım maliyeti; kitabınızın türüne ve kelime sayısına göre tahmini sayfa sayısı hesaplanarak bulunan bir baskı bedeli ile sabit bir hazırlık ve üretim bedelinin toplamından oluşur. Roman, şiir, öykü gibi türlerde sayfa başına düşen kelime sayısı farklı olduğu için tür seçimi maliyeti doğrudan etkiler. Kelime sayınızı ve türünüzü yukarıdaki hesaplama aracına girerek tahmini maliyetinizi anında görebilirsiniz."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Kitap basım maliyetine neler dahildir?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Hesaplamaya sayfa başı baskı bedeli ile baskı hazırlık, teknik düzenleme ve üretim başlangıç bedeli dahildir. Kapak tasarımı, editörlük gibi ek hizmetler talebe göre ayrıca değerlendirilir."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Hesaplanan tutar kesin fiyat mıdır?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Hayır, bu araç tahmini bir kitap basım maliyeti sunar. Kitabınızın içeriğine ve tercih ettiğiniz ek hizmetlere göre net fiyat için Tecrit Edebiyat ile iletişime geçmeniz gerekir."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "{{ ornek_kelime_sayisi }} kelimelik bir {{ ornek_tur_adi }} kitabın basım maliyeti ne kadar tutar?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "{{ ornek_kelime_sayisi }} kelimelik bir {{ ornek_tur_adi }} kitap yaklaşık {{ ornek_maliyet_formatli }} TL civarında bir basım maliyetine denk gelir. Kendi kitabınızın türüne ve kelime sayısına göre tahmini maliyeti görmek için yukarıdaki hesaplama aracını kullanmanız yeterli."
+      }
+    }
+  ]
+}
+</script>
+{% endblock %}
+
+{% block page_main_class %} inner-page-content{% endblock %}
+
+{% block content %}
+<div class="mxd-section mxd-section-inner-headline padding-s-text-pre-form overflow-hidden">
+    <div class="mxd-container grid-container">
+        <div class="mxd-block loading-wrap">
+            <div class="container-fluid px-0">
+                <div class="row gx-0">
+                    <div class="col-12 col-xl-2 mxd-grid-item no-margin">
+                        <div class="mxd-block__name name-inner-headline">
+                            <p class="mxd-point-subtitle">
+                                <svg version="1.1" xmlns="http://www.w3.org/2000/svg" x="0" y="0" width="20px" height="20px" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill="currentColor" d="M19.6,9.6c0,0-3,0-4,0c-0.4,0-1.8-.2-1.8-.2c-0.6-0.1-1.1-.2-1.6-.6c-0.5-.3-0.9-.8-1.2-1.2c-0.3-.4-0.4-.9-.5-1.4c0,0-0.1-1.1-.2-1.5c-0.1-1.1,0-4.4,0-4.4C10.4,0.2,10.2,0,10,0S9.6,0.2,9.6,0.4c0,0,0.1,3.3,0,4.4c0,0.4-.2,1.5-.2,1.5C9.4,6.7,9.2,7.2,9,7.6C8.7,8.1,8.2,8.5,7.8,8.9c-0.5,0.3-1,0.5-1.6,0.6c0,0-1.2,0.1-1.7,0.2c-1,0.1-4.2,0-4.2,0C0.2,9.6,0,9.8,0,10c0,0.2,0.2,0.4,0.4,0.4c0,0,3.1-0.1,4.2,0c0.4,0,1.7,0.2,1.7,0.2c0.6,0.1,1.1,0.2,1.6,0.6c0.4,0.3,0.8,0.7,1.1,1.1c0.3,0.5,0.5,1,0.6,1.6c0,0,0.1,1.3,0.2,1.7c0,1,0,4.1,0,4.1c0,0.2,0.2,0.4,0.4,0.4s0.4-0.2,0.4-0.4c0,0,0-3.1,0-4.1c0-0.4,0.2-1.7,0.2-1.7c0.1-0.6,0.2-1.1,0.6-1.6c0.3-0.4,0.7-0.8,1.1-1.1c0.5-0.3,1-0.5,1.6-.6c0,0,1.3-0.1,1.8-0.2c1,0,4,0,4,0c0.2,0,0.4-0.2,0.4-0.4C20,9.8,19.8,9.6,19.6,9.6L19.6,9.6z"/>
+                                </svg>
+                                <span>Kitap Maliyeti</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-xl-8 mxd-grid-item no-margin">
+                        <div class="mxd-block__content">
+                            <div class="mxd-block__inner-headline loading__item">
+                                <h1 class="inner-headline__title">Kitap Maliyeti Hesaplama: Basım Ücretinizi Saniyeler İçinde Öğrenin</h1>
+                                <p class="inner-headline__text t-large t-bright loading__item">
+                                  Kitabınızın türünü ve kelime sayısını girin, toplam tahmini basım maliyetini anında hesaplayalım. Bu hesaplama tahmini kitap basım maliyetini gösterir. Net fiyat için bizimle iletişime geçebilirsiniz.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mxd-section mxd-section-inner-form padding-default kitap-maliyeti-hesapla">
+    <div class="mxd-container grid-container">
+        <div class="mxd-block">
+            <div class="container-fluid px-0">
+                <div class="row gx-0">
+                    <div class="col-12 col-xl-2 mxd-grid-item no-margin"></div>
+                    <div class="col-12 col-xl-8">
+                        <div class="mxd-block__content contact">
+                            <div class="mxd-block__inner-form loading__fade">
+                                <div class="form-container">
+                                    {% if form_hatasi %}
+                                        <div class="contact-page__notice contact-page__notice--error">
+                                            {{ form_hatasi }}
+                                        </div>
+                                    {% endif %}
+
+                                    {% if toplam_ucret %}
+                                        <div class="contact-page__notice contact-page__notice--success">
+                                            <strong>Toplam Ücret:</strong> {{ formatli_toplam_ucret }} TL
+                                            <br>
+                                        </div>
+                                    {% endif %}
+
+                                    <form class="form contact-form giris-form" method="post" novalidate>
+                                        {% csrf_token %}
+                                        <div class="container-fluid p-0">
+                                            <div class="row gx-0">
+                                                <div class="col-12 mxd-grid-item anim-uni-in-up">
+                                                    <label class="contact-page__label" for="id_tur">Kitap türü</label>
+                                                    <select id="id_tur" name="tur" required>
+                                                        {% for tur in turler %}
+                                                        <option value="{{ tur.id }}" data-sayfa-bazli="{% if tur.sayfa_bazli or not tur.kelime_yogunlugu %}1{% else %}0{% endif %}" {% if secili_tur_id == tur.id|stringformat:"s" %}selected{% endif %}>{{ tur.ad }}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                                <div class="col-12 mxd-grid-item anim-uni-in-up" id="kelime_sayisi_alani">
+                                                    <label class="contact-page__label" for="id_kelime_sayisi">Kitap kelime sayısı</label>
+                                                    <input id="id_kelime_sayisi" type="number" min="1" step="1" name="kelime_sayisi" value="{{ kelime_sayisi }}" placeholder="Örnek: 60000">
+                                                </div>
+                                                <div class="col-12 mxd-grid-item anim-uni-in-up" id="sayfa_sayisi_alani" hidden>
+                                                    <label class="contact-page__label" for="id_sayfa_sayisi">Kitap sayfa sayısı</label>
+                                                    <input id="id_sayfa_sayisi" type="number" min="1" step="1" name="sayfa_sayisi" value="{{ sayfa_sayisi }}" placeholder="Örnek: 120">
+                                                </div>
+                                                <script>
+                                                (function () {
+                                                    var tur = document.getElementById("id_tur");
+                                                    var kelime = document.getElementById("kelime_sayisi_alani");
+                                                    var sayfa = document.getElementById("sayfa_sayisi_alani");
+                                                    if (!tur || !kelime || !sayfa) return;
+                                                    function guncelle() {
+                                                        var secili = tur.options[tur.selectedIndex];
+                                                        var sayfaBazli = secili && secili.getAttribute("data-sayfa-bazli") === "1";
+                                                        kelime.hidden = sayfaBazli;
+                                                        sayfa.hidden = !sayfaBazli;
+                                                    }
+                                                    tur.addEventListener("change", guncelle);
+                                                    guncelle();
+                                                })();
+                                                </script>
+                                                <div class="col-12 mxd-grid-item anim-uni-in-up kitap-maliyeti-actions">
+                                                    <div class="kitap-maliyeti-actions__inner" style="display:flex; flex-direction:column; gap:2.4rem; padding-top:0.8rem;">
+                                                        <button class="btn btn-anim btn-default btn-large btn-opposite slide-right-up" type="submit" style="width:100%; margin:1.4rem 0 0; display:flex;">
+                                                            <span class="btn-caption">Maliyeti Hesapla</span>
+                                                            <i class="ph-bold ph-arrow-up-right"></i>
+                                                        </button>
+                                                        <a class="btn btn-anim btn-default btn-large btn-outline slide-right-up" href="{% url 'iletisim' %}" style="width:100%; margin:0; display:flex;">
+                                                            <span class="btn-caption">Net fiyat için iletişim</span>
+                                                            <i class="ph-bold ph-arrow-up-right"></i>
+                                                        </a>
+                                                    </div>
+                                               </div>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mxd-section padding-mtext">
+    <div class="mxd-container fullwidth-container">
+        <div class="mxd-block">
+            <div class="marquee marquee-right--gsap muted-extra">
+                <div class="marquee__toright">
+                    {% for _ in "1234" %}
+                        <div class="marquee__item one-line item-regular text">
+                            <p class="marquee__text">Maliyet</p>
+                            <div class="marquee__image">
+                                <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" fill="currentColor">
+                                    <path fill="currentColor" d="M78.4,38.4c0,0-11.8,0-15.8,0c-1.6,0-4.8-0.2-7.1-0.8c-2.3-0.6-4.3-0.8-6.3-2.4c-2-1.2-3.5-3.2-4.7-4.8c-1.2-1.6-1.6-3.6-2-5.5c-0.3-1.5-0.7-4.3-0.8-5.9c-0.2-4.3,0-17.4,0-17.4C41.8,0.8,41,0,40.2,0s-1.6,0.8-1.6,1.6c0,0,0,13.1,0,17.4c0,1.6-0.6,4.3-0.8,5.9c-0.3,2-0.8,4-2,5.5c-1.2,2-2.8,3.6-4.7,4.8s-4,1.8-6.3,2.4c-1.9,0.5-4.7,0.6-6.7,0.8c-3.9,0.4-16.6,0-16.6,0C0.8,38.4,0,39.2,0,40c0,0.8,0.8,1.6,1.6,1.6c0,0,12.2,0,16.6,0c1.6,0,4.8,0.3,6.7,0.8c2.3,0.6,4.3,0.8,6.3,2.4c1.6,1.2,3.2,2.8,4.3,4.4c1.2,2,2.1,3.9,2.4,6.3c0.2,1.7,0.7,4.7,0.8,6.7c0.2,4,0,16.2,0,16.2c0,0.8,0.8,1.6,1.6,1.6s1.6-0.8,1.6-1.6c0,0,0-12.3,0-16.2c0-1.6,0.5-5.1,0.8-6.7c0.5-2.3,0.8-4.4,2.4-6.3c1.2-1.6,2.8-3.2,4.3-4.4c2-1.2,3.9-2,6.3-2.4c1.8-0.3,5.1-0.7,7.1-0.8c3.5-0.2,15.8,0,15.8,0c0.8,0,1.6-0.8,1.6-1.6C80,39.2,79.2,38.4,78.4,38.4C78.4,38.4,78.4,38.4,78.4,38.4z"/>
+                                </svg>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mxd-section padding-default">
+    <div class="mxd-container grid-container">
+        <div class="mxd-block">
+            <div class="container-fluid px-0">
+                <div class="row gx-0">
+                    <div class="col-12 col-xl-5 mxd-grid-item no-margin">
+                        <div class="mxd-block__name">
+                            <h2 class="reveal-type anim-uni-in-up">Hesaplama nasıl çalışır?</h2>
+                        </div>
+                    </div>
+                    <div class="col-12 col-xl-6 mxd-grid-item no-margin">
+                        <div class="mxd-block__content">
+                            <div class="mxd-block__paragraph">
+                                <p class="t-large t-bright anim-uni-in-up">
+Kitap basım maliyeti; kitabınızın türü, kelime sayısı, baskı hazırlık süreci, teknik düzenleme,
+üretim planlaması ve baskı öncesi işlemler dikkate alınarak hesaplanır. Roman, şiir, öykü gibi türlerde
+sayfa başına düşen kelime sayısı farklı olduğu için aynı kelime sayısı farklı türlerde farklı sayfa
+sayısına ve dolayısıyla farklı maliyete karşılık gelebilir.
+                                </p>
+                                <div class="mxd-paragraph__lists">
+                                    <div class="container-fluid p-0">
+                                        <div class="row g-0">
+                                            <div class="col-12 col-md-6 col-xl-5 mxd-paragraph__lists-item">
+                                                <div class="mxd-paragraph__lists-title">
+                                                    <p class="t-large t-bright t-caption anim-uni-in-up">Ücret kalemleri</p>
+                                                </div>
+                                                <ul>
+                                                    <li class="anim-uni-in-up">Sayfa başı baskı bedeli</li>
+                                                    <li class="anim-uni-in-up">Baskı hazırlık ve üretim başlangıç bedeli</li>
+                                                </ul>
+                                            </div>
+                                            <div class="col-12 col-md-6 col-xl-5 mxd-paragraph__lists-item">
+                                                <div class="mxd-paragraph__lists-title">
+                                                    <p class="t-large t-bright t-caption anim-uni-in-up">Basım süreci hakkında</p>
+                                                </div>
+                                                <ul>
+                                                    <li class="anim-uni-in-up">Kitabınız, baskı öncesi hazırlık ve teknik kontrol süreçleriyle
+profesyonel şekilde yayına hazırlanır.</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mxd-section padding-default">
+    <div class="mxd-container grid-container">
+        <div class="mxd-block">
+            <div class="container-fluid px-0">
+                <div class="row gx-0">
+                    <div class="col-12 col-xl-5 mxd-grid-item no-margin">
+                        <div class="mxd-block__name">
+                            <h2 class="reveal-type anim-uni-in-up">Kitap maliyeti hesaplama hakkında sık sorulanlar</h2>
+                        </div>
+                    </div>
+                    <div class="col-12 col-xl-6 mxd-grid-item no-margin">
+                        <div class="mxd-block__content">
+                            <div class="mxd-accordion loading__fade">
+                                <div class="mxd-accordion__item">
+                                    <div class="mxd-accordion__divider anim-uni-in-up"></div>
+                                    <div class="mxd-accordion__title anim-uni-in-up">
+                                        <h6>Kitap maliyeti nasıl hesaplanır?</h6>
+                                        <div class="mxd-accordion__arrow">
+                                            <i class="ph ph-plus"></i>
+                                        </div>
+                                    </div>
+                                    <div class="mxd-accordion__content">
+                                        <p class="mxd-accordion__text">Kitap basım maliyeti; kitabınızın türüne ve kelime sayısına göre değişen bir baskı bedeli ile sabit bir hazırlık ve üretim bedelinin toplamından oluşur. Roman, şiir, öykü gibi türlerde sayfa başına düşen kelime sayısı farklı olduğu için tür seçimi maliyeti doğrudan etkiler. Türünüzü ve kelime sayınızı yukarıdaki hesaplama aracına girerek tahmini maliyetinizi anında görebilirsiniz.</p>
+                                    </div>
+                                </div>
+                                <div class="mxd-accordion__item">
+                                    <div class="mxd-accordion__divider anim-uni-in-up"></div>
+                                    <div class="mxd-accordion__title anim-uni-in-up">
+                                        <h6>Kitap basım maliyetine neler dahildir?</h6>
+                                        <div class="mxd-accordion__arrow">
+                                            <i class="ph ph-plus"></i>
+                                        </div>
+                                    </div>
+                                    <div class="mxd-accordion__content">
+                                        <p class="mxd-accordion__text">Hesaplamaya sayfa başı baskı bedeli ile baskı hazırlık, teknik düzenleme ve üretim başlangıç bedeli dahildir. Kapak tasarımı, editörlük gibi ek hizmetler talebe göre ayrıca değerlendirilir.</p>
+                                    </div>
+                                </div>
+                                <div class="mxd-accordion__item">
+                                    <div class="mxd-accordion__divider anim-uni-in-up"></div>
+                                    <div class="mxd-accordion__title anim-uni-in-up">
+                                        <h6>Hesaplanan tutar kesin fiyat mıdır?</h6>
+                                        <div class="mxd-accordion__arrow">
+                                            <i class="ph ph-plus"></i>
+                                        </div>
+                                    </div>
+                                    <div class="mxd-accordion__content">
+                                        <p class="mxd-accordion__text">Hayır, bu araç tahmini bir kitap basım maliyeti sunar. Kitabınızın içeriğine ve tercih ettiğiniz ek hizmetlere göre net fiyat için Tecrit Edebiyat ile iletişime geçmeniz gerekir.</p>
+                                    </div>
+                                </div>
+                                <div class="mxd-accordion__item">
+                                    <div class="mxd-accordion__divider anim-uni-in-up"></div>
+                                    <div class="mxd-accordion__title anim-uni-in-up">
+                                        <h6>{{ ornek_kelime_sayisi }} kelimelik bir {{ ornek_tur_adi }} kitabın basım maliyeti ne kadar tutar?</h6>
+                                        <div class="mxd-accordion__arrow">
+                                            <i class="ph ph-plus"></i>
+                                        </div>
+                                    </div>
+                                    <div class="mxd-accordion__content">
+                                        <p class="mxd-accordion__text">{{ ornek_kelime_sayisi }} kelimelik bir {{ ornek_tur_adi }} kitap yaklaşık {{ ornek_maliyet_formatli }} TL civarında bir basım maliyetine denk gelir. Kendi kitabınızın türüne ve kelime sayısına göre tahmini maliyetini görmek için yukarıdaki hesaplama aracını kullanmanız yeterli.</p>
+                                    </div>
+                                </div>
+                                <div class="mxd-accordion__divider anim-uni-in-up"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

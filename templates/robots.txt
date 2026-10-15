@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /django-admin/
+Disallow: /superadmin/
+Disallow: /panel/
+Disallow: /giris/
+Disallow: /kayit/
+
+Sitemap: https://www.tecritedebiyat.com/sitemap.xml

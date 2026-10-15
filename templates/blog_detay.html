@@ -1,0 +1,284 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ yazi.meta_title|default:page_title|default:yazi.baslik }}{% endblock %}
+{% block meta_description %}{{ yazi.meta_description|default:yazi.ozet|default:yazi.baslik|striptags|truncatewords:26 }}{% endblock %}
+{% block meta_keywords %}{{ yazi.seo_keywords|default:yazi.etiket_listesi|default:"Tecrit Edebiyat, blog, edebiyat" }}{% endblock %}
+{% block canonical_url %}{{ request.build_absolute_uri }}{% endblock %}
+{% block og_title %}{{ yazi.meta_title|default:yazi.baslik|default:"Tecrit Edebiyat" }}{% endblock %}
+{% block og_description %}{{ yazi.meta_description|default:yazi.ozet|default:yazi.baslik|striptags|truncatewords:26 }}{% endblock %}
+{% block twitter_title %}{{ yazi.meta_title|default:yazi.baslik|default:"Tecrit Edebiyat" }}{% endblock %}
+{% block twitter_description %}{{ yazi.meta_description|default:yazi.ozet|default:yazi.baslik|striptags|truncatewords:26 }}{% endblock %}
+{% block og_image %}{% if yazi.gorsel.name %}{{ request.scheme }}://{{ request.get_host }}{{ yazi.gorsel.url }}{% endif %}{% endblock %}
+{% block twitter_image %}{% if yazi.gorsel.name %}{{ request.scheme }}://{{ request.get_host }}{{ yazi.gorsel.url }}{% endif %}{% endblock %}
+
+{% block page_main_class %} inner-page-content blog-detail-page{% endblock %}
+
+{% block extra_css %}
+<style>
+    .article-content-rich img {
+        max-width: 100%;
+        height: auto;
+    }
+
+    .blog-detail-page .blog-detail-richtext,
+    .blog-detail-page .blog-detail-richtext * {
+        background: transparent !important;
+        background-color: transparent !important;
+        box-shadow: none !important;
+    }
+
+    .blog-detail-page .blog-detail-richtext {
+        color: var(--base-opp) !important;
+        border: 0 !important;
+        border-radius: 0 !important;
+        padding: 0 !important;
+    }
+
+    .blog-detail-page .blog-detail-richtext p,
+    .blog-detail-page .blog-detail-richtext span,
+    .blog-detail-page .blog-detail-richtext div,
+    .blog-detail-page .blog-detail-richtext li,
+    .blog-detail-page .blog-detail-richtext strong,
+    .blog-detail-page .blog-detail-richtext em,
+    .blog-detail-page .blog-detail-richtext h1,
+    .blog-detail-page .blog-detail-richtext h2,
+    .blog-detail-page .blog-detail-richtext h3,
+    .blog-detail-page .blog-detail-richtext h4,
+    .blog-detail-page .blog-detail-richtext h5,
+    .blog-detail-page .blog-detail-richtext h6,
+    .blog-detail-page .blog-detail-richtext pre {
+        color: var(--base-opp) !important;
+    }
+
+    .blog-detail-page .blog-detail-richtext a {
+        color: var(--base-opp) !important;
+        text-decoration-color: currentColor;
+    }
+
+    .blog-detail-page .blog-detail-richtext table,
+    .blog-detail-page .blog-detail-richtext td,
+    .blog-detail-page .blog-detail-richtext th {
+        border-color: rgba(255,255,255,.25) !important;
+        color: var(--base-opp) !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+
+<div class="mxd-section padding-pre-title">
+    <div class="mxd-container grid-container">
+        <div class="mxd-article-area loading-wrap">
+            <div class="mxd-article-container mxd-grid-item no-margin">
+                <article class="mxd-article">
+                    <div class="mxd-article__headline">
+                        <div class="mxd-article__meta">
+                            <div class="mxd-article__breadcrumbs loading__item">
+                                <span><a href="{% url 'anasayfa' %}">Ana Sayfa</a></span>
+                                <span><a href="{% url 'blog' %}">Yazılar</a></span>
+                                <span class="current-item">{{ yazi.baslik }}</span>
+                            </div>
+                            <div class="mxd-article__data loading__item">
+                                {% if yazi.yayin_tarihi %}
+                                <span class="meta-date">
+                                    {{ yazi.yayin_tarihi|date:"d F Y" }}
+                                    <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 20 20">
+                                        <path d="M19.6,9.6h-3.9c-.4,0-1.8-.2-1.8-.2-.6,0-1.1-.2-1.6-.6-.5-.3-.9-.8-1.2-1.2-.3-.4-.4-.9-.5-1.4,0,0,0-1.1-.2-1.5V.4c0-.2-.2-.4-.4-.4s-.4.2-.4.4v4.4c0,.4-.2,1.5-.2,1.5,0,.5-.2,1-.5,1.4-.3.5-.7.9-1.2,1.2s-1,.5-1.6.6c0,0-1.2,0-1.7.2H.4c-.2,0-.4.2-.4.4s.2.4.4.4h4.1c.4,0,1.7.2,1.7.2.6,0,1.1.2,1.6.6.4.3.8.7,1.1,1.1.3.5.5,1,.6,1.6,0,0,0,1.3.2,1.7v4.1c0,.2.2.4.4.4s.4-.2.4-.4v-4.1c0-.4.2-1.7.2-1.7,0-.6.2-1.1.6-1.6.3-.4.7-.8,1.1-1.1.5-.3,1-.5,1.6-.6,0,0,1.3,0,1.8-.2h3.9c.2,0,.4-.2.4-.4s-.2-.4-.4-.4h0Z" />
+                                    </svg>
+                                </span>
+                                {% endif %}
+                                <span class="meta-time">{{ okuma_suresi }} dk. okuma</span>
+                            </div>
+                        </div>
+                        <div class="mxd-article__title loading__item">
+                            <h1 class="h1-small">{{ yazi.baslik }}</h1>
+                        </div>
+                        <div class="mxd-article__tags loading__item">
+                            {% if yazi.tum_kategoriler %}
+                                {% for kategori in yazi.tum_kategoriler %}
+                                <span class="tag tag-default tag-outline tag-link-outline">
+                                    <a href="{% url 'blog' %}?kategori={{ kategori.slug }}">{{ kategori.ad }}</a>
+                                </span>
+                                {% endfor %}
+                            {% endif %}
+                            {% if yazi.etiketler.all %}
+                                {% for etiket in yazi.etiketler.all|slice:":15" %}
+                                <span class="tag tag-default tag-outline">
+                                    {{ etiket.ad }}
+                                </span>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mxd-article__content">
+                        <div class="mxd-article__block">
+                            {% if yazi.ozet %}
+                            <p class="t-large mxd-article__excerpt">{{ yazi.ozet|striptags }}</p>
+                            {% endif %}
+
+                            <style>
+                                .blog-detail-page .blog-detail-richtext,
+                                .blog-detail-page .blog-detail-richtext *,
+                                .blog-detail-page .blog-detail-richtext [style] {
+                                    background: transparent !important;
+                                    background-color: transparent !important;
+                                    color: var(--base-opp) !important;
+                                    box-shadow: none !important;
+                                }
+                            </style>
+                            <div class="ckeditor-content article-content-rich blog-detail-richtext">
+                                {{ yazi.icerik|safe }}
+                            </div>
+                        </div>
+                    </div>
+                </article>
+
+                <div class="mxd-article-author">
+                    <div class="mxd-article-author__data">
+                        <div class="mxd-article-author__avatar">
+                            {% if yazi.yazar.fotograf %}
+                            <img src="{{ yazi.yazar.fotograf.url }}" alt="{{ yazi.yazar.ad_soyad }}">
+                            {% else %}
+                            <div class="blog-article-fallback-avatar">
+                                {{ yazi.yazar.ad_soyad|slice:":1"|upper }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="mxd-article-author__info">
+                            <h5 class="mxd-article-author__name">
+                                <span>{{ yazi.yazar.ad_soyad }}</span>
+                                <small class="mxd-article-author__position">Yazar</small>
+                            </h5>
+                            <div class="mxd-article-author__socials">
+                                {% if yazi.yazar.instagram %}
+                                <a class="tag tag-default tag-outline-medium" href="{{ yazi.yazar.instagram }}" target="_blank" rel="noopener noreferrer">Instagram</a>
+                                {% endif %}
+                                {% if yazi.yazar.x_hesabi %}
+                                <a class="tag tag-default tag-outline-medium" href="{{ yazi.yazar.x_hesabi }}" target="_blank" rel="noopener noreferrer">X</a>
+                                {% endif %}
+                                {% if yazi.yazar.websitesi %}
+                                <a class="tag tag-default tag-outline-medium" href="{{ yazi.yazar.websitesi }}" target="_blank" rel="noopener noreferrer">Website</a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mxd-article-author__quote">
+                        <p>{{ yazi.yazar.biyografi|default:yazi.yazar.ad_soyad }}</p>
+                    </div>
+                </div>
+
+                <div class="mxd-article-navigation">
+                    <div class="container-fluid p-0">
+                        <div class="row g-0">
+                            <div class="col-6 mxd-article-navigation__navitem left">
+                                {% if onceki_yazi %}
+                                <a class="btn btn-line-small btn-muted" href="{{ onceki_yazi.get_absolute_url }}">
+                                    <i class="ph ph-arrow-left"></i>
+                                    <span class="btn-caption">Önceki</span>
+                                </a>
+                                <a class="mxd-article-navigation__link" href="{{ onceki_yazi.get_absolute_url }}">
+                                    <span class="t-small">{{ onceki_yazi.baslik }}</span>
+                                </a>
+                                {% else %}
+                                <span class="btn btn-line-small btn-muted disabled">
+                                    <i class="ph ph-arrow-left"></i>
+                                    <span class="btn-caption">Önceki</span>
+                                </span>
+                                <span class="mxd-article-navigation__link"><span class="t-small">İlk yazı</span></span>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-6 mxd-article-navigation__navitem right">
+                                {% if sonraki_yazi %}
+                                <a class="btn btn-line-small btn-muted" href="{{ sonraki_yazi.get_absolute_url }}">
+                                    <span class="btn-caption">Sonraki</span>
+                                    <i class="ph ph-arrow-right"></i>
+                                </a>
+                                <a class="mxd-article-navigation__link" href="{{ sonraki_yazi.get_absolute_url }}">
+                                    <span class="t-small">{{ sonraki_yazi.baslik }}</span>
+                                </a>
+                                {% else %}
+                                <span class="btn btn-line-small btn-muted disabled">
+                                    <span class="btn-caption">Sonraki</span>
+                                    <i class="ph ph-arrow-right"></i>
+                                </span>
+                                <span class="mxd-article-navigation__link"><span class="t-small">Son yazı</span></span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if benzer_yazilar %}
+<div class="mxd-section padding-blog">
+    <div class="mxd-container grid-container">
+        <div class="mxd-block">
+            <div class="mxd-section-title pre-grid">
+                <div class="container-fluid p-0">
+                    <div class="row g-0">
+                        <div class="col-12 col-xl-5 mxd-grid-item no-margin">
+                            <div class="mxd-section-title__hrtitle">
+                                <h2 class="reveal-type anim-uni-in-up">Konuyla İlgili Diğer Yazılar</h2>
+                            </div>
+                        </div>
+                        <div class="col-12 col-xl-4 mxd-grid-item no-margin"></div>
+                        <div class="col-12 col-xl-3 mxd-grid-item no-margin">
+                            <div class="mxd-section-title__hrcontrols anim-uni-in-up">
+                                <a class="btn btn-anim btn-default btn-outline slide-right-up" href="{% url 'blog' %}">
+                                    <span class="btn-caption">Tüm Yazılar</span>
+                                    <i class="ph-bold ph-arrow-up-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mxd-block">
+            <div class="mxd-blog-preview">
+                <div class="container-fluid p-0">
+                    <div class="row g-0">
+                        {% for benzer in benzer_yazilar %}
+                        <div class="col-12 col-xl-4 mxd-blog-preview__item mxd-grid-item animate-card-3">
+                            <a class="mxd-blog-preview__media" href="{{ benzer.get_absolute_url }}">
+                                <div class="mxd-blog-preview__image parallax-img-small">
+                                    {% if benzer.gorsel.name %}
+                                    <img class="parallax-img-small" src="{{ benzer.gorsel.url }}" alt="{{ benzer.baslik }}">
+                                    {% else %}
+                                    <div class="blog-detail-card__fallback"></div>
+                                    {% endif %}
+                                </div>
+                                <div class="mxd-preview-hover">
+                                    <i class="mxd-preview-hover__icon">
+                                        <i class="ph ph-eye" style="color: white; font-size: 24px;"></i>
+                                    </i>
+                                </div>
+                                <div class="mxd-blog-preview__tags">
+                                    {% if benzer.tum_kategoriler %}
+                                        {% for kategori in benzer.tum_kategoriler %}
+                                        <span class="tag tag-default tag-permanent">{{ kategori.ad }}</span>
+                                        {% endfor %}
+                                    {% endif %}
+                                </div>
+                            </a>
+                            <div class="mxd-blog-preview__data">
+                                <a class="anim-uni-in-up" href="{{ benzer.get_absolute_url }}">{{ benzer.baslik }}</a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,294 @@
+/* ckeditor-styles.css */
+/* CKEditor İçerik Stilleri */
+
+.ckeditor-content,
+.article-content-rich {
+    /* Temel stilleri sıfırla ve standart değerler uygula */
+    all: initial;
+    isolation: isolate;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+    font-size: 16px !important;
+    line-height: 1.6 !important;
+    color: #333333 !important;
+}
+
+/* Tüm child elementler için */
+.ckeditor-content *,
+.article-content-rich * {
+    all: unset;
+    font-family: inherit !important;
+    font-size: inherit !important;
+    line-height: inherit !important;
+    color: inherit !important;
+    box-sizing: border-box !important;
+}
+
+/* Paragraf stilleri */
+.ckeditor-content p,
+.article-content-rich p {
+    display: block !important;
+    margin-bottom: 1.2em !important;
+    margin-top: 0 !important;
+}
+
+/* Başlık stilleri */
+.ckeditor-content h1,
+.ckeditor-content h2,
+.ckeditor-content h3,
+.ckeditor-content h4,
+.ckeditor-content h5,
+.ckeditor-content h6,
+.article-content-rich h1,
+.article-content-rich h2,
+.article-content-rich h3,
+.article-content-rich h4,
+.article-content-rich h5,
+.article-content-rich h6 {
+    display: block !important;
+    font-weight: bold !important;
+    margin: 1.5em 0 0.8em 0 !important;
+    line-height: 1.3 !important;
+}
+
+.ckeditor-content h1,
+.article-content-rich h1 { font-size: 2em !important; }
+.ckeditor-content h2,
+.article-content-rich h2 { font-size: 1.5em !important; }
+.ckeditor-content h3,
+.article-content-rich h3 { font-size: 1.25em !important; }
+.ckeditor-content h4,
+.article-content-rich h4 { font-size: 1.1em !important; }
+.ckeditor-content h5,
+.article-content-rich h5 { font-size: 1em !important; }
+.ckeditor-content h6,
+.article-content-rich h6 { font-size: 0.9em !important; }
+
+/* Kalın ve italik stiller */
+.ckeditor-content strong,
+.ckeditor-content b,
+.article-content-rich strong,
+.article-content-rich b {
+    font-weight: bold !important;
+}
+
+
+.ckeditor-content em,
+.ckeditor-content i,
+.article-content-rich em,
+.article-content-rich i {
+    font-style: italic !important;
+}
+
+.ckeditor-content u,
+.ckeditor-content ins,
+.article-content-rich u,
+.article-content-rich ins {
+    text-decoration: underline !important;
+    text-underline-offset: 0.14em !important;
+}
+
+.ckeditor-content s,
+.ckeditor-content strike,
+.article-content-rich s,
+.article-content-rich strike {
+    text-decoration: line-through !important;
+}
+
+
+
+
+}
+
+/* Link stilleri */
+.ckeditor-content a,
+.article-content-rich a {
+    color: #007bff !important;
+    text-decoration: underline !important;
+    cursor: pointer !important;
+}
+
+.ckeditor-content a:hover,
+.article-content-rich a:hover {
+    color: #0056b3 !important;
+    text-decoration: none !important;
+}
+
+/* Listeler */
+.ckeditor-content ul,
+.ckeditor-content ol,
+.article-content-rich ul,
+.article-content-rich ol {
+    display: block !important;
+    margin: 1em 0 !important;
+    padding-left: 2em !important;
+}
+
+.ckeditor-content li,
+.article-content-rich li {
+    display: list-item !important;
+    margin: 0.5em 0 !important;
+}
+
+.ckeditor-content ul li,
+.article-content-rich ul li {
+    list-style-type: disc !important;
+}
+
+.ckeditor-content ol li,
+.article-content-rich ol li {
+    list-style-type: decimal !important;
+}
+
+/* Blokquote */
+.ckeditor-content blockquote,
+.article-content-rich blockquote {
+    display: block !important;
+    margin: 1.5em 0 !important;
+    padding: 1.2em 1.6em !important;
+    border-left: none !important;
+    background: transparent !important;
+    background-color: transparent !important;
+    color: inherit !important;
+    font-style: italic !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+
+
+
+.ckeditor-content blockquote *,
+.article-content-rich blockquote * {
+    color: inherit !important;
+}
+
+.ckeditor-content blockquote p,
+.article-content-rich blockquote p {
+    margin-bottom: 0 !important;
+}
+
+
+
+
+/* Kod blokları */
+.ckeditor-content code,
+.article-content-rich code {
+    font-family: 'Courier New', Courier, monospace !important;
+    background-color: #f4f4f4 !important;
+    padding: 0.2em 0.4em !important;
+    border-radius: 3px !important;
+    font-size: 0.9em !important;
+}
+
+.ckeditor-content pre,
+.article-content-rich pre {
+    display: block !important;
+    font-family: 'Courier New', Courier, monospace !important;
+    background-color: #f8f8f8 !important;
+    padding: 1em !important;
+    border-radius: 5px !important;
+    overflow-x: auto !important;
+    margin: 1.5em 0 !important;
+    white-space: pre-wrap !important;
+}
+
+.ckeditor-content pre code,
+.article-content-rich pre code {
+    background: none !important;
+    padding: 0 !important;
+}
+
+/* Resimler */
+.ckeditor-content img,
+.article-content-rich img {
+    max-width: 100% !important;
+    height: auto !important;
+    display: block !important;
+    margin: 1.5em auto !important;
+    border-radius: 5px !important;
+}
+
+/* Tablolar */
+.ckeditor-content table,
+.article-content-rich table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    margin: 1.5em 0 !important;
+}
+
+.ckeditor-content th,
+.ckeditor-content td,
+.article-content-rich th,
+.article-content-rich td {
+    border: 1px solid #ddd !important;
+    padding: 0.8em !important;
+    text-align: left !important;
+}
+
+.ckeditor-content th,
+.article-content-rich th {
+    background-color: #f8f9fa !important;
+    font-weight: bold !important;
+}
+
+/* Yatay çizgi */
+.ckeditor-content hr,
+.article-content-rich hr {
+    border: none !important;
+    border-top: 1px solid #ddd !important;
+    margin: 2em 0 !important;
+    display: block !important;
+    height: 1px !important;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* CKEditor içeriği için - CSS değişkenleriyle */
+.ckeditor-content,
+.ckeditor-content * {
+    color: inherit !important;
+}
+
+.ckeditor-content p,
+.ckeditor-content div:not([class*="btn"]):not([class*="tag"]),
+.ckeditor-content span:not([class*="tag"]):not([class*="meta"]),
+.ckeditor-content li,
+.ckeditor-content td,
+.ckeditor-content th {
+    color: var(--t-default) !important;
+}
+
+.ckeditor-content h1,
+.ckeditor-content h2, 
+.ckeditor-content h3,
+.ckeditor-content h4,
+.ckeditor-content h5,
+.ckeditor-content h6 {
+    color: var(--t-bright) !important;
+}
+
+/* Inline style'ları kaldır */
+.ckeditor-content [style*="color"],
+.article-content-rich [style*="color"] {
+    color: inherit !important;
+}
+
+
+
+
+
+
+
+
+
+
+

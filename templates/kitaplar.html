@@ -1,0 +1,206 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Kitaplar | Tecrit Edebiyat Yayınevi{% endblock %}
+{% block meta_description %}Tecrit Edebiyat kitapları, yeni çıkan eserler, şiir kitapları, romanlar ve yayınevi kataloğunu inceleyin. Kitaplar hakkında bilgi ve iletişim için bize ulaşın.{% endblock %}
+{% block canonical_url %}https://www.tecritedebiyat.com/kitaplar/{% endblock %}
+{% block og_title %}Kitaplar | Tecrit Edebiyat{% endblock %}
+{% block og_description %}Tecrit Edebiyat yayınevinden çıkan kitapları, şiir kitaplarını ve romanları keşfedin.{% endblock %}
+{% block twitter_title %}Kitaplar | Tecrit Edebiyat{% endblock %}
+{% block twitter_description %}Yeni çıkan kitaplar, şiir kitapları ve romanlar Tecrit Edebiyat’ta.{% endblock %}
+
+{% block page_main_class %} inner-page-content{% endblock %}
+
+{% block content %}
+
+
+<div class="mxd-section mxd-section-inner-headline padding-s-text-pre-form overflow-hidden">
+    <div class="mxd-container grid-l-container kitaplar-container">
+        <div class="mxd-block loading-wrap">
+            <div class="container-fluid px-0">
+                <div class="row gx-0">
+                    <div class="col-12 col-xl-7 mxd-grid-item no-margin">
+                        <div class="mxd-block__content">
+                            <div class="mxd-block__inner-headline loading__item">
+                                <h1 class="inner-headline__title headline-img-before headline-img-06">Kitapları keşfet</h1>
+                                <p class="inner-headline__text t-large t-bright">
+                                    Kategorilere göre filtrelenebilen, yazar bilgileri ve detay sayfalarıyla sunulan güncel kitap vitrini.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-0 kitaplar-grid-row" style="align-items: stretch; row-gap: 3rem;">
+                    <div class="col-12 col-xl-8 mxd-grid-item no-margin">
+                        <div class="inner-headline__blogtags loading__item">
+                            <span class="tag tag-default tag-outline tag-link-outline">
+                                <a href="{% url 'kitaplar' %}">Tümü</a>
+                            </span>
+                            {% for kategori in kategoriler %}
+                                <span class="tag tag-default tag-outline tag-link-outline">
+                                    <a href="{% url 'kitaplar' %}?kategori={{ kategori.slug }}{% if arama %}&q={{ arama }}{% endif %}">{{ kategori.ad }}</a>
+                                </span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-0">
+                    <div class="col-12 col-xl-8 mxd-grid-item no-margin">
+                        <div class="content-block" style="margin-top: 2.8rem;">
+                            <form method="get" class="form search-form">
+                                {% if secili_kategori %}
+                                    <input type="hidden" name="kategori" value="{{ secili_kategori.slug }}">
+                                {% endif %}
+                                <input id="kitap-ara" type="search" name="q" value="{{ arama }}" placeholder="Kitap, yazar veya açıklama ara...">
+                                <button class="btn btn-form no-scale btn-absolute-right btn-muted" type="submit">
+                                    <i class="ph-bold ph-magnifying-glass"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mxd-section padding-default kitaplar-section">
+    <div class="mxd-container grid-l-container">
+        <div class="mxd-block">
+            <div class="mxd-pricing-table loading__fade kitaplar-card-grid" style="overflow: visible;">
+                <div class="container-fluid p-0 kitaplar-grid-wrap">
+                    <div class="row g-0">
+                        {% for kitap in kitaplar %}
+                            <div class="col-12 col-xl-4 mxd-pricing-table__item mxd-grid-item animate-card-3" style="display:flex;">
+                                <article class="mxd-post post-secondary kitap-card" style="width:100%; min-height:0;">
+                                    <a class="post-secondary__thumb radius-l" href="{{ kitap.get_absolute_url }}" style="height:320px;">
+                                        {% if kitap.kapak_resmi %}
+                                            <img src="{{ kitap.kapak_resmi.url }}" alt="{{ kitap.ad }}">
+                                        {% else %}
+                                            <img src="{% static 'img/default-blog.jpg' %}" alt="{{ kitap.ad }}">
+                                        {% endif %}
+                                        <div class="mxd-preview-hover">
+                                            <i class="mxd-preview-hover__icon">
+                                                <i class="ph ph-eye" style="color: white; font-size: 24px;"></i>
+                                            </i>
+                                        </div>
+                                    </a>
+
+                                    <div class="post-secondary__categories">
+                                        {% for tur in kitap.turler.all|slice:":3" %}
+                                            <span class="tag tag-default tag-outline-permanent tag-link-outline-premanent">
+                                                <a href="{% url 'kitaplar' %}?kategori={{ tur.slug }}">{{ tur.ad }}</a>
+                                            </span>
+                                        {% empty %}
+                                            <span class="tag tag-default tag-outline-permanent tag-link-outline-premanent">
+                                                <a href="{{ kitap.get_absolute_url }}">Kitap</a>
+                                            </span>
+                                        {% endfor %}
+                                    </div>
+
+                                    <div class="post-secondary__descr" style="padding-top: 2rem;">
+                                        <div class="post-secondary__meta">
+                                            {% for tur in kitap.turler.all|slice:":2" %}
+                                                <span class="meta-tag">
+                                                    <a href="{% url 'kitaplar' %}?kategori={{ tur.slug }}">{{ tur.ad }}</a>
+                                                    <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 20 20">
+                                                        <path d="M19.6,9.6h-3.9c-.4,0-1.8-.2-1.8-.2-.6,0-1.1-.2-1.6-.6-.5-.3-.9-.8-1.2-1.2-.3-.4-.4-.9-.5-1.4,0,0,0-1.1-.2-1.5V.4c0-.2-.2-.4-.4-.4s-.4.2-.4.4v4.4c0,.4-.2,1.5-.2,1.5,0,.5-.2,1-.5,1.4-.3.5-.7.9-1.2,1.2s-1,.5-1.6.6c0,0-1.2,0-1.7.2H.4c-.2,0-.4.2-.4.4s.2.4.4.4h4.1c.4,0,1.7.2,1.7.2.6,0,1.1.2,1.6.6.4.3.8.7,1.1,1.1.3.5.5,1,.6,1.6,0,0,0,1.3.2,1.7v4.1c0,.2.2.4.4.4s.4-.2.4-.4v-4.1c0-.4.2-1.7.2-1.7,0-.6.2-1.1.6-1.6.3-.4.7-.8,1.1-1.1.5-.3,1-.5,1.6-.6,0,0,1.3,0,1.8-.2h3.9c.2,0,.4-.2.4-.4s-.2-.4-.4-.4h0Z"/>
+                                                    </svg>
+                                                </span>
+                                            {% endfor %}
+                                            <span class="meta-tag">
+                                                {% if kitap.yazar or kitap.ikinci_yazar %}
+                                                    {% for y in kitap.yazarlar_listesi %}{% if not forloop.first %} &amp; {% endif %}<a href="{{ y.get_absolute_url }}">{{ y.ad_soyad }}</a>{% endfor %}
+                                                {% else %}
+                                                    <span>{{ kitap.yazar_adi }}</span>
+                                                {% endif %}
+                                                <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 20 20">
+                                                    <path d="M19.6,9.6h-3.9c-.4,0-1.8-.2-1.8-.2-.6,0-1.1-.2-1.6-.6-.5-.3-.9-.8-1.2-1.2-.3-.4-.4-.9-.5-1.4,0,0,0-1.1-.2-1.5V.4c0-.2-.2-.4-.4-.4s-.4.2-.4.4v4.4c0,.4-.2,1.5-.2,1.5,0,.5-.2,1-.5,1.4-.3.5-.7.9-1.2,1.2s-1,.5-1.6.6c0,0-1.2,0-1.7.2H.4c-.2,0-.4.2-.4.4s.2.4.4.4h4.1c.4,0,1.7.2,1.7.2.6,0,1.1.2,1.6.6.4.3.8.7,1.1,1.1.3.5.5,1,.6,1.6,0,0,0,1.3.2,1.7v4.1c0,.2.2.4.4.4s.4-.2.4-.4v-4.1c0-.4.2-1.7.2-1.7,0-.6.2-1.1.6-1.6.3-.4.7-.8,1.1-1.1.5-.3,1-.5,1.6-.6,0,0,1.3,0,1.8-.2h3.9c.2,0,.4-.2.4-.4s-.2-.4-.4-.4h0Z"/>
+                                                </svg>
+                                            </span>
+                                            <span class="meta-date">
+                                                {% if kitap.yayin_tarihi %}
+                                                    {{ kitap.yayin_tarihi|date:"d F Y" }}
+                                                {% else %}
+                                                    Yakında
+                                                {% endif %}
+                                            </span>
+                                        </div>
+
+                                        <div class="post-secondary__title">
+                                            <h5>
+                                                <a href="{{ kitap.get_absolute_url }}"><span>{{ kitap.ad }}</span></a>
+                                            </h5>
+                                        </div>
+
+                                        <p class="t-small" style="margin-top: 1.2rem; color: var(--t-medium);">
+                                            {{ kitap.aciklama|truncatewords:22 }}
+                                        </p>
+
+                                    </div>
+                                </article>
+                            </div>
+                        {% empty %}
+                            <div class="col-12 mxd-grid-item">
+                                <div class="content-block">
+                                    <p>Henüz görüntülenecek kitap bulunmuyor.</p>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Section - CTA Start -->
+<div class="mxd-section overflow-hidden cta-footer-gap home-cta-block">
+    <div class="mxd-container">
+        <div class="mxd-block">
+            <div class="mxd-promo">
+                <div class="mxd-promo__inner anim-zoom-out-container" style="background: var(--base-opp);">
+                    <div class="mxd-promo__content" style="text-align: left; display: flex; flex-direction: column; align-items: flex-start;">
+                        <p class="mxd-promo__title anim-uni-in-up">
+                            <span class="mxd-promo__caption reveal-type" style="color: var(--t-opp-bright);">Edebiyat Dolu Bir Yolculuğa Hazır Mısın?</span>
+                        </p>
+                        <p class="t-large anim-uni-in-up" style="color: var(--t-opp-medium); max-width: 64rem; margin: 0 0 2rem 0;">
+                            Kitap çıkarmak, dosyanızı değerlendirmeye göndermek ya da yayın süreci hakkında bilgi almak istiyorsanız size uygun başvuru akışı iletişim sayfasında hazır.
+                        </p>
+                        <div class="mxd-promo__controls anim-uni-in-up" style="width: 100%; display: flex; justify-content: flex-start; gap: 1.2rem; flex-wrap: wrap;">
+
+
+<a class="btn btn-anim btn-default btn-large slide-right-up"
+   style="background:#DBEE5F; color:#000;"
+   href="{% url 'kitap_maliyeti_hesapla' %}">
+    <span class="btn-caption">Maliyeti Hesapla</span>
+    <i class="ph-bold ph-arrow-up-right"></i>
+</a>
+                             <a class="btn btn-anim btn-default btn-large btn-additional slide-right-up" href="{% url 'iletisim' %}">
+                                <span class="btn-caption">Kitap Başvurusu Yap</span>
+                                <i class="ph-bold ph-arrow-up-right"></i>
+                            </a>
+
+
+
+
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Section - CTA End -->
+
+
+
+
+
+
+
+{% endblock %}

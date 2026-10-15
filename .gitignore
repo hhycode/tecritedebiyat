@@ -1,0 +1,25 @@
+# Veri ve yuklenen dosyalar
+db.sqlite3
+db.sqlite3.*
+media/
+media_backup*/
+media_backup*.tar.gz
+media_optimization_backup*/
+staticfiles/
+
+# Ortamlar ve calisma dosyalari
+venv/
+myenv/
+__pycache__/
+*.pyc
+gunicorn.sock
+*.log
+.env
+
+# Sifre iceriyor
+start_gunicorn.sh
+
+# Yedekler ve arsivler
+backups/
+yayinevim.tar.gz
+tmp_homepage_update/

@@ -1,0 +1,31 @@
+from django.urls import path
+
+from . import views
+
+urlpatterns = [
+    path("", views.anasayfa, name="anasayfa"),
+    path("kitaplar/", views.kitaplar, name="kitaplar"),
+    path("kitaplar/<slug:slug>/", views.kitap_detay, name="kitap_detay"),
+    path("yazarlar/", views.yazarlar, name="yazarlar"),
+    path("blog/", views.blog, name="blog"),
+    path("blog/<slug:slug>/", views.blog_detay, name="blog_detay"),
+    path("alintilar/", views.alintilar, name="alintilar"),
+    path("sss/", views.sss, name="sss"),
+    path("gizlilik-politikasi/", views.gizlilik_politikasi, name="gizlilik_politikasi"),
+    path("kullanim-sartlari/", views.kullanim_sartlari, name="kullanim_sartlari"),
+    path("iletisim/", views.iletisim, name="iletisim"),
+    path("hakkimizda/", views.hakkimizda, name="hakkimizda"),
+    path("kitap-maliyeti-hesapla/", views.kitap_maliyeti_hesapla, name="kitap_maliyeti_hesapla"),
+    path("kayit/", views.kayit, name="kayit"),
+    path("giris/", views.giris, name="giris"),
+    path("sifremi-unuttum/", views.sifremi_unuttum, name="sifremi_unuttum"),
+    path("sifremi-unuttum/gonderildi/", views.sifremi_unuttum_gonderildi, name="sifremi_unuttum_gonderildi"),
+    path("sifre-sifirla/<uidb64>/<token>/", views.sifre_sifirla, name="sifre_sifirla"),
+    path("cikis/", views.cikis, name="cikis"),
+    path("panel/", views.yazar_paneli, name="yazar_paneli"),
+    path("panel/profil/", views.yazar_panel_profil, name="yazar_panel_profil"),
+    path("panel/sifre/", views.yazar_panel_sifre, name="yazar_panel_sifre"),
+    path("panel/yazi/yeni/", views.yazar_panel_yeni_yazi, name="yazar_panel_yeni_yazi"),
+    path("panel/yazi/<int:pk>/duzenle/", views.yazar_panel_yazi_duzenle, name="yazar_panel_yazi_duzenle"),
+    path("panel/yazi/<int:pk>/sil/", views.yazar_panel_yazi_sil, name="yazar_panel_yazi_sil"),
+]

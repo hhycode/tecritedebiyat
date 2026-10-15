@@ -1,0 +1,64 @@
+{% extends "superadmin/base.html" %}
+
+{% block superadmin_content %}
+<div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+    <div>
+        <p class="text-uppercase small fw-semibold sa-muted mb-2">Kimlik Doğrulama</p>
+        <h2 class="h1 mb-2">Kullanıcılar</h2>
+        <p class="sa-muted mb-0">Site personelini ve girişlerini bu ekrandan yönetebilirsin. Şifre değişimi ve yetki düzenlemesi için eski Django admin ekranına gitmene gerek yok.</p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+        <a class="sa-chip" href="{% url 'superadmin_kullanici_yeni' %}">Yeni Kullanıcı</a>
+    </div>
+</div>
+
+<div class="card sa-card sa-table-card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th class="px-4 py-3">Kullanıcı adı</th>
+                        <th class="px-4 py-3">Ad Soyad</th>
+                        <th class="px-4 py-3">E-posta</th>
+                        <th class="px-4 py-3">Personel</th>
+                        <th class="px-4 py-3">Süper kullanıcı</th>
+                        <th class="px-4 py-3">Aktif</th>
+                        <th class="px-4 py-3">Son giriş</th>
+                        <th class="px-4 py-3 text-end">İşlem</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for kullanici in kullanicilar %}
+                    <tr>
+                        <td class="px-4 py-3"><strong>{{ kullanici.username }}</strong></td>
+                        <td class="px-4 py-3">{{ kullanici.get_full_name|default:"-" }}</td>
+                        <td class="px-4 py-3">{{ kullanici.email|default:"-" }}</td>
+                        <td class="px-4 py-3">
+                            {% if kullanici.is_staff %}<span class="badge text-bg-success">Evet</span>{% else %}<span class="badge text-bg-secondary">Hayır</span>{% endif %}
+                        </td>
+                        <td class="px-4 py-3">
+                            {% if kullanici.is_superuser %}<span class="badge text-bg-success">Evet</span>{% else %}<span class="badge text-bg-secondary">Hayır</span>{% endif %}
+                        </td>
+                        <td class="px-4 py-3">
+                            {% if kullanici.is_active %}<span class="badge text-bg-success">Aktif</span>{% else %}<span class="badge text-bg-danger">Pasif</span>{% endif %}
+                        </td>
+                        <td class="px-4 py-3 sa-muted small">{{ kullanici.last_login|date:"d.m.Y H:i"|default:"Hiç giriş yapmadı" }}</td>
+                        <td class="px-4 py-3 text-end">
+                            <div class="d-inline-flex gap-2 flex-wrap justify-content-end">
+                                <a class="btn btn-sm btn-outline-dark rounded-pill" href="{% url 'superadmin_kullanici_duzenle' kullanici.pk %}">Düzenle</a>
+                                <a class="btn btn-sm btn-outline-dark rounded-pill" href="{% url 'superadmin_kullanici_sifre' kullanici.pk %}">Şifre Belirle</a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td class="px-4 py-4 sa-muted" colspan="8">Henüz kullanıcı yok.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

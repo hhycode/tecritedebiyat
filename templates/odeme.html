@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Ödeme | Tecrit Edebiyat{% endblock %}
+{% block meta_description %}{{ meta_description }}{% endblock %}
+{% block canonical_url %}{{ canonical_url }}{% endblock %}
+
+{% block page_main_class %} inner-page-content{% endblock %}
+
+{% block content %}
+<div class="mxd-section mxd-section-inner-headline padding-s-text-pre-form overflow-hidden">
+    <div class="mxd-container grid-container">
+        <div class="mxd-block loading-wrap">
+            <div class="container-fluid px-0">
+                <div class="row gx-0">
+                    <div class="col-12 col-xl-10 mxd-grid-item no-margin">
+                        <div class="mxd-block__content">
+                            <div class="mxd-block__inner-headline loading__item">
+                                <h1 class="inner-headline__title headline-img-before headline-img-06">Sipariş Bilgileri</h1>
+                                <p class="inner-headline__text t-large t-bright loading__item">
+                                    Teslimat ve ödeme için bilgilerinizi girin. Ödeme işlemi güvenli şekilde bu sayfa üzerinde tamamlanır.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mxd-section mxd-section-inner-form padding-default">
+    <div class="mxd-container grid-container">
+        <div class="mxd-block">
+            <div class="container-fluid px-0">
+                <div class="row gx-0" style="row-gap: 3rem;">
+                    <div class="col-12 col-xl-7">
+                        <div class="mxd-block__content contact">
+                            <div class="mxd-block__inner-form loading__fade">
+                                <div class="form-container">
+                                    {% if form.errors %}
+                                        <div class="contact-page__notice contact-page__notice--error">
+                                            Lütfen eksik veya hatalı alanları kontrol edin.
+                                        </div>
+                                    {% endif %}
+                                    <form class="form contact-form" method="post" novalidate>
+                                        {% csrf_token %}
+                                        <div class="container-fluid p-0">
+                                            <div class="row gx-0">
+                                                <div class="col-12 col-md-6 mxd-grid-item anim-uni-in-up">
+                                                    {{ form.ad_soyad }}
+                                                    {% if form.ad_soyad.errors %}<p class="contact-page__field-error">{{ form.ad_soyad.errors|striptags }}</p>{% endif %}
+                                                </div>
+                                                <div class="col-12 col-md-6 mxd-grid-item anim-uni-in-up">
+                                                    {{ form.email }}
+                                                    {% if form.email.errors %}<p class="contact-page__field-error">{{ form.email.errors|striptags }}</p>{% endif %}
+                                                </div>
+                                                <div class="col-12 col-md-6 mxd-grid-item anim-uni-in-up">
+                                                    {{ form.telefon }}
+                                                    {% if form.telefon.errors %}<p class="contact-page__field-error">{{ form.telefon.errors|striptags }}</p>{% endif %}
+                                                </div>
+                                                <div class="col-12 col-md-6 mxd-grid-item anim-uni-in-up">
+                                                    {{ form.tc_kimlik_no }}
+                                                    {% if form.tc_kimlik_no.errors %}<p class="contact-page__field-error">{{ form.tc_kimlik_no.errors|striptags }}</p>{% endif %}
+                                                </div>
+                                                <div class="col-12 mxd-grid-item anim-uni-in-up">
+                                                    {{ form.adres }}
+                                                    {% if form.adres.errors %}<p class="contact-page__field-error">{{ form.adres.errors|striptags }}</p>{% endif %}
+                                                </div>
+                                                <div class="col-12 col-md-6 mxd-grid-item anim-uni-in-up">
+                                                    {{ form.sehir }}
+                                                    {% if form.sehir.errors %}<p class="contact-page__field-error">{{ form.sehir.errors|striptags }}</p>{% endif %}
+                                                </div>
+                                                <div class="col-12 col-md-6 mxd-grid-item anim-uni-in-up">
+                                                    {{ form.posta_kodu }}
+                                                </div>
+                                                <div class="col-12 mxd-grid-item anim-uni-in-up">
+                                                    <button class="btn btn-anim btn-default btn-large btn-opposite slide-right-up" type="submit">
+                                                        <span class="btn-caption">Ödeme Adımına Geç</span>
+                                                        <i class="ph-bold ph-arrow-up-right"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-xl-5">
+                        <div class="bg-base-tint radius-m" style="padding: 2.5rem;">
+                            <p class="t-bright" style="font-size: 1.8rem; font-weight: var(--fw-semibold); margin-bottom: 1.5rem;">Sipariş Özeti</p>
+                            {% for kalem in kalemler %}
+                                <div style="display:flex; justify-content: space-between; margin-bottom: 1rem;">
+                                    <span class="t-medium">{{ kalem.kitap.ad }} x{{ kalem.adet }}</span>
+                                    <span class="t-bright">{{ kalem.ara_toplam }} TL</span>
+                                </div>
+                            {% endfor %}
+                            <hr style="border-color: var(--st-medium); margin: 1.5rem 0;">
+                            <div style="display:flex; justify-content: space-between;">
+                                <span class="t-bright" style="font-weight: var(--fw-semibold);">Toplam</span>
+                                <span class="t-bright" style="font-weight: var(--fw-semibold); font-size: 1.8rem;">{{ toplam_tutar }} TL</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

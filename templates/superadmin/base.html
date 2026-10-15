@@ -1,0 +1,325 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title|default:"Yönetim Paneli" }} | Tecrit Edebiyat</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+    :root {
+        --sa-bg: #f6f6f3;
+        --sa-surface: #ffffff;
+        --sa-border: #e2e1dc;
+        --sa-text: #1e1c1a;
+        --sa-muted: #766f67;
+        --sa-accent: #111111;
+        --sa-accent-2: #dff25f;
+    }
+    body {
+        background: var(--sa-bg);
+        color: var(--sa-text);
+    }
+    .sa-shell {
+        min-height: 100vh;
+    }
+    .sa-sidebar {
+        width: 248px;
+        background: #141414;
+        color: #fff;
+        padding: 20px 14px;
+        position: sticky;
+        top: 0;
+        height: 100vh;
+    }
+    .sa-brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 24px;
+    }
+    .sa-brand__mark {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        background: transparent;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.25rem;
+        overflow: hidden;
+    }
+    .sa-brand__logo {
+        width: 44px;
+        height: 44px;
+        display: block;
+    }
+    .sa-brand small {
+        display: block;
+        color: rgba(255,255,255,.6);
+        text-transform: uppercase;
+        letter-spacing: .08em;
+        font-size: .68rem;
+    }
+    .sa-brand strong {
+        display: block;
+        font-size: 1rem;
+    }
+    .sa-nav-section {
+        margin-bottom: 18px;
+    }
+    .sa-nav-title {
+        color: rgba(255,255,255,.5);
+        text-transform: uppercase;
+        letter-spacing: .08em;
+        font-size: .72rem;
+        margin: 0 0 8px;
+        padding: 0 10px;
+    }
+    .sa-nav-link {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 10px 12px;
+        border-radius: 8px;
+        color: rgba(255,255,255,.86);
+        text-decoration: none;
+        margin-bottom: 4px;
+        font-size: .94rem;
+    }
+    .sa-nav-link:hover,
+    .sa-nav-link.active {
+        background: rgba(255,255,255,.08);
+        color: #fff;
+    }
+    .sa-badge {
+        background: rgba(221, 241, 96, .16);
+        color: #ddf160;
+        border-radius: 999px;
+        padding: 3px 9px;
+        font-size: .75rem;
+        font-weight: 700;
+    }
+    .sa-main {
+        min-width: 0;
+        padding: 20px 24px 48px;
+    }
+    .sa-topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 16px;
+    }
+    .sa-topbar__actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .sa-chip {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 42px;
+        padding: 0 14px;
+        border-radius: 8px;
+        border: 1px solid var(--sa-border);
+        background: #fff;
+        color: var(--sa-text);
+        text-decoration: none;
+        font-weight: 600;
+    }
+    .sa-hero {
+        border: 1px solid var(--sa-border);
+        border-radius: 12px;
+        background: #171717;
+        color: #fff;
+        box-shadow: none;
+    }
+    .sa-card {
+        border: 1px solid var(--sa-border);
+        border-radius: 10px;
+        box-shadow: none;
+    }
+    .sa-table-card {
+        overflow: hidden;
+    }
+    .sa-table-card .table {
+        margin-bottom: 0;
+    }
+    .sa-muted {
+        color: var(--sa-muted);
+    }
+    .sa-section-title {
+        font-size: 1rem;
+        font-weight: 800;
+        margin: 0;
+    }
+    .sa-metric {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        min-height: 94px;
+    }
+    .sa-metric__label {
+        color: var(--sa-muted);
+        font-size: .76rem;
+        font-weight: 800;
+        letter-spacing: .06em;
+        text-transform: uppercase;
+    }
+    .sa-metric__value {
+        color: var(--sa-text);
+        font-size: 2rem;
+        font-weight: 850;
+        line-height: 1;
+    }
+    .sa-action-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 10px;
+    }
+    .sa-action {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
+        border: 1px solid var(--sa-border);
+        border-radius: 8px;
+        color: var(--sa-text);
+        background: #fff;
+        text-decoration: none;
+        font-weight: 800;
+    }
+    .sa-action.primary {
+        border-color: #111;
+        background: #111;
+        color: #fff;
+    }
+    .sa-list-item {
+        border: 1px solid var(--sa-border);
+        border-radius: 8px;
+        background: #fafaf8;
+        padding: 12px;
+    }
+    .sa-list-item strong {
+        color: var(--sa-text);
+    }
+    .btn,
+    .rounded-pill,
+    .rounded-4 {
+        border-radius: 8px !important;
+    }
+    @media (max-width: 992px) {
+        .sa-sidebar {
+            width: 100%;
+            height: auto;
+            position: relative;
+        }
+    }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+<div class="container-fluid sa-shell">
+    <div class="row g-0">
+        <aside class="col-12 col-lg-auto">
+            <div class="sa-sidebar">
+                <div class="sa-brand">
+                    <div class="sa-brand__mark" aria-hidden="true">
+                        <svg class="sa-brand__logo" viewBox="0 0 600 600" width="44" height="44" role="img">
+                            <rect width="600" height="600" rx="80" ry="80" style="fill: var(--sa-accent);"/>
+                            <g transform="scale(2.5) translate(-175, -270)" style="fill: #ffffff;">
+                                <path d="m327.209 373.045.182.082.977-.525 8.245-4.668 14.242-8.062-22.487-12.982-2.016-1.165-1.984-1.145-2.052-1.184-19.593-11.313-4.976-2.698-.265-.144-1.841-.999-1.932-1.048 1.932-1.123v-.09l2.266-1.296 1.734-.992 5.343-3.056.037-.022v.001l17.333-9.916-22.713-13.113-2-1.154-2 1.154-79.3 45.783 24.335 14.049 29.002-16.745.465-.268.138.08 3.871 2.224.15.086 14.696 8.440 9.518 5.433 1.125.642zM270.914 440.655l24.727 14.276v-27.988l-24.727-14.276zM238.675 360.884l-24.334-14.049v28.783l24.334 13.666z"/>
+                                <path d="m294.441 358.983-1.191-.692-22.973-13.194-25.589 14.638 24.226 13.988zM266.914 442.965v-32.608h-.001v-33.169l-24.238-13.995v58.849l-.017.009.011 2.408.006.003v1.433l.003.706-.003-.001v.062l-1.999 1.154-.098.057-4.062-2.274-22.175-12.411v27.523l2 1.154 79.3 45.782V459.55l-24.727-14.276zM328.368 405.787l24.238-13.601v-28.708l-24.238 13.72zM330.391 343.438l24.504 14.148 24.573-13.911-24.565-14.183zM299.641 487.647l24.726-14.275v-28.098l-24.726 14.276z"/>
+                                <path d="M356.606 389.941v4.586l-4 2.245-22.195 12.455-2.044 1.147-1.021.572-.979.565-2 1.154-22.674 13.092-2.053 1.185v27.987l22.672-13.089 2.055-1.187 1.98-1.144 2.02-1.166 22.239-12.839 1.809-1.044.001-.001.19-.128a2010 2010 0 0 0 4-2.722v33.149l22.334-12.895 2-1.154v-93.272l-24.334 13.775z"/>
+                            </g>
+                        </svg>
+                    </div>
+                    <div>
+                        <small>Tecrit Edebiyat</small>
+                        <strong>Admin Paneli</strong>
+                    </div>
+                </div>
+
+                <div class="sa-nav-section">
+                    <p class="sa-nav-title">Genel Bakış</p>
+                    <a class="sa-nav-link {% if request.resolver_match.url_name == 'superadmin_dashboard' %}active{% endif %}" href="{% url 'superadmin_dashboard' %}">
+                        <span>Kontrol Paneli</span>
+                        <span class="sa-badge">{{ admin_notification_count }}</span>
+                    </a>
+                </div>
+
+                <div class="sa-nav-section">
+                    <p class="sa-nav-title">İçerik</p>
+                    <a class="sa-nav-link {% if request.resolver_match.url_name == 'superadmin_yazilar' %}active{% endif %}" href="{% url 'superadmin_yazilar' %}">
+                        <span>Yazılar</span>
+                        <span class="sa-badge">{{ admin_pending_post_count }}</span>
+                    </a>
+                    <a class="sa-nav-link {% if request.resolver_match.url_name == 'superadmin_icerik_yonetimi' or request.resolver_match.url_name == 'superadmin_icerik_model_liste' or request.resolver_match.url_name == 'superadmin_icerik_model_yeni' or request.resolver_match.url_name == 'superadmin_icerik_model_duzenle' %}active{% endif %}" href="{% url 'superadmin_icerik_yonetimi' %}">
+                        <span>İçerik Yönetimi</span>
+                    </a>
+                </div>
+
+                <div class="sa-nav-section">
+                    <p class="sa-nav-title">Kitaplar</p>
+                    <a class="sa-nav-link {% if request.resolver_match.url_name == 'superadmin_kitaplar' %}active{% endif %}" href="{% url 'superadmin_kitaplar' %}">
+                        <span>Kitaplar</span>
+                    </a>
+                    <a class="sa-nav-link {% if request.resolver_match.url_name == 'superadmin_kitap_maliyeti_ayarlari' %}active{% endif %}" href="{% url 'superadmin_kitap_maliyeti_ayarlari' %}">
+                        <span>Kitap Maliyeti Ayarları</span>
+                    </a>
+                </div>
+
+                <div class="sa-nav-section">
+                    <p class="sa-nav-title">Topluluk</p>
+                    <a class="sa-nav-link {% if request.resolver_match.url_name == 'superadmin_yazarlar' %}active{% endif %}" href="{% url 'superadmin_yazarlar' %}">
+                        <span>Yazarlar</span>
+                    </a>
+                    <a class="sa-nav-link {% if request.resolver_match.url_name == 'superadmin_kullanicilar' or request.resolver_match.url_name == 'superadmin_kullanici_duzenle' or request.resolver_match.url_name == 'superadmin_kullanici_yeni' or request.resolver_match.url_name == 'superadmin_kullanici_sifre' %}active{% endif %}" href="{% url 'superadmin_kullanicilar' %}">
+                        <span>Kullanıcılar</span>
+                    </a>
+                    <a class="sa-nav-link {% if request.resolver_match.url_name == 'superadmin_iletisim' or request.resolver_match.url_name == 'superadmin_iletisim_detay' %}active{% endif %}" href="{% url 'superadmin_iletisim' %}">
+                        <span>İletişim</span>
+                        <span class="sa-badge">{{ admin_unread_contact_count }}</span>
+                    </a>
+                </div>
+
+                <div class="sa-nav-section">
+                    <p class="sa-nav-title">Kısayol</p>
+                    <a class="sa-nav-link" href="{% url 'yazar_paneli' %}">Yazar Paneline Dön</a>
+                    <a class="sa-nav-link" href="{% url 'anasayfa' %}">Siteyi Gör</a>
+                    <a class="sa-nav-link" href="{% url 'cikis' %}">Çıkış</a>
+                </div>
+            </div>
+        </aside>
+
+        <main class="col sa-main">
+            <div class="sa-topbar">
+                <div>
+                    <h1 class="h3 mb-1">{{ page_title|default:"Kontrol Paneli" }}</h1>
+                    <div class="sa-muted">{{ request.user.get_username }} olarak giriş yaptın</div>
+                </div>
+                <div class="sa-topbar__actions">
+                    <a class="sa-chip" href="{% url 'superadmin_yazilar' %}">Onay Yazıları</a>
+                    <a class="sa-chip" href="{% url 'superadmin_iletisim' %}">Mesajlar</a>
+                    <a class="sa-chip" href="{% url 'superadmin_icerik_yonetimi' %}">İçerik Yönetimi</a>
+                </div>
+            </div>
+
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-warning{% endif %} rounded-4 border-0 shadow-sm mb-3">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+
+            {% block superadmin_content %}{% endblock %}
+        </main>
+    </div>
+</div>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

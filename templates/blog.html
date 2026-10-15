@@ -1,0 +1,314 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title|default:"Blog | Tecrit Edebiyat" }}{% endblock %}
+{% block meta_description %}{{ meta_description }}{% endblock %}
+{% block canonical_url %}{{ canonical_url }}{% endblock %}
+{% block og_title %}{{ page_title|default:"Blog | Tecrit Edebiyat" }}{% endblock %}
+{% block og_description %}{{ meta_description }}{% endblock %}
+{% block twitter_title %}{{ page_title|default:"Blog | Tecrit Edebiyat" }}{% endblock %}
+{% block twitter_description %}{{ meta_description }}{% endblock %}
+
+{% block page_main_class %} inner-page-content{% endblock %}
+
+{% block content %}
+<div class="mxd-section mxd-section-inner-headline padding-s-text-pre-form overflow-hidden">
+    <div class="mxd-container grid-container">
+        <div class="mxd-block loading-wrap">
+            <div class="container-fluid px-0">
+                <div class="row gx-0">
+                    <div class="col-12 col-xl-10 mxd-grid-item no-margin">
+                        <div class="mxd-block__content">
+                            <div class="mxd-block__inner-headline loading__item">
+                                <h1 class="inner-headline__title headline-img-before headline-img-06">Son Yazılar</h1>
+                                <p class="inner-headline__text t-large t-bright loading__item">
+                                    Edebiyat, düşünce ve kültür etrafında yayımlanan son yazıları burada takip edebilir, kategoriye göre filtreleyerek aradığın metne hızlıca ulaşabilirsin.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-0">
+                    <div class="col-12 col-xl-8 mxd-grid-item no-margin">
+                        <div class="inner-headline__blogtags loading__item">
+                            <span class="tag tag-default tag-outline tag-link-outline">
+                                <a href="{% url 'blog' %}">Tümü</a>
+                            </span>
+                            {% for kategori in kategoriler %}
+                                <span class="tag tag-default tag-outline tag-link-outline">
+                                    <a href="{% url 'blog' %}?kategori={{ kategori.slug }}">{{ kategori.ad }}</a>
+                                </span>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-xl-4 mxd-grid-item no-margin">
+                        <div class="inner-headline__breadcrumbs loading__fade">
+                            <div class="breadcrumbs__nav">
+                                <span><a href="{% url 'anasayfa' %}">Ana Sayfa</a></span>
+                                <span class="current-item">Son Yazılar</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mxd-section padding-default">
+    <div class="mxd-container grid-container">
+        <div class="mxd-posts-area loading__fade">
+            <div class="mxd-posts-container mxd-grid-item">
+                {% for yazi in yazilar %}
+                    <article class="mxd-post post-simple">
+                        <a class="post-simple__thumb radius-m" href="{{ yazi.get_absolute_url }}">
+                            {% if yazi.gorsel.name %}
+                                <img src="{{ yazi.gorsel.url }}" alt="{{ yazi.baslik }}">
+                            {% else %}
+                                <img src="{% static 'img/1200x1400-bg.webp' %}" alt="{{ yazi.baslik }}">
+                            {% endif %}
+                            <div class="mxd-preview-hover">
+                                <i class="mxd-preview-hover__icon icon-small">
+                                    <i class="ph ph-eye" style="color: white; font-size: 24px;"></i>
+                                </i>
+                            </div>
+                        </a>
+                        <div class="post-simple__content">
+                            <div class="post-simple__descr">
+                                <div class="post-simple__meta">
+                                    {% if yazi.tum_kategoriler %}
+                                        {% for kategori in yazi.tum_kategoriler %}
+                                            <span class="meta-tag">
+                                                <a href="{% url 'blog' %}?kategori={{ kategori.slug }}">{{ kategori.ad }}</a>
+                                                <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 20 20">
+                                                    <path d="M19.6,9.6h-3.9c-.4,0-1.8-.2-1.8-.2-.6,0-1.1-.2-1.6-.6-.5-.3-.9-.8-1.2-1.2-.3-.4-.4-.9-.5-1.4,0,0,0-1.1-.2-1.5V.4c0-.2-.2-.4-.4-.4s-.4.2-.4.4v4.4c0,.4-.2,1.5-.2,1.5,0,.5-.2,1-.5,1.4-.3.5-.7.9-1.2,1.2s-1,.5-1.6.6c0,0-1.2,0-1.7.2H.4c-.2,0-.4.2-.4.4s.2.4.4.4h4.1c.4,0,1.7.2,1.7.2.6,0,1.1.2,1.6.6.4.3.8.7,1.1,1.1.3.5.5,1,.6,1.6,0,0,0,1.3.2,1.7v4.1c0,.2.2.4.4.4s.4-.2.4-.4v-4.1c0-.4.2-1.7.2-1.7,0-.6.2-1.1.6-1.6.3-.4.7-.8,1.1-1.1.5-.3,1-.5,1.6-.6,0,0,1.3,0,1.8-.2h3.9c.2,0,.4-.2.4-.4s-.2-.4-.4-.4h0Z" />
+                                                </svg>
+                                            </span>
+                                        {% endfor %}
+                                    {% endif %}
+                                    {% if yazi.yayin_tarihi %}
+                                        <span class="meta-date">{{ yazi.yayin_tarihi|date:"d F Y" }}</span>
+                                    {% endif %}
+                                </div>
+                                <div class="post-simple__title">
+                                    <h5><a href="{{ yazi.get_absolute_url }}">{{ yazi.baslik }}</a></h5>
+                                </div>
+                            </div>
+                            <div class="post-simple__btn">
+                                <a class="btn btn-anim btn-default btn-outline slide-right-up" href="{{ yazi.get_absolute_url }}">
+                                    <span class="btn-caption">Devamını Oku</span>
+                                    <i class="ph-bold ph-arrow-up-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </article>
+                {% empty %}
+                    <div class="text-center py-5">
+                        <p class="t-large">Henüz yazı bulunmuyor.</p>
+                    </div>
+                {% endfor %}
+
+                {% if sayfalandirildi_mi %}
+                    <div class="mxd-blog-pagination">
+                        <div class="mxd-blog-pagination__inner">
+                            <nav class="mxd-blog-pagination__items">
+                                {% if sayfa_nesnesi.has_previous %}
+                                    <a class="mxd-blog-pagination__item blog-pagination-control prev btn btn-anim btn-line-small btn-bright anim-no-delay slide-left" href="?{% if pagination_query %}{{ pagination_query }}&{% endif %}sayfa={{ sayfa_nesnesi.previous_page_number }}">
+                                        <i class="ph-bold ph-arrow-left"></i>
+                                        <span class="btn-caption">Önceki</span>
+                                    </a>
+                                {% else %}
+                                    <span class="mxd-blog-pagination__item blog-pagination-control prev btn btn-anim btn-line-small btn-bright anim-no-delay slide-left disabled">
+                                        <i class="ph-bold ph-arrow-left"></i>
+                                        <span class="btn-caption">Önceki</span>
+                                    </span>
+                                {% endif %}
+
+                                {% for num in sayfa_nesnesi.paginator.page_range %}
+                                    {% if sayfa_nesnesi.number == num %}
+                                        <span class="mxd-blog-pagination__item blog-pagination-number btn btn-anim active">
+                                            <span class="btn-caption">{{ num }}</span>
+                                        </span>
+                                    {% elif num > sayfa_nesnesi.number|add:'-3' and num < sayfa_nesnesi.number|add:'3' %}
+                                        <a class="mxd-blog-pagination__item blog-pagination-number btn btn-anim" href="?{% if pagination_query %}{{ pagination_query }}&{% endif %}sayfa={{ num }}">
+                                            <span class="btn-caption">{{ num }}</span>
+                                        </a>
+                                    {% endif %}
+                                {% endfor %}
+
+                                {% if sayfa_nesnesi.has_next %}
+                                    <a class="mxd-blog-pagination__item blog-pagination-control next btn btn-anim btn-line-small btn-bright anim-no-delay slide-right" href="?{% if pagination_query %}{{ pagination_query }}&{% endif %}sayfa={{ sayfa_nesnesi.next_page_number }}">
+                                        <span class="btn-caption">Sonraki</span>
+                                        <i class="ph-bold ph-arrow-right"></i>
+                                    </a>
+                                {% else %}
+                                    <span class="mxd-blog-pagination__item blog-pagination-control next btn btn-anim btn-line-small btn-bright anim-no-delay slide-right disabled">
+                                        <span class="btn-caption">Sonraki</span>
+                                        <i class="ph-bold ph-arrow-right"></i>
+                                    </span>
+                                {% endif %}
+                            </nav>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="mxd-sidebar mxd-grid-item">
+                <div class="mxd-sidebar__widget bg-base-tint radius-m widget-search">
+                    <div class="widget-search__form">
+                        <form class="form search-form" action="{% url 'blog' %}" method="get">
+                            {% if secili_kategori %}
+                                <input type="hidden" name="kategori" value="{{ secili_kategori.slug }}">
+                            {% endif %}
+                            <input id="search" type="search" name="q" placeholder="Yazılarda ara..." value="{{ arama }}">
+                            <button class="btn btn-form no-scale btn-absolute-right btn-muted" type="submit">
+                                <i class="ph-bold ph-magnifying-glass"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                {% if son_yazilar %}
+                    <div class="mxd-sidebar__widget bg-base-tint radius-m">
+                        <div class="widget__title">
+                            <p>Son Yazılar</p>
+                        </div>
+                        <ul class="widget__recent-posts">
+                            {% for recent_post in son_yazilar %}
+                                <li class="recent-post__item">
+                                    <div class="recent-post__thumb">
+                                        <a href="{{ recent_post.get_absolute_url }}">
+                                            {% if recent_post.gorsel.name %}
+                                                <img src="{{ recent_post.gorsel.url }}" alt="{{ recent_post.baslik }}">
+                                            {% else %}
+                                                <img src="{% static 'img/1200x1400-bg.webp' %}" alt="{{ recent_post.baslik }}">
+                                            {% endif %}
+                                        </a>
+                                    </div>
+                                    <div class="recent-post__content">
+                                        <div class="recent-post__meta">
+                                            {% if recent_post.tum_kategoriler %}
+                                                {% for kategori in recent_post.tum_kategoriler %}
+                                                    <span class="meta-tag">
+                                                        <a href="{% url 'blog' %}?kategori={{ kategori.slug }}">{{ kategori.ad }}</a>
+                                                    </span>
+                                                {% endfor %}
+                                            {% endif %}
+                                        </div>
+                                        <div class="recent-post__title">
+                                            <a href="{{ recent_post.get_absolute_url }}">{{ recent_post.baslik }}</a>
+                                        </div>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+
+                {% if aktif_reklamlar %}
+                    {% for reklam in aktif_reklamlar %}
+                        <div style="background: transparent; border-radius: 12px; overflow: hidden; margin-bottom: 30px; position: relative;">
+                            <a href="{{ reklam.link|default:'#0' }}" target="_blank" rel="noopener noreferrer" style="display: block; line-height: 0;">
+                                {% if reklam.resim_base64 %}
+                                    <img src="data:{{ reklam.resim_mime }};base64,{{ reklam.resim_base64 }}"
+                                         alt="{{ reklam.isim }}"
+                                         style="width: 100%; height: auto; display: block;">
+                                {% else %}
+                                    {% if reklam.resim %}
+                                        <img src="{{ reklam.resim.url }}"
+                                             alt="{{ reklam.isim }}"
+                                             style="width: 100%; height: auto; display: block;">
+                                    {% else %}
+                                        <img src="https://dummyimage.com/1200x1400/4d4d4d/838383"
+                                             alt="{{ reklam.isim }}"
+                                             style="width: 100%; height: auto; display: block;">
+                                    {% endif %}
+                                {% endif %}
+                            </a>
+                            <div style="position: absolute; top: 12px; left: 12px; z-index: 2;">
+                                <span style="display: inline-block; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); padding: 4px 12px; border-radius: 20px; font-size: 11px; color: #fff; font-weight: 500; letter-spacing: 0.5px;">
+                                    {{ reklam.sponsor_etiketi }}
+                                </span>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                {% if urunler %}
+                    <div class="mxd-sidebar__widget bg-base-tint radius-m">
+                        <div class="widget__title">
+                            <p>Bu Ayın Kitabı</p>
+                        </div>
+                        <ul class="widget__recent-posts">
+                            {% with urun=urunler.0 %}
+                                <li class="recent-post__item">
+                                    <div class="recent-post__thumb">
+                                        <a href="{{ urun.satis_linki }}" target="_blank" rel="noopener noreferrer">
+                                            {% if urun.resim %}
+                                                <img src="{{ urun.resim_optimized.url }}" alt="{{ urun.isim }}">
+                                            {% else %}
+                                                <img src="{% static 'img/default-blog.jpg' %}" alt="{{ urun.isim }}">
+                                            {% endif %}
+                                        </a>
+                                    </div>
+                                    <div class="recent-post__content">
+                                        <div class="recent-post__meta">
+                                            <span class="meta-tag">
+                                                <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 20 20">
+                                                    <path d="M19.6,9.6h-3.9c-.4,0-1.8-.2-1.8-.2-.6,0-1.1-.2-1.6-.6-.5-.3-.9-.8-1.2-1.2-.3-.4-.4-.9-.5-1.4,0,0,0-1.1-.2-1.5V.4c0-.2-.2-.4-.4-.4s-.4.2-.4.4v4.4c0,.4-.2,1.5-.2,1.5,0,.5-.2,1-.5,1.4-.3.5-.7.9-1.2,1.2s-1,.5-1.6.6c0,0-1.2,0-1.7.2H.4c-.2,0-.4.2-.4.4s.2.4.4.4h4.1c-.4,0,1.7.2,1.7.2.6,0,1.1.2,1.6.6.4.3.8.7,1.1,1.1.3.5.5,1,.6,1.6,0,0,0,1.3.2,1.7v4.1c0,.2.2.4.4.4s.4-.2.4-.4v-4.1c0-.4.2-1.7.2-1.7,0-.6.2-1.1.6-1.6.3-.4.7-.8,1.1-1.1.5-.3,1-.5,1.6-.6,0,0,1.3,0,1.8-.2h3.9c.2,0,.4-.2.4-.4s-.2-.4-.4-.4h0Z" />
+                                                </svg>
+                                                <span>{{ urun.kategori_etiketi }}</span>
+                                            </span>
+                                        </div>
+                                        <div class="recent-post__title">
+                                            <a href="{{ urun.satis_linki }}" target="_blank" rel="noopener noreferrer">{{ urun.isim }}</a>
+                                        </div>
+                                        <div class="product-price" style="margin-top: 0.5rem;">
+                                            {% if urun.indirim_var_mi %}
+                                                <span style="text-decoration: line-through; color: var(--t-bright); opacity: 0.6; font-size: 1.4rem; margin-right: 0.8rem;">
+                                                    {{ urun.fiyat }} TL
+                                                </span>
+                                                <span style="color: #ff4444; font-weight: var(--fw-semibold); font-size: 1.6rem;">
+                                                    {{ urun.indirimli_fiyat }} TL
+                                                </span>
+                                            {% else %}
+                                                <span style="color: var(--t-bright); font-weight: var(--fw-semibold); font-size: 1.6rem;">
+                                                    {{ urun.fiyat }} TL
+                                                </span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </li>
+                            {% endwith %}
+                        </ul>
+                    </div>
+                {% endif %}
+
+                <div class="mxd-sidebar__widget bg-base-tint radius-m widget-socials">
+                    <div class="widget__title">
+                        <p>Kategoriler</p>
+                    </div>
+                    <div class="widget__social-links-small">
+                        {% for kategori in kategoriler %}
+                            <div class="social-links-small__item">
+                                <div class="social-links-small__divider"></div>
+                                <a class="social-links-small__link" href="{% url 'blog' %}?kategori={{ kategori.slug }}">
+                                    <p class="social-links-small__title">{{ kategori.ad }}</p>
+                                    <div class="social-links-small__icon">
+                                        <i class="ph-bold ph-arrow-up-right"></i>
+                                    </div>
+                                </a>
+                                <div class="social-links-small__divider"></div>
+                            </div>
+                        {% empty %}
+                            <p class="t-small">Henüz kategori eklenmedi.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

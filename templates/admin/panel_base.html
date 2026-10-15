@@ -1,0 +1,604 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block panel_title %}Yazar Paneli{% endblock %} | Tecrit Edebiyat</title>
+
+    <link rel="icon" href="{% static 'img/favicon/favicon.ico' %}" sizes="any">
+    <link rel="icon" href="{% static 'img/favicon/icon.svg' %}" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="{% static 'img/favicon/apple-touch-icon.png' %}">
+    <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+
+    {% block panel_extra_css %}{% endblock %}
+
+    <style>
+    :root {
+        --panel-bg: #0f1115;
+        --panel-surface: #171a20;
+        --panel-surface-2: #1d222b;
+        --panel-line: rgba(255, 255, 255, .10);
+        --panel-text: #f4f6f8;
+        --panel-muted: #9ba4b1;
+        --panel-accent: #e8ff6b;
+        --panel-danger: #ff8f8f;
+    }
+
+    * {
+        box-sizing: border-box;
+    }
+
+    html {
+        background: var(--panel-bg);
+    }
+
+    body.panel-page {
+        margin: 0;
+        min-height: 100vh;
+        background:
+            linear-gradient(120deg, rgba(232, 255, 107, .06), transparent 28%),
+            linear-gradient(180deg, #111318 0%, #0f1115 100%);
+        color: var(--panel-text);
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        font-size: 16px;
+        line-height: 1.5;
+    }
+
+    .panel-page a {
+        color: inherit;
+        text-decoration: none;
+    }
+
+    .panel-topbar {
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        background: rgba(15, 17, 21, .86);
+        border-bottom: 1px solid var(--panel-line);
+        backdrop-filter: blur(18px);
+    }
+
+    .panel-topbar__inner,
+    .panel-shell {
+        width: min(1180px, calc(100% - 32px));
+        margin: 0 auto;
+    }
+
+    .panel-topbar__inner {
+        min-height: 78px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+    }
+
+    .panel-brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 0;
+    }
+
+    .panel-brand__mark {
+        width: 44px;
+        height: 44px;
+        flex: 0 0 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        background: transparent;
+        color: #111318;
+        font-size: 20px;
+        overflow: hidden;
+    }
+
+    .panel-brand__logo {
+        width: 44px;
+        height: 44px;
+        display: block;
+    }
+
+    .panel-brand__text {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .panel-brand__eyebrow {
+        color: #ffffff !important;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: .14em;
+        text-transform: uppercase;
+    }
+
+    .panel-brand__title {
+        color: var(--panel-text);
+        font-size: 16px;
+        font-weight: 750;
+    }
+
+    .panel-topbar__actions,
+    .panel-nav,
+    .action-buttons,
+    .post-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .panel-chip,
+    .panel-nav__link,
+    .action-btn,
+    .post-action-link,
+    .panel-submit-btn {
+        min-height: 38px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--panel-line);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, .045);
+        color: var(--panel-text);
+        font-size: 14px;
+        font-weight: 700;
+        line-height: 1;
+        padding: 0 14px;
+        cursor: pointer;
+        transition: background-color .18s ease, border-color .18s ease, color .18s ease;
+    }
+
+    .panel-chip:hover,
+    .panel-nav__link:hover,
+    .action-btn:hover,
+    .post-action-link:hover {
+        border-color: rgba(232, 255, 107, .36);
+        background: rgba(232, 255, 107, .10);
+    }
+
+    .panel-chip--danger,
+    .panel-nav__link.danger,
+    .post-action-link--danger {
+        color: #ffdada;
+        border-color: rgba(255, 143, 143, .26);
+        background: rgba(255, 143, 143, .10);
+    }
+
+    .panel-main {
+        padding: 28px 0 70px;
+    }
+
+    .dashboard-header {
+        margin: 0 0 18px;
+        padding: 28px;
+        border: 1px solid var(--panel-line);
+        border-radius: 14px;
+        background: linear-gradient(135deg, rgba(29, 34, 43, .98), rgba(20, 23, 30, .98));
+    }
+
+    .dashboard-header h1 {
+        margin: 0;
+        color: var(--panel-text);
+        font-size: clamp(28px, 4vw, 46px);
+        font-weight: 800;
+        line-height: 1.05;
+        letter-spacing: 0;
+    }
+
+    .last-update {
+        margin: 8px 0 0;
+        color: var(--panel-muted);
+        font-size: 14px;
+    }
+
+    .panel-nav {
+        margin: 0 0 22px;
+    }
+
+    .panel-message {
+        margin: 0 0 16px;
+        padding: 14px 16px;
+        border: 1px solid var(--panel-line);
+        border-radius: 10px;
+        background: rgba(255, 255, 255, .045);
+        color: var(--panel-text);
+        font-weight: 650;
+    }
+
+    .panel-message.success {
+        border-color: rgba(52, 211, 153, .26);
+        background: rgba(52, 211, 153, .10);
+    }
+
+    .panel-message.error {
+        border-color: rgba(255, 143, 143, .26);
+        background: rgba(255, 143, 143, .10);
+    }
+
+    .panel-content,
+    .panel-content * {
+        letter-spacing: 0;
+    }
+
+    .panel-content h1,
+    .panel-content h2,
+    .panel-content h3,
+    .panel-content h4,
+    .panel-content h5,
+    .panel-content h6 {
+        margin: 0;
+        color: var(--panel-text);
+        line-height: 1.18;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+        gap: 14px;
+        margin-bottom: 22px;
+    }
+
+    .stat-card,
+    .stats-section,
+    .quick-actions,
+    .panel-form-card {
+        border: 1px solid var(--panel-line);
+        border-radius: 12px;
+        background: rgba(255, 255, 255, .045);
+        overflow: hidden;
+    }
+
+    .stat-card {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 18px;
+        border-left: 4px solid var(--panel-accent);
+    }
+
+    .stat-icon {
+        width: 42px;
+        height: 42px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        background: rgba(232, 255, 107, .12);
+        color: var(--panel-accent);
+        font-size: 0;
+    }
+
+    .stat-icon::before {
+        content: "";
+        width: 12px;
+        height: 12px;
+        border-radius: 3px;
+        background: currentColor;
+    }
+
+    .stat-content h3 {
+        margin: 0 0 4px;
+        color: var(--panel-muted);
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+    }
+
+    .stat-number {
+        margin: 0;
+        color: var(--panel-text);
+        font-size: 28px;
+        font-weight: 850;
+        line-height: 1;
+    }
+
+    .stat-content small {
+        color: var(--panel-muted);
+        font-size: 13px;
+    }
+
+    .quick-actions {
+        margin-bottom: 22px;
+    }
+
+    .quick-actions h3,
+    .section-header h3,
+    .panel-form-card__header h3 {
+        margin: 0;
+        color: var(--panel-text);
+        font-size: 17px;
+        font-weight: 800;
+    }
+
+    .quick-actions h3,
+    .section-header,
+    .panel-form-card__header {
+        padding: 16px 18px;
+        border-bottom: 1px solid var(--panel-line);
+        background: rgba(255, 255, 255, .025);
+    }
+
+    .action-buttons {
+        padding: 18px;
+    }
+
+    .two-column-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 18px;
+        align-items: start;
+        margin-bottom: 22px;
+    }
+
+    .post-item,
+    .country-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 16px 18px;
+        border-bottom: 1px solid var(--panel-line);
+    }
+
+    .post-item:last-child,
+    .country-item:last-child {
+        border-bottom: 0;
+    }
+
+    .post-info {
+        min-width: 0;
+    }
+
+    .post-info h4 {
+        margin: 0 0 5px;
+        color: var(--panel-text);
+        font-size: 17px;
+        font-weight: 800;
+        line-height: 1.25;
+    }
+
+    .post-meta,
+    .country-stats,
+    .panel-help {
+        color: var(--panel-muted);
+        font-size: 13px;
+    }
+
+    .post-actions {
+        flex: 0 0 auto;
+        align-items: center;
+        justify-content: flex-end;
+    }
+
+    .post-actions form {
+        margin: 0;
+    }
+
+    .post-action-link,
+    .post-actions button {
+        min-height: 34px;
+        padding: 0 11px;
+        border-radius: 7px;
+        border: 1px solid var(--panel-line);
+        background: rgba(255, 255, 255, .045);
+        color: var(--panel-text);
+        font: inherit;
+        font-size: 13px;
+        font-weight: 750;
+        cursor: pointer;
+    }
+
+    .post-actions button {
+        color: #ffdada;
+        border-color: rgba(255, 143, 143, .24);
+        background: rgba(255, 143, 143, .10);
+    }
+
+    .country-info {
+        min-width: 0;
+        flex: 1 1 auto;
+    }
+
+    .country-name {
+        color: var(--panel-text);
+        font-weight: 750;
+        margin-bottom: 8px;
+    }
+
+    .country-bar {
+        height: 7px;
+        overflow: hidden;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, .08);
+    }
+
+    .bar-fill {
+        height: 100%;
+        border-radius: inherit;
+        background: var(--panel-accent);
+    }
+
+    .empty-state {
+        padding: 22px 18px;
+        color: var(--panel-muted);
+    }
+
+    .panel-form-card__body {
+        padding: 20px;
+    }
+
+    .panel-form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+    }
+
+    .panel-field {
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+    }
+
+    .panel-field.full {
+        grid-column: 1 / -1;
+    }
+
+    .panel-field label {
+        color: var(--panel-text);
+        font-size: 13px;
+        font-weight: 800;
+    }
+
+    .panel-field input,
+    .panel-field textarea,
+    .panel-field select,
+    .panel-field .panel-multiselect {
+        width: 100%;
+        min-height: 44px;
+        border: 1px solid rgba(255, 255, 255, .14);
+        border-radius: 9px;
+        background: #ffffff;
+        color: #111827;
+        padding: 10px 12px;
+        font: inherit;
+        outline: none;
+    }
+
+    .panel-field textarea {
+        min-height: 140px;
+        resize: vertical;
+    }
+
+    .panel-field input:focus,
+    .panel-field textarea:focus,
+    .panel-field select:focus {
+        border-color: var(--panel-accent);
+        box-shadow: 0 0 0 4px rgba(232, 255, 107, .16);
+    }
+
+    .panel-errorlist {
+        margin: 0;
+        color: var(--panel-danger);
+        font-size: 13px;
+    }
+
+    .panel-submit-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 18px;
+    }
+
+    .panel-submit-btn {
+        min-height: 44px;
+        border-color: transparent;
+        background: var(--panel-accent);
+        color: #111318;
+    }
+
+    @media (max-width: 900px) {
+        .two-column-layout,
+        .panel-form-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 640px) {
+        .panel-topbar__inner {
+            align-items: flex-start;
+            flex-direction: column;
+            padding: 16px 0;
+        }
+
+        .panel-topbar__actions,
+        .panel-nav {
+            width: 100%;
+        }
+
+        .panel-chip,
+        .panel-nav__link {
+            flex: 1 1 auto;
+        }
+
+        .dashboard-header {
+            padding: 22px;
+        }
+
+        .post-item,
+        .country-item {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .post-actions {
+            width: 100%;
+            justify-content: flex-start;
+        }
+    }
+    </style>
+</head>
+<body class="panel-page">
+    <header class="panel-topbar">
+        <div class="panel-topbar__inner">
+            <a href="{% url 'yazar_paneli' %}" class="panel-brand">
+                <span class="panel-brand__mark" aria-hidden="true">
+                    <svg class="panel-brand__logo" viewBox="0 0 600 600" width="44" height="44" role="img">
+                        <rect width="600" height="600" rx="80" ry="80" style="fill: var(--panel-accent);"/>
+                        <g transform="scale(2.5) translate(-175, -270)" style="fill: #111318;">
+                            <path d="m327.209 373.045.182.082.977-.525 8.245-4.668 14.242-8.062-22.487-12.982-2.016-1.165-1.984-1.145-2.052-1.184-19.593-11.313-4.976-2.698-.265-.144-1.841-.999-1.932-1.048 1.932-1.123v-.09l2.266-1.296 1.734-.992 5.343-3.056.037-.022v.001l17.333-9.916-22.713-13.113-2-1.154-2 1.154-79.3 45.783 24.335 14.049 29.002-16.745.465-.268.138.08 3.871 2.224.15.086 14.696 8.440 9.518 5.433 1.125.642zM270.914 440.655l24.727 14.276v-27.988l-24.727-14.276zM238.675 360.884l-24.334-14.049v28.783l24.334 13.666z"/>
+                            <path d="m294.441 358.983-1.191-.692-22.973-13.194-25.589 14.638 24.226 13.988zM266.914 442.965v-32.608h-.001v-33.169l-24.238-13.995v58.849l-.017.009.011 2.408.006.003v1.433l.003.706-.003-.001v.062l-1.999 1.154-.098.057-4.062-2.274-22.175-12.411v27.523l2 1.154 79.3 45.782V459.55l-24.727-14.276zM328.368 405.787l24.238-13.601v-28.708l-24.238 13.72zM330.391 343.438l24.504 14.148 24.573-13.911-24.565-14.183zM299.641 487.647l24.726-14.275v-28.098l-24.726 14.276z"/>
+                            <path d="M356.606 389.941v4.586l-4 2.245-22.195 12.455-2.044 1.147-1.021.572-.979.565-2 1.154-22.674 13.092-2.053 1.185v27.987l22.672-13.089 2.055-1.187 1.98-1.144 2.02-1.166 22.239-12.839 1.809-1.044.001-.001.19-.128a2010 2010 0 0 0 4-2.722v33.149l22.334-12.895 2-1.154v-93.272l-24.334 13.775z"/>
+                        </g>
+                    </svg>
+                </span>
+                <span class="panel-brand__text">
+                    <span class="panel-brand__eyebrow">Tecrit Edebiyat</span>
+                    <span class="panel-brand__title">Yazar Paneli</span>
+                </span>
+            </a>
+
+            <div class="panel-topbar__actions">
+                <a href="{% url 'anasayfa' %}" class="panel-chip">Ana Sayfa</a>
+                <a href="{% url 'blog' %}" class="panel-chip">Siteyi Gör</a>
+                <a href="{% url 'cikis' %}" class="panel-chip panel-chip--danger">Çıkış</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="panel-main">
+        <div class="panel-shell">
+            <div class="dashboard-header">
+                <h1>{% block panel_heading %}Yazar Paneli{% endblock %}</h1>
+                <p class="last-update">{{ profil.ad_soyad }} için özel görünüm - {% now "d.m.Y H:i" %}</p>
+            </div>
+
+            {% if messages %}
+                {% for message in messages %}
+                <div class="panel-message {% if message.tags == 'success' %}success{% else %}error{% endif %}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            {% endif %}
+
+            <nav class="panel-nav" aria-label="Yazar paneli">
+                <a href="{% url 'yazar_paneli' %}" class="panel-nav__link">Panel</a>
+                <a href="{% url 'yazar_panel_profil' %}" class="panel-nav__link">Profilim</a>
+                <a href="{% url 'yazar_panel_sifre' %}" class="panel-nav__link">Şifre</a>
+                <a href="{% url 'yazar_panel_yeni_yazi' %}" class="panel-nav__link">Yeni Yazı</a>
+                <a href="{% url 'blog' %}" class="panel-nav__link">Blog</a>
+                <a href="{% url 'cikis' %}" class="panel-nav__link danger">Çıkış</a>
+            </nav>
+
+            <section class="panel-content">
+                {% block panel_content %}{% endblock %}
+            </section>
+        </div>
+    </main>
+
+    <script src="{% static 'js/libs.min.js' %}"></script>
+    <script src="{% static 'js/app.js' %}"></script>
+    {% block panel_extra_js %}{% endblock %}
+</body>
+</html>

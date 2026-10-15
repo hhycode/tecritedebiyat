@@ -1,0 +1,51 @@
+{% extends "superadmin/base.html" %}
+
+{% block superadmin_content %}
+<div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+    <div>
+        <p class="text-uppercase small fw-semibold sa-muted mb-2">İçerik Yönetimi</p>
+        <h2 class="h1 mb-2">{{ content_config.title }}</h2>
+        <p class="sa-muted mb-0">Bu içerik türünü eski Django admin ekranına gitmeden burada listeleyebilir, düzenleyebilir ve yeni kayıt ekleyebilirsin.</p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+        <a class="sa-chip" href="{% url 'superadmin_icerik_yonetimi' %}">Tüm İçerikler</a>
+        <a class="sa-chip" href="{{ add_url }}">Yeni {{ content_config.singular }}</a>
+    </div>
+</div>
+
+<div class="card sa-card sa-table-card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead>
+                    <tr>
+                        {% for header in content_headers %}
+                        <th class="px-4 py-3">{{ header }}</th>
+                        {% endfor %}
+                        <th class="px-4 py-3 text-end">İşlem</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in content_rows %}
+                    <tr>
+                        {% for value in row.values %}
+                        <td class="px-4 py-3">{{ value }}</td>
+                        {% endfor %}
+                        <td class="px-4 py-3 text-end">
+                            <div class="d-inline-flex gap-2 flex-wrap justify-content-end">
+                                <a class="btn btn-sm btn-outline-dark rounded-pill" href="{{ row.edit_url }}">Düzenle</a>
+                                <a class="btn btn-sm btn-outline-danger rounded-pill" href="{{ row.delete_url }}">Sil</a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td class="px-4 py-4 sa-muted" colspan="{{ content_headers|length|add:1 }}">Henüz kayıt yok.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

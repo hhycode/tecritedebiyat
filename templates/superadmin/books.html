@@ -1,0 +1,32 @@
+{% extends "superadmin/base.html" %}
+
+{% block superadmin_content %}
+<div class="card sa-card sa-table-card">
+    <div class="card-body p-4">
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th>Kitap</th>
+                        <th>Yazar</th>
+                        <th>Yayın Tarihi</th>
+                        <th>Durum</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for kitap in kitaplar %}
+                    <tr>
+                        <td><strong>{{ kitap.ad }}</strong></td>
+                        <td>{{ kitap.yazar_adi }}</td>
+                        <td>{{ kitap.yayin_tarihi|date:"d.m.Y"|default:"-" }}</td>
+                        <td>{% if kitap.yayinda %}<span class="badge text-bg-success">Yayında</span>{% else %}<span class="badge text-bg-secondary">Pasif</span>{% endif %}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="4" class="sa-muted text-center py-5">Kitap bulunamadı.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

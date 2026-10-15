@@ -1,0 +1,38 @@
+{% extends "superadmin/base.html" %}
+
+{% block superadmin_content %}
+<div class="card sa-card sa-table-card">
+    <div class="card-body p-4">
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th>Yazar</th>
+                        <th>Kullanıcı</th>
+                        <th>Rol</th>
+                        <th>Onay</th>
+                        <th>Sosyal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for yazar in yazarlar %}
+                    <tr>
+                        <td><strong>{{ yazar.ad_soyad }}</strong></td>
+                        <td>{{ yazar.user.username|default:"-" }}</td>
+                        <td>{{ yazar.get_rol_display }}</td>
+                        <td>{% if yazar.onayli %}<span class="badge text-bg-success">Aktif</span>{% else %}<span class="badge text-bg-secondary">Pasif</span>{% endif %}</td>
+                        <td class="sa-muted small">
+                            {% if yazar.instagram %}Instagram {% endif %}
+                            {% if yazar.x_hesabi %}X {% endif %}
+                            {% if yazar.websitesi %}Web{% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5" class="sa-muted text-center py-5">Yazar bulunamadı.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

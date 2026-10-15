@@ -1,0 +1,175 @@
+{% extends "superadmin/base.html" %}
+
+{% block superadmin_content %}
+<div class="card sa-hero mb-4">
+    <div class="card-body p-4 p-lg-5">
+        <div class="d-flex flex-column flex-lg-row justify-content-between gap-4">
+            <div>
+                <p class="text-uppercase small fw-semibold mb-2 text-white-50">İçerik Yönetimi</p>
+                <h2 class="display-5 fw-semibold mb-3">Tüm içerikler tek ekranda</h2>
+                <p class="mb-0 fs-5 text-white-50">Blog, kitap, alıntı, yazar, slider ve diğer tüm içerik unsurlarını bu alan içinden yönetebilirsin. Ayrı içerik yönetimi ekranına gitmene gerek yok.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h3 class="sa-section-title mb-3">Blog</h3>
+<div class="row g-4 mb-4">
+    <div class="col-12 col-md-6 col-xl-3">
+        <a class="card sa-card h-100 text-decoration-none text-dark" href="{% url 'superadmin_icerik_model_liste' 'blogyazisi' %}">
+            <div class="card-body p-4">
+                <div class="h3 mb-1">Yazı Yönetimi</div>
+                <div class="sa-muted">Listele, düzenle, yeni yazı ekle</div>
+            </div>
+        </a>
+    </div>
+    <div class="col-12 col-md-6 col-xl-3">
+        <a class="card sa-card h-100 text-decoration-none text-dark" href="{% url 'superadmin_icerik_model_liste' 'blogkategori' %}">
+            <div class="card-body p-4">
+                <div class="h3 mb-1">Blog Kategorileri</div>
+                <div class="sa-muted">Blog kategorilerini yönet</div>
+            </div>
+        </a>
+    </div>
+    <div class="col-12 col-md-6 col-xl-3">
+        <a class="card sa-card h-100 text-decoration-none text-dark" href="{% url 'superadmin_icerik_model_liste' 'blogreklam' %}">
+            <div class="card-body p-4">
+                <div class="h3 mb-1">Reklam Yönetimi</div>
+                <div class="sa-muted">Sidebar sponsor etiketi, görsel ve link</div>
+            </div>
+        </a>
+    </div>
+    <div class="col-12 col-md-6 col-xl-3">
+        <a class="card sa-card h-100 text-decoration-none text-dark" href="{% url 'superadmin_icerik_model_liste' 'blogurun' %}">
+            <div class="card-body p-4">
+                <div class="h3 mb-1">Ürün Yönetimi</div>
+                <div class="sa-muted">Sidebar'daki "bu ayın kitabı" ve satış linki</div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<h3 class="sa-section-title mb-3">Kitaplar</h3>
+<div class="row g-4 mb-4">
+    <div class="col-12 col-md-6 col-xl-3">
+        <a class="card sa-card h-100 text-decoration-none text-dark" href="{% url 'superadmin_icerik_model_liste' 'kitap' %}">
+            <div class="card-body p-4">
+                <div class="h3 mb-1">Kitap Yönetimi</div>
+                <div class="sa-muted">Kapak, açıklama, yayın durumu</div>
+            </div>
+        </a>
+    </div>
+    <div class="col-12 col-md-6 col-xl-3">
+        <a class="card sa-card h-100 text-decoration-none text-dark" href="{% url 'superadmin_icerik_model_liste' 'kitaptur' %}">
+            <div class="card-body p-4">
+                <div class="h3 mb-1">Kitap Kategorileri</div>
+                <div class="sa-muted">Kitap türlerini listele ve düzenle</div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<h3 class="sa-section-title mb-3">Ana Sayfa</h3>
+<div class="row g-4 mb-4">
+    <div class="col-12 col-md-6 col-xl-3">
+        <a class="card sa-card h-100 text-decoration-none text-dark" href="{% url 'superadmin_icerik_model_liste' 'anasayfayayinkarti' %}">
+            <div class="card-body p-4">
+                <div class="h3 mb-1">Yayın Kartları</div>
+                <div class="sa-muted">Hero altı yönlendirme kartlarını düzenle</div>
+            </div>
+        </a>
+    </div>
+    <div class="col-12 col-md-6 col-xl-3">
+        <a class="card sa-card h-100 text-decoration-none text-dark" href="{% url 'superadmin_icerik_model_liste' 'slider' %}">
+            <div class="card-body p-4">
+                <div class="h3 mb-1">Sliderlar</div>
+                <div class="sa-muted">Ana sayfa slider görsellerini yönet</div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<h3 class="sa-section-title mb-3">Alıntılar</h3>
+<div class="row g-4 mb-4">
+    <div class="col-12 col-md-6 col-xl-3">
+        <a class="card sa-card h-100 text-decoration-none text-dark" href="{% url 'superadmin_icerik_model_liste' 'alinti' %}">
+            <div class="card-body p-4">
+                <div class="h3 mb-1">Alıntı Yönetimi</div>
+                <div class="sa-muted">Metin, etiket, kategori düzenle</div>
+            </div>
+        </a>
+    </div>
+    <div class="col-12 col-md-6 col-xl-3">
+        <a class="card sa-card h-100 text-decoration-none text-dark" href="{% url 'superadmin_icerik_model_liste' 'alintikategori' %}">
+            <div class="card-body p-4">
+                <div class="h3 mb-1">Alıntı Kategorileri</div>
+                <div class="sa-muted">Alıntı kategorilerini yönet</div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<h3 class="sa-section-title mb-3">Yazarlar</h3>
+<div class="row g-4 mb-4">
+    <div class="col-12 col-md-6 col-xl-3">
+        <a class="card sa-card h-100 text-decoration-none text-dark" href="{% url 'superadmin_icerik_model_liste' 'yazarprofil' %}">
+            <div class="card-body p-4">
+                <div class="h3 mb-1">Yazar Yönetimi</div>
+                <div class="sa-muted">Profil, rol ve sosyal medya</div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<h3 class="sa-section-title mb-3">SSS</h3>
+<div class="row g-4 mb-4">
+    <div class="col-12 col-md-6 col-xl-3">
+        <a class="card sa-card h-100 text-decoration-none text-dark" href="{% url 'superadmin_icerik_model_liste' 'sss' %}">
+            <div class="card-body p-4">
+                <div class="h3 mb-1">SSS Yönetimi</div>
+                <div class="sa-muted">Sık sorulan soru ve cevapları düzenle</div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<h3 class="sa-section-title mb-3">Sistem (Django Admin)</h3>
+<p class="sa-muted mb-3">Kullanıcı ve grup yetkilendirmesi ile arayüz temaları gibi Django'nun kendi yönetim ekranları. Günlük içerik işleri için yukarıdaki bölümleri kullan.</p>
+<div class="row g-4">
+    {% for app in app_list %}
+    <div class="col-12 col-lg-6 col-xxl-4">
+        <div class="card sa-card h-100">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h3 class="h5 mb-0">{{ app.name }}</h3>
+                </div>
+                <div class="d-flex flex-column gap-3">
+                    {% for model in app.models %}
+                    <div class="border rounded-4 p-3 bg-light-subtle">
+                        <div class="d-flex justify-content-between align-items-start gap-3">
+                            <div>
+                                {% if model.admin_url %}
+                                <a class="fw-semibold text-dark text-decoration-none" href="{{ model.admin_url }}">{{ model.name }}</a>
+                                {% else %}
+                                <span class="fw-semibold">{{ model.name }}</span>
+                                {% endif %}
+                                <div class="sa-muted small">Bu alanın tüm kayıtlarını görüntüle ve düzenle.</div>
+                            </div>
+                            <div class="d-flex gap-2 flex-wrap">
+                                {% if model.admin_url %}
+                                <a class="btn btn-sm btn-outline-dark rounded-pill" href="{{ model.admin_url }}">Liste</a>
+                                {% endif %}
+                                {% if model.add_url %}
+                                <a class="btn btn-sm btn-primary rounded-pill" href="{{ model.add_url }}">Ekle</a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

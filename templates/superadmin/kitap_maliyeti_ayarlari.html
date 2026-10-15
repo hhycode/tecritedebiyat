@@ -1,0 +1,172 @@
+{% extends "superadmin/base.html" %}
+
+{% block extra_css %}
+<style>
+.sa-panel-card {
+    border: 1px solid var(--sa-border);
+    border-radius: 26px;
+    box-shadow: 0 12px 24px rgba(20,20,20,.04);
+    background: #fff;
+    overflow: hidden;
+    max-width: 640px;
+}
+
+.sa-panel-card__header {
+    padding: 24px 28px;
+    border-bottom: 1px solid var(--sa-border);
+    background: #faf8f3;
+}
+
+.sa-panel-card__body {
+    padding: 28px;
+}
+
+.sa-field {
+    margin-bottom: 18px;
+}
+
+.sa-field label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: .95rem;
+    font-weight: 600;
+}
+
+.sa-field input {
+    width: 100%;
+    min-height: 52px;
+    padding: 14px 16px;
+    border-radius: 16px;
+    border: 1px solid var(--sa-border);
+    background: #fff;
+    color: var(--sa-text);
+}
+
+.sa-help {
+    display: block;
+    margin-top: 8px;
+    color: var(--sa-muted);
+    font-size: .88rem;
+}
+
+.sa-errors {
+    margin: 8px 0 0;
+    color: #991b1b;
+    font-size: .88rem;
+    font-weight: 600;
+}
+
+.sa-form-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 24px;
+    flex-wrap: wrap;
+}
+
+.sa-formula-preview {
+    margin-bottom: 24px;
+    padding: 18px 20px;
+    border-radius: 16px;
+    background: #faf8f3;
+    border: 1px solid var(--sa-border);
+    font-size: .95rem;
+    color: var(--sa-muted);
+}
+
+.sa-formula-preview strong {
+    color: var(--sa-text);
+}
+</style>
+{% endblock %}
+
+{% block superadmin_content %}
+<div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+    <div>
+        <p class="text-uppercase small fw-semibold sa-muted mb-2">Kitaplar</p>
+        <h2 class="h1 mb-2">Kitap Maliyeti Hesaplama Ayarları</h2>
+        <p class="sa-muted mb-0">Sitedeki "Kitap Maliyeti Hesapla" aracının kullandığı sayfa başı ücret ve sabit hazırlık bedelini burada güncelleyebilirsin. Kitap türüne göre kelime/sayfa oranlarını ise aşağıdaki "Kitap Maliyeti Türleri" ekranından yönetebilirsin. Değişiklik anında siteye yansır.</p>
+    </div>
+</div>
+
+<div class="sa-panel-card mb-4">
+    <div class="sa-panel-card__header">
+        <h3 class="h4 mb-1">Kullanım İstatistiği</h3>
+        <p class="sa-muted mb-0">Sitedeki hesaplama aracının şimdiye kadar kaç kez kullanıldığı</p>
+    </div>
+    <div class="sa-panel-card__body">
+        <div class="sa-formula-preview">
+            Toplam <strong>{{ hesaplama_sayisi }}</strong> kez hesaplama yapıldı.
+            {% if hesaplama_tur_dagilimi %}
+            <br><br>
+            Türe göre dağılım:
+            <ul class="mb-0">
+                {% for satir in hesaplama_tur_dagilimi %}
+                <li>{{ satir.tur__ad|default:"Tür belirtilmemiş" }}: {{ satir.adet }} kez</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </div>
+        <div class="mt-3">
+            <a class="btn btn-outline-danger rounded-pill px-4" href="{% url 'superadmin_kitap_maliyeti_istatistik_sifirla' %}">Kullanım İstatistiğini Sıfırla</a>
+        </div>
+    </div>
+</div>
+
+<div class="sa-panel-card mb-4">
+    <div class="sa-panel-card__header">
+        <h3 class="h4 mb-1">Formül</h3>
+        <p class="sa-muted mb-0">Toplam maliyet = sayfa sayısı × sayfa başı ücret + sabit ücret. Kelime sayısına göre hesaplanan türlerde sayfa sayısı = kelime sayısı ÷ türün kelime/sayfa oranı (yukarı yuvarlanır); sayfa sayısına göre hesaplanan türlerde (örn. şiir) kullanıcı sayfa sayısını doğrudan girer.</p>
+    </div>
+    <div class="sa-panel-card__body">
+        <div class="sa-formula-preview">
+            Sayfa başı ücret: <strong>{{ object.sayfa_basi_ucret }} TL</strong> · Sabit ücret: <strong>{{ object.sabit_ucret }} TL</strong>
+            {% if turler %}
+            <br><br>
+            Örnek hesaplamalar (kelime bazlı türlerde {{ ornek_kelime_sayisi }} kelime, sayfa bazlı türlerde {{ ornek_sayfa_sayisi }} sayfa):
+            <ul class="mb-0">
+                {% for tur in turler %}
+                {% if tur.sayfa_bazli or not tur.kelime_yogunlugu %}
+                <li>{{ tur.ad }} (sayfa sayısına göre) → {{ tur.tahmini_sayfa }} sayfa = <strong>{{ tur.maliyet_formatli }} TL</strong></li>
+                {% else %}
+                <li>{{ tur.ad }} ({{ tur.kelime_yogunlugu }} kelime/sayfa) → ~{{ tur.tahmini_sayfa }} sayfa = <strong>{{ tur.maliyet_formatli }} TL</strong></li>
+                {% endif %}
+                {% endfor %}
+            </ul>
+            {% else %}
+            <br><br>
+            Henüz bir kitap türü tanımlanmamış. Hesaplama aracının çalışması için en az bir tür eklemen gerekiyor.
+            {% endif %}
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+            <div class="alert alert-warning rounded-4 border-0 mb-4">{{ form.non_field_errors }}</div>
+            {% endif %}
+            {% for field in form %}
+            <div class="sa-field">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.help_text %}<span class="sa-help">{{ field.help_text }}</span>{% endif %}
+                {% if field.errors %}<p class="sa-errors">{{ field.errors|striptags }}</p>{% endif %}
+            </div>
+            {% endfor %}
+            <div class="sa-form-actions">
+                <a class="btn btn-outline-dark rounded-pill px-4" href="{% url 'superadmin_dashboard' %}">Vazgeç</a>
+                <button class="btn btn-dark rounded-pill px-4" type="submit">{{ submit_label }}</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="sa-panel-card">
+    <div class="sa-panel-card__header">
+        <h3 class="h4 mb-1">Kitap Maliyeti Türleri</h3>
+        <p class="sa-muted mb-0">Roman, şiir gibi türlerin hesaplama yöntemini (kelime veya sayfa sayısına göre) ve sayfa başı kelime sayısını burada yönetebilirsin.</p>
+    </div>
+    <div class="sa-panel-card__body">
+        <a class="btn btn-dark rounded-pill px-4" href="{% url 'superadmin_icerik_model_liste' 'kitapmaliyetturu' %}">Türleri Yönet</a>
+    </div>
+</div>
+{% endblock %}

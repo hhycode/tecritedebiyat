@@ -1,0 +1,151 @@
+{% extends "superadmin/base.html" %}
+
+{% block extra_css %}
+<style>
+.sa-panel-card {
+    border: 1px solid var(--sa-border);
+    border-radius: 26px;
+    box-shadow: 0 12px 24px rgba(20,20,20,.04);
+    background: #fff;
+    overflow: hidden;
+}
+
+.sa-panel-card__header {
+    padding: 24px 28px;
+    border-bottom: 1px solid var(--sa-border);
+    background: #faf8f3;
+}
+
+.sa-panel-card__body {
+    padding: 28px;
+}
+
+.sa-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px 20px;
+}
+
+.sa-form-grid .full {
+    grid-column: 1 / -1;
+}
+
+.sa-field label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: .95rem;
+    font-weight: 600;
+}
+
+.sa-field input,
+.sa-field select {
+    width: 100%;
+    min-height: 52px;
+    padding: 14px 16px;
+    border-radius: 16px;
+    border: 1px solid var(--sa-border);
+    background: #fff;
+    color: var(--sa-text);
+}
+
+.sa-field input[type="checkbox"] {
+    width: 18px;
+    min-height: 18px;
+    padding: 0;
+    border-radius: 6px;
+}
+
+.sa-field .helptext,
+.sa-help {
+    display: block;
+    margin-top: 8px;
+    color: var(--sa-muted);
+    font-size: .88rem;
+}
+
+.sa-errors {
+    margin: 8px 0 0;
+    color: #991b1b;
+    font-size: .88rem;
+    font-weight: 600;
+}
+
+.sa-checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 52px;
+}
+
+.sa-form-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 24px;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 992px) {
+    .sa-form-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}
+
+{% block superadmin_content %}
+<div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+    <div>
+        <p class="text-uppercase small fw-semibold sa-muted mb-2">Kimlik Doğrulama</p>
+        <h2 class="h1 mb-2">{{ form_title }}</h2>
+        <p class="sa-muted mb-0">Kullanıcı bilgilerini ve yetkilerini bu ekrandan düzenleyebilirsin.</p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+        <a class="sa-chip" href="{{ back_url }}">Listeye Dön</a>
+        {% if object %}
+        <a class="sa-chip" href="{% url 'superadmin_kullanici_sifre' object.pk %}">Şifre Belirle</a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="sa-panel-card">
+    <div class="sa-panel-card__header">
+        <h3 class="h4 mb-1">{{ form_title }}</h3>
+        {% if object %}
+        <p class="sa-muted mb-0">Kayıt kimliği: #{{ object.pk }}</p>
+        {% endif %}
+    </div>
+    <div class="sa-panel-card__body">
+        <form method="post">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+            <div class="alert alert-warning rounded-4 border-0 mb-4">{{ form.non_field_errors }}</div>
+            {% endif %}
+            <div class="sa-form-grid">
+                {% for hidden in form.hidden_fields %}
+                    {{ hidden }}
+                {% endfor %}
+                {% for field in form.visible_fields %}
+                <div class="sa-field {% if field.widget_type == 'checkbox' %}full{% endif %}">
+                    {% if field.widget_type == 'checkbox' %}
+                    <div class="sa-checkbox-row">
+                        {{ field }}
+                        <label for="{{ field.id_for_label }}" class="mb-0">{{ field.label }}</label>
+                    </div>
+                    {% else %}
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% endif %}
+                    {% if field.help_text %}<span class="sa-help">{{ field.help_text }}</span>{% endif %}
+                    {% if field.errors %}<p class="sa-errors">{{ field.errors|striptags }}</p>{% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            <div class="sa-form-actions">
+                <a class="btn btn-outline-dark rounded-pill px-4" href="{{ back_url }}">Vazgeç</a>
+                <button class="btn btn-dark rounded-pill px-4" type="submit">{{ submit_label }}</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

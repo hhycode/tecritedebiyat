@@ -1,0 +1,390 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <script>
+    (function () {
+        var theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        var stored = localStorage.getItem('template.theme');
+        if (stored) { theme = stored; }
+        document.documentElement.setAttribute('color-scheme', theme);
+    })();
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="p:domain_verify" content="c74366e8452d6172bf3af35cffe6d307"/>
+    <title>{% block title %}Tecrit Edebiyat | Yayınevi, Kitap Çıkartma, Şiir Kitabı, Roman, Tez ve Editörlük{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}Tecrit Edebiyat; yayınevi, kitap çıkartma, şiir kitabı, roman basımı, tez düzenleme, editörlük ve yayın danışmanlığı hizmetleri sunar. İletişim için hemen arayın: +90 553 759 16 27.{% endblock %}">
+    <meta name="keywords" content="{% block meta_keywords %}yayınevi, kitap çıkartma, kitap bastırma, şiir kitabı, roman basımı, tez düzenleme, editörlük, yayın danışmanlığı, kitap yayını, İstanbul yayınevi, Tecrit Edebiyat{% endblock %}">
+    <meta name="author" content="Tecrit Edebiyat">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <meta name="format-detection" content="telephone=yes">
+
+    <link rel="canonical" href="{% block canonical_url %}{{ request.build_absolute_uri }}{% endblock %}">
+
+    <meta property="og:locale" content="tr_TR">
+    <meta property="og:type" content="{% block og_type %}website{% endblock %}">
+    <meta property="og:site_name" content="Tecrit Edebiyat">
+    <meta property="og:title" content="{% block og_title %}Tecrit Edebiyat | Yayınevi, Kitap Çıkartma, Şiir Kitabı, Roman, Tez ve Editörlük{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}Yayınevi, kitap çıkartma, şiir kitabı, roman, tez düzenleme ve editörlük desteği için Tecrit Edebiyat ile iletişime geçin. Telefon: +90 553 759 16 27.{% endblock %}">
+    <meta property="og:url" content="{% block og_url %}{{ request.build_absolute_uri }}{% endblock %}">
+    <meta property="og:image" content="{% block og_image %}https://www.tecritedebiyat.com/static/img/logo-og.jpg{% endblock %}">
+    <meta property="og:image:alt" content="{% block og_image_alt %}Tecrit Edebiyat yayınevi ve iletişim bilgileri{% endblock %}">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{% block twitter_title %}Tecrit Edebiyat | Yayınevi ve Kitap Çıkartma{% endblock %}">
+    <meta name="twitter:description" content="{% block twitter_description %}Kitap çıkartma, şiir kitabı, roman, tez düzenleme ve editörlük desteği için Tecrit Edebiyat ile iletişime geçin: +90 553 759 16 27.{% endblock %}">
+    <meta name="twitter:image" content="{% block twitter_image %}https://www.tecritedebiyat.com/static/img/logo-og.jpg{% endblock %}">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Tecrit Edebiyat",
+      "url": "https://www.tecritedebiyat.com/",
+      "logo": "https://www.tecritedebiyat.com/static/img/logo-og.jpg",
+      "description": "Tecrit Edebiyat; yayınevi, kitap çıkartma, şiir kitabı, roman, tez düzenleme, editörlük ve yayın danışmanlığı alanlarında hizmet sunar.",
+      "email": "tecritedebiyat@gmail.com",
+      "telephone": "+90 553 759 16 27",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Cağaloğlu",
+        "addressRegion": "İstanbul",
+        "addressCountry": "TR"
+      },
+      "contactPoint": [
+        {
+          "@type": "ContactPoint",
+          "telephone": "+90 553 759 16 27",
+          "contactType": "customer service",
+          "areaServed": "TR",
+          "availableLanguage": ["tr"]
+        }
+      ],
+      "sameAs": [
+        "https://www.instagram.com/tecritdergi/",
+        "https://x.com/tecritedebiyat",
+        "https://www.facebook.com/profile.php?id=61571147760041",
+        "https://www.youtube.com/@TecritEdebiyat"
+      ]
+    }
+    </script>
+
+    <link rel="icon" href="{% static 'img/favicon/favicon.ico' %}" sizes="any">
+    <link rel="icon" href="{% static 'img/favicon/icon.svg' %}" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="{% static 'img/favicon/apple-touch-icon.png' %}">
+    <link rel="manifest" href="{% static 'img/favicon/manifest.webmanifest' %}">
+
+    <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+
+    <link rel="stylesheet" type="text/css" href="{% static 'css/loaders/loader.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/plugins.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/custom.css' %}?v=5">
+
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#FAF7F6">
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#161616">
+
+
+<style>
+.mxd-header .mxd-header__controls {
+    right: 100px !important;
+}
+
+@media (max-width: 768px) {
+    .mxd-header .mxd-header__controls {
+        right:  80px !important;
+    }
+}
+</style>
+
+
+    {% block extra_css %}{% endblock %}
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-4BCTDJE33K"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-4BCTDJE33K');
+    </script>
+
+    {% block extra_head %}{% endblock %}
+</head>
+
+
+
+
+<body>
+
+    <!-- Loader -->
+    <div id="loader" class="loader">
+        <div class="loader__wrapper">
+            <div class="loader__content">
+                <div class="loader__count">
+                    <span class="count__text">0</span>
+                    <span class="count__percent">%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<nav class="mxd-nav__wrap" data-lenis-prevent="">
+  <div class="mxd-nav__contain loading__fade">
+    <a href="#0" class="mxd-nav__hamburger">
+      <div class="hamburger__base"></div>
+      <div class="hamburger__line"></div>
+      <div class="hamburger__line"></div>
+    </a>
+  </div>
+
+  <div class="mxd-menu__wrapper">
+    <div class="mxd-menu__base"></div>
+
+    <div class="mxd-menu__contain">
+      <div class="mxd-menu__inner">
+
+        <div class="mxd-menu__left">
+          <p class="mxd-menu__caption menu-fade-in">
+            Tecrit Edebiyat<br>
+            Kitabınızı okurla buluşturun.
+          </p>
+
+          <div class="main-menu">
+            <nav class="main-menu__content">
+              <ul id="main-menu" class="main-menu__accordion">
+
+                <li class="main-menu__item">
+                  <a class="main-menu__link btn btn-anim" href="{% url 'anasayfa' %}">
+                    <span class="btn-caption">Ana Sayfa</span>
+                  </a>
+                </li>
+
+                <li class="main-menu__item">
+                  <a class="main-menu__link btn btn-anim" href="{% url 'hakkimizda' %}">
+                    <span class="btn-caption">Hakkımızda</span>
+                  </a>
+                </li>
+
+                <li class="main-menu__item">
+                  <a class="main-menu__link btn btn-anim" href="{% url 'kitaplar' %}">
+                    <span class="btn-caption">Kitaplar</span>
+                  </a>
+                </li>
+
+                <li class="main-menu__item">
+                  <a class="main-menu__link btn btn-anim" href="{% url 'yazarlar' %}">
+                    <span class="btn-caption">Yazarlar</span>
+                  </a>
+                </li>
+
+                 <li class="main-menu__item">
+                  <a class="main-menu__link btn btn-anim" href="{% url 'kitap_maliyeti_hesapla' %}">
+                    <span class="btn-caption">Teklif Al</span>
+                  </a>
+                </li>
+
+                <li class="main-menu__item">
+                  <a class="main-menu__link btn btn-anim" href="{% url 'blog' %}">
+                    <span class="btn-caption">Blog</span>
+                  </a>
+                </li>
+
+                <li class="main-menu__item">
+                  <a class="main-menu__link btn btn-anim" href="{% url 'alintilar' %}">
+                    <span class="btn-caption">Alıntılar</span>
+                  </a>
+                </li>
+
+                <li class="main-menu__item">
+                  <a class="main-menu__link btn btn-anim" href="{% url 'sss' %}">
+                    <span class="btn-caption">S.S.S.</span>
+                  </a>
+                </li>
+
+                <li class="main-menu__item">
+                  <a class="main-menu__link btn btn-anim" href="{% url 'iletisim' %}">
+                    <span class="btn-caption">İletişim</span>
+                  </a>
+                </li>
+
+              </ul>
+            </nav>
+          </div>
+        </div>
+
+        <div class="mxd-menu__right">
+          <div class="menu-promo">
+            <div class="menu-promo__content">
+              <p class="menu-promo__caption menu-fade-in">
+                Kitap basımı, editörlük ve yayın danışmanlığı için
+                Tecrit Edebiyat yanınızda.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="mxd-menu__data menu-fade-in">
+          <p class="t-xsmall">© 2026 Tecrit Edebiyat</p>
+          <p class="t-xsmall">
+            <a href="mailto:iletisim@tecritedebiyat.com">iletisim@tecritedebiyat.com</a>
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</nav>
+
+
+    <!-- Header -->
+    <header id="header" class="mxd-header">
+        <div class="mxd-header__logo loading__fade">
+            <a href="{% url 'anasayfa' %}" class="mxd-logo">
+                <svg class="mxd-logo__image" viewBox="0 0 600 600" width="40" height="40">
+                    <rect width="600" height="600" rx="80" ry="80" style="fill: var(--base-opp);"/>
+                    <g transform="scale(2.5) translate(-175, -270)" style="fill: var(--base);">
+                        <path d="m327.209 373.045.182.082.977-.525 8.245-4.668 14.242-8.062-22.487-12.982-2.016-1.165-1.984-1.145-2.052-1.184-19.593-11.313-4.976-2.698-.265-.144-1.841-.999-1.932-1.048 1.932-1.123v-.09l2.266-1.296 1.734-.992 5.343-3.056.037-.022v.001l17.333-9.916-22.713-13.113-2-1.154-2 1.154-79.3 45.783 24.335 14.049 29.002-16.745.465-.268.138.08 3.871 2.224.15.086 14.696 8.440 9.518 5.433 1.125.642zM270.914 440.655l24.727 14.276v-27.988l-24.727-14.276zM238.675 360.884l-24.334-14.049v28.783l24.334 13.666z"/>
+                        <path d="m294.441 358.983-1.191-.692-22.973-13.194-25.589 14.638 24.226 13.988zM266.914 442.965v-32.608h-.001v-33.169l-24.238-13.995v58.849l-.017.009.011 2.408.006.003v1.433l.003.706-.003-.001v.062l-1.999 1.154-.098.057-4.062-2.274-22.175-12.411v27.523l2 1.154 79.3 45.782V459.55l-24.727-14.276zM328.368 405.787l24.238-13.601v-28.708l-24.238 13.72zM330.391 343.438l24.504 14.148 24.573-13.911-24.565-14.183zM299.641 487.647l24.726-14.275v-28.098l-24.726 14.276z"/>
+                        <path d="M356.606 389.941v4.586l-4 2.245-22.195 12.455-2.044 1.147-1.021.572-.979.565-2 1.154-22.674 13.092-2.053 1.185v27.987l22.672-13.089 2.055-1.187 1.98-1.144 2.02-1.166 22.239-12.839 1.809-1.044.001-.001.19-.128a2010 2010 0 0 0 4-2.722v33.149l22.334-12.895 2-1.154v-93.272l-24.334 13.775z"/>
+                    </g>
+                </svg>
+                <span class="mxd-logo__text">Tecrit<br>Edebiyat</span>
+            </a>
+        </div>
+      
+
+
+
+
+
+<div class="mxd-header__controls loading__fade tecrit-header-controls">
+    <button id="color-switcher" class="mxd-color-switcher" type="button" role="switch" aria-label="light/dark mode" aria-checked="true"></button>
+
+    {% if not user.is_authenticated %}
+    <a class="btn btn-anim btn-default btn-mobile-icon btn-outline slide-right-up" href="{% url 'giris' %}">
+        <span class="btn-caption">Giriş Yap</span>
+        <i class="ph-bold ph-sign-in"></i>
+    </a>
+    {% else %}
+    <a class="btn btn-anim btn-default btn-mobile-icon btn-outline slide-right-up" href="{% url 'cikis' %}">
+        <span class="btn-caption">Çıkış Yap</span>
+        <i class="ph-bold ph-sign-out"></i>
+    </a>
+    {% endif %}
+</div>
+
+
+
+
+       
+
+        
+    </header>
+
+    <!-- Main Content -->
+    <main id="mxd-page-content" class="mxd-page-content{% block page_main_class %}{% endblock %}">
+        {% if messages %}
+        <div class="mxd-container">
+            <div class="messages-container" style="margin: 20px 0;">
+                {% for message in messages %}
+                <div class="message" style="padding: 15px; border-radius: 10px; {% if message.tags == 'success' %}background: #d4edda; color: #155724;{% else %}background: #f8d7da; color: #721c24;{% endif %}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer id="mxd-footer" class="mxd-footer">
+        <div class="mxd-footer__footer-blocks">
+            <div class="footer-blocks__column animate-card-3">
+                <div class="footer-blocks__card fullheight-card">
+                    <div class="footer-blocks__nav">
+                        <ul class="footer-nav">
+                            <li class="footer-nav__item anim-uni-in-up"><a href="{% url 'anasayfa' %}" class="footer-nav__link btn-anim"><span class="btn-caption">Ana Sayfa</span></a></li>
+                            <li class="footer-nav__item anim-uni-in-up"><a href="{% url 'hakkimizda' %}" class="footer-nav__link btn-anim"><span class="btn-caption">Hakkımızda</span></a></li>
+                            <li class="footer-nav__item anim-uni-in-up"><a href="/kitaplar/" class="footer-nav__link btn-anim"><span class="btn-caption">Kitaplar</span></a></li>
+                            <li class="footer-nav__item anim-uni-in-up"><a href="/yazarlar/" class="footer-nav__link btn-anim"><span class="btn-caption">Yazarlar</span></a></li>
+                            <li class="footer-nav__item anim-uni-in-up"><a href="{% url 'kitap_maliyeti_hesapla' %}" class="footer-nav__link btn-anim"><span class="btn-caption">Teklif Al</span></a></li>
+                            <li class="footer-nav__item anim-uni-in-up"><a href="/blog/" class="footer-nav__link btn-anim"><span class="btn-caption">Blog</span></a></li>
+                            <li class="footer-nav__item anim-uni-in-up"><a href="{% url 'alintilar' %}" class="footer-nav__link btn-anim"><span class="btn-caption">Alıntılar</span></a></li>
+                            <li class="footer-nav__item anim-uni-in-up"><a href="/iletisim/" class="footer-nav__link btn-anim"><span class="btn-caption">İletişim</span></a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-blocks__links anim-uni-in-up">
+                        <a href="{% url 'gizlilik_politikasi' %}" class="btn btn-line-xsmall btn-muted slide-right anim-no-delay"><span class="btn-caption">Gizlilik Politikası</span><i class="ph ph-arrow-right"></i></a>
+                        <a href="{% url 'kullanim_sartlari' %}" class="btn btn-line-xsmall btn-muted slide-right anim-no-delay"><span class="btn-caption">Kullanım Şartları</span><i class="ph ph-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-blocks__column animate-card-3">
+                <div class="footer-blocks__card">
+                    <p class="mxd-point-subtitle anim-uni-in-up">
+                        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="20px" height="20px" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill="currentColor" d="M19.6,9.6c0,0-3,0-4,0c-0.4,0-1.8-0.2-1.8-0.2c-0.6-0.1-1.1-0.2-1.6-0.6c-0.5-0.3-0.9-0.8-1.2-1.2c-0.3-0.4-0.4-0.9-0.5-1.4c0,0-0.1-1.1-0.2-1.5c-0.1-1.1,0-4.4,0-4.4C10.4,0.2,10.2,0,10,0S9.6,0.2,9.6,0.4c0,0,0.1,3.3,0,4.4c0,0.4-0.2,1.5-0.2,1.5C9.4,6.7,9.2,7.2,9,7.6C8.7,8.1,8.2,8.5,7.8,8.9c-0.5,0.3-1,0.5-1.6,0.6c0,0-1.2,0.1-1.7,0.2c-1,0.1-4.2,0-4.2,0C0.2,9.6,0,9.8,0,10c0,0.2,0.2,0.4,0.4,0.4c0,0,3.1-0.1,4.2,0c0.4,0,1.7,0.2,1.7,0.2c0.6,0.1,1.1,0.2,1.6,0.6c0.4,0.3,0.8,0.7,1.1,1.1c0.3,0.5,0.5,1,0.6,1.6c0,0,0.1,1.3,0.2,1.7c0,1,0,4.1,0,4.1c0,0.2,0.2,0.4,0.4,0.4s0.4-0.2,0.4-0.4c0,0,0-3.1,0-4.1c0-0.4,0.2-1.7,0.2-1.7c0.1-0.6,0.2-1.1,0.6-1.6c0.3-0.4,0.7-0.8,1.1-1.1c0.5-0.3,1-0.5,1.6-0.6c0,0,1.3-0.1,1.8-0.2c1,0,4,0,4,0c0.2,0,0.4-0.2,0.4-0.4C20,9.8,19.8,9.6,19.6,9.6L19.6,9.6z"></path>
+                        </svg>
+                        <a href="mailto:iletisim@tecritedebiyat.com">iletisim@tecritedebiyat.com</a>
+                    </p>
+                </div>
+                <div class="footer-blocks__card">
+                    <p class="mxd-point-subtitle anim-uni-in-up">
+                        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="20px" height="20px" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill="currentColor" d="M19.6,9.6c0,0-3,0-4,0c-0.4,0-1.8-0.2-1.8-0.2c-0.6-0.1-1.1-0.2-1.6-0.6c-0.5-0.3-0.9-0.8-1.2-1.2c-0.3-0.4-0.4-0.9-0.5-1.4c0,0-0.1-1.1-0.2-1.5c-0.1-1.1,0-4.4,0-4.4C10.4,0.2,10.2,0,10,0S9.6,0.2,9.6,0.4c0,0,0.1,3.3,0,4.4c0,0.4-0.2,1.5-0.2,1.5C9.4,6.7,9.2,7.2,9,7.6C8.7,8.1,8.2,8.5,7.8,8.9c-0.5,0.3-1,0.5-1.6,0.6c0,0-1.2,0.1-1.7,0.2c-1,0.1-4.2,0-4.2,0C0.2,9.6,0,9.8,0,10c0,0.2,0.2,0.4,0.4,0.4c0,0,3.1-0.1,4.2,0c0.4,0,1.7,0.2,1.7,0.2c0.6,0.1,1.1,0.2,1.6,0.6c0.4,0.3,0.8,0.7,1.1,1.1c0.3,0.5,0.5,1,0.6,1.6c0,0,0.1,1.3,0.2,1.7c0,1,0,4.1,0,4.1c0,0.2,0.2,0.4,0.4,0.4s0.4-0.2,0.4-0.4c0,0,0-3.1,0-4.1c0-0.4,0.2-1.7,0.2-1.7c0.1-0.6,0.2-1.1,0.6-1.6c0.3-0.4,0.7-0.8,1.1-1.1c0.5-0.3,1-0.5,1.6-0.6c0,0,1.3-0.1,1.8-0.2c1,0,4,0,4,0c0.2,0,0.4-0.2,0.4-0.4C20,9.8,19.8,9.6,19.6,9.6L19.6,9.6z"></path>
+                        </svg>
+                        <a href="tel:+905537591627">+90 553 759 16 27</a>
+                    </p>
+                </div>
+                <div class="footer-blocks__card fill-card">
+                    <p class="mxd-point-subtitle anim-uni-in-up">
+                        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="20px" height="20px" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill="currentColor" d="M19.6,9.6c0,0-3,0-4,0c-0.4,0-1.8-0.2-1.8-0.2c-0.6-0.1-1.1-0.2-1.6-0.6c-0.5-0.3-0.9-0.8-1.2-1.2c-0.3-0.4-0.4-0.9-0.5-1.4c0,0-0.1-1.1-0.2-1.5c-0.1-1.1,0-4.4,0-4.4C10.4,0.2,10.2,0,10,0S9.6,0.2,9.6,0.4c0,0,0.1,3.3,0,4.4c0,0.4-0.2,1.5-0.2,1.5C9.4,6.7,9.2,7.2,9,7.6C8.7,8.1,8.2,8.5,7.8,8.9c-0.5,0.3-1,0.5-1.6,0.6c0,0-1.2,0.1-1.7,0.2c-1,0.1-4.2,0-4.2,0C0.2,9.6,0,9.8,0,10c0,0.2,0.2,0.4,0.4,0.4c0,0,3.1-0.1,4.2,0c0.4,0,1.7,0.2,1.7,0.2c0.6,0.1,1.1,0.2,1.6,0.6c0.4,0.3,0.8,0.7,1.1,1.1c0.3,0.5,0.5,1,0.6,1.6c0,0,0.1,1.3,0.2,1.7c0,1,0,4.1,0,4.1c0,0.2,0.2,0.4,0.4,0.4s0.4-0.2,0.4-0.4c0,0,0-3.1,0-4.1c0-0.4,0.2-1.7,0.2-1.7c0.1-0.6,0.2-1.1,0.6-1.6c0.3-0.4,0.7-0.8,1.1-1.1c0.5-0.3,1-0.5,1.6-0.6c0,0,1.3-0.1,1.8-0.2c1,0,4,0,4,0c0.2,0,0.4-0.2,0.4-0.4C20,9.8,19.8,9.6,19.6,9.6L19.6,9.6z"></path>
+                        </svg>
+                        <a href="https://maps.google.com/?q=Cağaloğlu, İstanbul" target="_blank">Cağaloğlu, İstanbul</a>
+                    </p>
+                </div>
+            </div>
+            <div class="footer-blocks__column animate-card-3">
+                <div class="footer-blocks__card fullheight-card">
+                    <div class="footer-blocks__block">
+                        <div class="footer-blocks__title anim-uni-in-up"><p class="footer-blocks__title-l">Sosyal Medya</p></div>
+                        <div class="footer-blocks__socials">
+                            <ul class="footer-socials">
+                                <li class="footer-socials__item anim-uni-in-up"><a href="https://www.instagram.com/tecritdergi/" class="footer-socials__link" target="_blank">Instagram</a></li>
+                                <li class="footer-socials__item anim-uni-in-up"><a href="https://x.com/tecritedebiyat" class="footer-socials__link" target="_blank">X (Twitter)</a></li>
+                                <li class="footer-socials__item anim-uni-in-up"><a href="https://www.facebook.com/profile.php?id=61571147760041" class="footer-socials__link" target="_blank">Facebook</a></li>
+                                <li class="footer-socials__item anim-uni-in-up"><a href="https://www.youtube.com/@TecritEdebiyat" class="footer-socials__link" target="_blank">YouTube</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="footer-blocks__links anim-uni-in-up">
+                        <p class="t-xsmall t-muted">© 2026 Tecrit Edebiyat<br>Tüm hakları saklıdır.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- To Top Button -->
+    <a href="#0" id="to-top" class="btn btn-to-top slide-up anim-no-delay">
+        <i class="ph ph-arrow-up"></i>
+    </a>
+
+           <!-- GSAP Kütüphanesi -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js"></script>
+    <!-- Diğer kütüphaneler -->
+    <script src="{% static 'js/libs.min.js' %}"></script>
+    <!-- Tema JavaScript'i -->
+    <script src="{% static 'js/app.js' %}?v=20260804-1"></script>
+    
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

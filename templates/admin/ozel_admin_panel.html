@@ -1,0 +1,110 @@
+{% extends "admin/panel_base.html" %}
+
+{% block panel_title %}Yazar Paneli{% endblock %}
+{% block panel_heading %}Yazar Paneli{% endblock %}
+
+{% block panel_content %}
+<div class="stats-grid">
+    <div class="stat-card primary">
+        <div class="stat-icon">📝</div>
+        <div class="stat-content">
+            <h3>Toplam Yazı</h3>
+            <p class="stat-number">{{ stats.toplam_yazi }}</p>
+            <small>Hesabına bağlı tüm yazılar</small>
+        </div>
+    </div>
+
+    <div class="stat-card success">
+        <div class="stat-icon">✅</div>
+        <div class="stat-content">
+            <h3>Yayındaki Yazı</h3>
+            <p class="stat-number">{{ stats.yayindaki_yazi }}</p>
+            <small>Yayımlanmış içerikler</small>
+        </div>
+    </div>
+
+    <div class="stat-card info">
+        <div class="stat-icon">🕓</div>
+        <div class="stat-content">
+            <h3>İncelemede</h3>
+            <p class="stat-number">{{ stats.incelemedeki_yazi }}</p>
+            <small>Taslak: {{ stats.taslak_yazi }}</small>
+        </div>
+    </div>
+
+    <div class="stat-card warning">
+        <div class="stat-icon">📚</div>
+        <div class="stat-content">
+            <h3>Aktif Kitap</h3>
+            <p class="stat-number">{{ stats.kitap_sayisi }}</p>
+            <small>Yayımlanmış kitap sayısı</small>
+        </div>
+    </div>
+</div>
+
+<div class="quick-actions">
+    <h3>Hızlı Erişim</h3>
+    <div class="action-buttons">
+        <a href="{% url 'yazar_panel_yeni_yazi' %}" class="action-btn primary">Yeni Yazı Ekle</a>
+        <a href="{% url 'yazar_panel_profil' %}" class="action-btn success">Profili Düzenle</a>
+        <a href="{% url 'yazar_panel_sifre' %}" class="action-btn info">Şifre Güncelle</a>
+    </div>
+</div>
+
+<div class="two-column-layout">
+    <div class="stats-section">
+        <div class="section-header">
+            <h3>Yazılarım</h3>
+        </div>
+        <div class="popular-posts">
+            {% for yazi in stats.tum_yazilar %}
+            <div class="post-item">
+                <div class="post-info">
+                    <h4>{{ yazi.baslik }}</h4>
+                    <div class="post-meta">
+                        <span>{{ yazi.get_durum_display }}</span>
+                        {% if yazi.kategori %}
+                        <span>{{ yazi.kategori.ad }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="post-actions">
+                    <a class="post-action-link" href="{% url 'yazar_panel_yazi_duzenle' yazi.pk %}">Düzenle</a>
+                    <form method="post" action="{% url 'yazar_panel_yazi_sil' yazi.pk %}" onsubmit="return confirm('Bu yazıyı silmek istediğine emin misin?');">
+                        {% csrf_token %}
+                        <button type="submit" class="post-action-link post-action-link--danger">Sil</button>
+                    </form>
+                </div>
+            </div>
+            {% empty %}
+            <div class="empty-state">
+                <p>Henüz yazı eklenmemiş.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="stats-section">
+        <div class="section-header">
+            <h3>Kategori Dağılımı</h3>
+        </div>
+        <div class="country-list">
+            {% for item in stats.kategori_dagilimi %}
+            <div class="country-item">
+                <span class="country-name">{{ item.kategori__ad }}</span>
+                <div class="country-stats">
+                    <span class="country-count">{{ item.sayi }}</span>
+                    <div class="country-bar">
+                        <div class="bar-fill" style="width: {% widthratio item.sayi stats.toplam_kategori_yazi 100 %}%"></div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="empty-state">
+                <p>Henüz kategori verisi oluşmamış.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,73 @@
+{% extends "superadmin/base.html" %}
+
+{% block superadmin_content %}
+<div class="card sa-card sa-table-card">
+    <div class="card-body p-4">
+        <form class="row g-3 mb-4" method="get">
+            <div class="col-12 col-md-4">
+                <input class="form-control rounded-4" type="search" name="q" value="{{ arama }}" placeholder="Başlık veya yazar ara">
+            </div>
+            <div class="col-12 col-md-3">
+                <select class="form-select rounded-4" name="durum">
+                    <option value="">Tüm durumlar</option>
+                    {% for value, label in durumler %}
+                    <option value="{{ value }}" {% if secili_durum == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-12 col-md-2">
+                <button class="btn btn-primary rounded-pill w-100" type="submit">Filtrele</button>
+            </div>
+        </form>
+
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th>Başlık</th>
+                        <th>Yazar</th>
+                        <th>Kategori</th>
+                        <th>Durum</th>
+                        <th>İşlem</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for yazi in yazilar %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'superadmin_yazi_detay' yazi.pk %}" class="fw-bold text-decoration-none">{{ yazi.baslik }}</a>
+                            <div class="sa-muted small">{{ yazi.created_at|date:"d.m.Y H:i" }}</div>
+                        </td>
+                        <td>{{ yazi.yazar.ad_soyad }}</td>
+                        <td>{{ yazi.kategori.ad|default:"-" }}</td>
+                        <td><span class="badge text-bg-light">{{ yazi.get_durum_display }}</span></td>
+                        <td>
+                            <div class="d-flex gap-2 flex-wrap">
+                                <a class="btn btn-sm btn-outline-dark rounded-pill" href="{% url 'superadmin_yazi_detay' yazi.pk %}">İncele</a>
+                                <form method="post" action="{% url 'superadmin_yazi_durum_guncelle' yazi.pk %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="durum" value="yayinda">
+                                    <button class="btn btn-sm btn-primary rounded-pill" type="submit">Yayına Al</button>
+                                </form>
+                                <form method="post" action="{% url 'superadmin_yazi_durum_guncelle' yazi.pk %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="durum" value="incelemede">
+                                    <button class="btn btn-sm btn-outline-secondary rounded-pill" type="submit">İncelemede</button>
+                                </form>
+                                <form method="post" action="{% url 'superadmin_yazi_durum_guncelle' yazi.pk %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="durum" value="reddedildi">
+                                    <button class="btn btn-sm btn-outline-danger rounded-pill" type="submit">Reddet</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5" class="sa-muted text-center py-5">Gösterilecek yazı yok.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

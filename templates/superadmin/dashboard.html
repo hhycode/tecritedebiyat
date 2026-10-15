@@ -1,0 +1,172 @@
+{% extends "superadmin/base.html" %}
+
+{% block superadmin_content %}
+<div class="card sa-hero mb-3">
+    <div class="card-body p-4">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+            <div>
+                <p class="text-uppercase small fw-semibold mb-2 text-white-50">Süper Admin</p>
+                <h2 class="h1 fw-bold mb-2">Kontrol Paneli</h2>
+                <p class="mb-0 text-white-50">Bekleyen işler, mesajlar ve temel içerik işlemleri.</p>
+            </div>
+            <span class="badge text-bg-light px-3 py-2">{{ admin_notification_count }} bildirim</span>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-3">
+    <div class="col-6 col-xl-3">
+        <div class="card sa-card h-100">
+            <div class="card-body p-3 sa-metric">
+                <div>
+                    <div class="sa-metric__label">Bekleyen Yazı</div>
+                    <div class="sa-metric__value">{{ admin_pending_post_count }}</div>
+                </div>
+                <a class="btn btn-sm btn-outline-dark" href="{% url 'superadmin_yazilar' %}">Aç</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="card sa-card h-100">
+            <div class="card-body p-3 sa-metric">
+                <div>
+                    <div class="sa-metric__label">Mesaj</div>
+                    <div class="sa-metric__value">{{ admin_unread_contact_count }}</div>
+                </div>
+                <a class="btn btn-sm btn-outline-dark" href="{% url 'superadmin_iletisim' %}">Aç</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="card sa-card h-100">
+            <div class="card-body p-3 sa-metric">
+                <div>
+                    <div class="sa-metric__label">Toplam Yazı</div>
+                    <div class="sa-metric__value">{{ admin_total_posts }}</div>
+                </div>
+                <a class="btn btn-sm btn-outline-dark" href="{% url 'superadmin_yazilar' %}">Liste</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="card sa-card h-100">
+            <div class="card-body p-3 sa-metric">
+                <div>
+                    <div class="sa-metric__label">Toplam Kitap</div>
+                    <div class="sa-metric__value">{{ admin_total_books }}</div>
+                </div>
+                <a class="btn btn-sm btn-outline-dark" href="{% url 'superadmin_kitaplar' %}">Liste</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-3">
+    <div class="col-6 col-xl-3">
+        <div class="card sa-card h-100">
+            <div class="card-body p-3 sa-metric">
+                <div>
+                    <div class="sa-metric__label">Toplam Yazar</div>
+                    <div class="sa-metric__value">{{ admin_total_authors }}</div>
+                </div>
+                <a class="btn btn-sm btn-outline-dark" href="{% url 'superadmin_yazarlar' %}">Liste</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card sa-card mb-3">
+    <div class="card-body p-3">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+            <h3 class="sa-section-title">Hızlı İşlemler</h3>
+            <div class="sa-action-grid flex-grow-1">
+                <a class="sa-action primary" href="{% url 'superadmin_icerik_model_yeni' 'blogyazisi' %}">Yeni Yazı</a>
+                <a class="sa-action" href="{% url 'superadmin_icerik_model_yeni' 'kitap' %}">Yeni Kitap</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-12 col-xl-6">
+        <div class="card sa-card h-100">
+            <div class="card-body p-3">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h3 class="sa-section-title">Onaya Sunulan Yazılar</h3>
+                    <a class="btn btn-sm btn-outline-dark" href="{% url 'superadmin_yazilar' %}">Tümü</a>
+                </div>
+                <div class="d-flex flex-column gap-2">
+                    {% for yazi in admin_pending_posts %}
+                    <div class="sa-list-item">
+                        <div class="d-flex justify-content-between align-items-start gap-3">
+                            <div>
+                                <strong class="d-block">{{ yazi.baslik }}</strong>
+                                <div class="sa-muted small">{{ yazi.yazar.ad_soyad }}{% if yazi.kategori %} - {{ yazi.kategori.ad }}{% endif %}</div>
+                            </div>
+                            <div class="d-flex gap-2 flex-wrap justify-content-end">
+                                <form method="post" action="{% url 'superadmin_yazi_durum_guncelle' yazi.pk %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="durum" value="yayinda">
+                                    <button class="btn btn-sm btn-dark" type="submit">Yayınla</button>
+                                </form>
+                                <form method="post" action="{% url 'superadmin_yazi_durum_guncelle' yazi.pk %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="durum" value="reddedildi">
+                                    <button class="btn btn-sm btn-outline-danger" type="submit">Reddet</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="sa-list-item sa-muted">Bekleyen yazı yok.</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-xl-6">
+        <div class="card sa-card h-100">
+            <div class="card-body p-3">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h3 class="sa-section-title">İletişim Mesajları</h3>
+                    <a class="btn btn-sm btn-outline-dark" href="{% url 'superadmin_iletisim' %}">Tümü</a>
+                </div>
+                <div class="d-flex flex-column gap-2">
+                    {% for mesaj in admin_unread_contacts %}
+                    <div class="sa-list-item">
+                        <strong class="d-block">{{ mesaj.ad }} {{ mesaj.soyad }}</strong>
+                        <div class="sa-muted small mb-1">{{ mesaj.get_amac_display }} - {{ mesaj.email }}</div>
+                        <div class="small">{{ mesaj.mesaj|truncatechars:120 }}</div>
+                    </div>
+                    {% empty %}
+                    <div class="sa-list-item sa-muted">Okunmamış mesaj yok.</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card sa-card mt-3">
+    <div class="card-body p-3">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3 class="sa-section-title">Son Hareketler</h3>
+        </div>
+        <div class="row g-2">
+            {% for log in admin_recent_logs|slice:":6" %}
+            <div class="col-12 col-lg-6">
+                <div class="sa-list-item h-100">
+                    <strong class="d-block">{{ log.object_repr }}</strong>
+                    <div class="sa-muted small">{{ log.user }} - {{ log.action_time|date:"d M Y H:i" }}</div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <div class="sa-list-item sa-muted">Henüz hareket kaydı yok.</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

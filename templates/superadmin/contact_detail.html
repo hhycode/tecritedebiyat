@@ -1,0 +1,56 @@
+{% extends "superadmin/base.html" %}
+
+{% block superadmin_content %}
+<div class="row g-4">
+    <div class="col-12 col-xl-8">
+        <div class="card sa-card">
+            <div class="card-body p-4 p-lg-5">
+                <div class="d-flex flex-column flex-lg-row justify-content-between gap-3 mb-4">
+                    <div>
+                        <p class="text-uppercase small fw-semibold sa-muted mb-2">İletişim Başvurusu</p>
+                        <h2 class="h1 mb-2">{{ basvuru.ad }} {{ basvuru.soyad }}</h2>
+                        <div class="sa-muted">{{ basvuru.get_amac_display }} · {{ basvuru.created_at|date:"d.m.Y H:i" }}</div>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2 align-items-start">
+                        {% if basvuru.incelendi %}
+                        <span class="badge text-bg-success">İncelendi</span>
+                        {% else %}
+                        <span class="badge text-bg-warning">Bekliyor</span>
+                        {% endif %}
+                        <a class="btn rounded-pill" href="{% url 'superadmin_iletisim_sil' basvuru.pk %}" style="color:#b91c1c; border:1px solid #fecaca; background:#fff;">Sil</a>
+                        <a class="btn btn-outline-dark rounded-pill" href="{% url 'superadmin_iletisim' %}">Listeye Dön</a>
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-12 col-md-6">
+                        <div class="border rounded-4 p-3 h-100">
+                            <div class="sa-muted small mb-1">E-posta</div>
+                            <div class="fw-semibold">{{ basvuru.email }}</div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <div class="border rounded-4 p-3 h-100">
+                            <div class="sa-muted small mb-1">Telefon</div>
+                            <div class="fw-semibold">{{ basvuru.telefon|default:"-" }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                {% if basvuru.dosya %}
+                <div class="border rounded-4 p-4 mb-4">
+                    <div class="sa-muted small mb-2">Ekli Dosya</div>
+                    <a class="btn btn-outline-dark rounded-pill" href="{{ basvuru.dosya.url }}" target="_blank" rel="noopener">Dosyayı İndir</a>
+                </div>
+                {% endif %}
+
+                <div class="border rounded-4 p-4 bg-light-subtle">
+                    <div class="sa-muted small mb-2">Mesajın Tamamı</div>
+                    <div class="fs-5" style="white-space: pre-wrap;">{{ basvuru.mesaj }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
