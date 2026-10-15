@@ -2,6 +2,11 @@
 
 {% block sayfa_ust_etiket %}Topluluk{% endblock %}
 
+{% block sayfa_aksiyonlari %}
+<a class="sa-btn sa-btn--secondary" href="{% url 'superadmin_icerik_model_liste' 'yazarprofil' %}">Yazar Profillerini Yönet</a>
+<a class="sa-btn sa-btn--primary" href="{% url 'superadmin_icerik_model_yeni' 'yazarprofil' %}">Yazar profili ekle</a>
+{% endblock %}
+
 {% block superadmin_content %}
 {% include "superadmin/_components/search_form.html" with arama=arama placeholder="Yazar veya kullanıcı adı ara" %}
 
@@ -16,6 +21,7 @@
                         <th>Rol</th>
                         <th>Onay</th>
                         <th>Sosyal</th>
+                        <th class="text-end">İşlem</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -30,9 +36,10 @@
                             {% if yazar.x_hesabi %}X {% endif %}
                             {% if yazar.websitesi %}Web{% endif %}
                         </td>
+                        <td class="text-end"><a class="sa-btn sa-btn--secondary sa-btn--sm" href="{% url 'superadmin_icerik_model_duzenle' 'yazarprofil' yazar.pk %}">Düzenle</a></td>
                     </tr>
                     {% empty %}
-                    <tr><td colspan="5" class="sa-muted text-center py-5">Yazar bulunamadı.</td></tr>
+                    <tr><td colspan="6" class="sa-muted text-center py-5">Yazar bulunamadı.</td></tr>
                     {% endfor %}
                 </tbody>
             </table>

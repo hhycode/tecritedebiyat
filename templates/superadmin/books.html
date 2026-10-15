@@ -2,6 +2,11 @@
 
 {% block sayfa_ust_etiket %}Kitaplar{% endblock %}
 
+{% block sayfa_aksiyonlari %}
+<a class="sa-btn sa-btn--secondary" href="{% url 'superadmin_icerik_model_liste' 'kitap' %}">Kitapları Yönet</a>
+<a class="sa-btn sa-btn--primary" href="{% url 'superadmin_icerik_model_yeni' 'kitap' %}">Kitap ekle</a>
+{% endblock %}
+
 {% block superadmin_content %}
 {% include "superadmin/_components/search_form.html" with arama=arama placeholder="Kitap veya yazar ara" %}
 
@@ -15,6 +20,7 @@
                         <th>Yazar</th>
                         <th>Yayın Tarihi</th>
                         <th>Durum</th>
+                        <th class="text-end">İşlem</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -24,9 +30,10 @@
                         <td>{{ kitap.yazar_adi }}</td>
                         <td>{{ kitap.yayin_tarihi|date:"d.m.Y"|default:"-" }}</td>
                         <td>{% if kitap.yayinda %}<span class="sa-pill sa-pill--success">Yayında</span>{% else %}<span class="sa-pill">Yayında değil</span>{% endif %}</td>
+                        <td class="text-end"><a class="sa-btn sa-btn--secondary sa-btn--sm" href="{% url 'superadmin_icerik_model_duzenle' 'kitap' kitap.pk %}">Düzenle</a></td>
                     </tr>
                     {% empty %}
-                    <tr><td colspan="4" class="sa-muted text-center py-5">Kitap bulunamadı.</td></tr>
+                    <tr><td colspan="5" class="sa-muted text-center py-5">Kitap bulunamadı.</td></tr>
                     {% endfor %}
                 </tbody>
             </table>

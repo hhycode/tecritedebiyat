@@ -2,6 +2,10 @@
 
 {% block sayfa_ust_etiket %}İçerik{% endblock %}
 
+{% block sayfa_aksiyonlari %}
+<a class="sa-btn sa-btn--primary" href="{% url 'superadmin_icerik_model_yeni' 'blogyazisi' %}">Blog yazısı ekle</a>
+{% endblock %}
+
 {% block superadmin_content %}
 {% include "superadmin/_components/search_form.html" with arama=arama placeholder="Başlık veya yazar ara" durum_secenekleri=durumler secili_durum=secili_durum durum_bos_etiketi="Tüm durumlar" %}
 
@@ -31,21 +35,22 @@
                         <td>
                             <div class="d-flex gap-2 flex-wrap">
                                 <a class="sa-btn sa-btn--secondary sa-btn--sm" href="{% url 'superadmin_yazi_detay' yazi.pk %}">İncele</a>
-                                <form method="post" action="{% url 'superadmin_yazi_durum_guncelle' yazi.pk %}">
+                                <a class="sa-btn sa-btn--secondary sa-btn--sm" href="{% url 'superadmin_icerik_model_duzenle' 'blogyazisi' yazi.pk %}">Düzenle</a>
+                                {% if yazi.durum != 'yayinda' %}<form method="post" action="{% url 'superadmin_yazi_durum_guncelle' yazi.pk %}">
                                     {% csrf_token %}
                                     <input type="hidden" name="durum" value="yayinda">
                                     <button class="sa-btn sa-btn--primary sa-btn--sm" type="submit">Yayına Al</button>
-                                </form>
-                                <form method="post" data-onay="Bu yazı incelemeye alınacak. Yayındaysa siteden kaldırılır. Devam edilsin mi?" action="{% url 'superadmin_yazi_durum_guncelle' yazi.pk %}">
+                                </form>{% endif %}
+                                {% if yazi.durum != 'incelemede' %}<form method="post" data-onay="Bu yazı incelemeye alınacak. Yayındaysa siteden kaldırılır. Devam edilsin mi?" action="{% url 'superadmin_yazi_durum_guncelle' yazi.pk %}">
                                     {% csrf_token %}
                                     <input type="hidden" name="durum" value="incelemede">
                                     <button class="sa-btn sa-btn--secondary sa-btn--sm" type="submit">İncelemede</button>
-                                </form>
-                                <form method="post" data-onay="Bu yazı reddedilecek. Yayındaysa siteden kaldırılır. Devam edilsin mi?" action="{% url 'superadmin_yazi_durum_guncelle' yazi.pk %}">
+                                </form>{% endif %}
+                                {% if yazi.durum != 'reddedildi' %}<form method="post" data-onay="Bu yazı reddedilecek. Yayındaysa siteden kaldırılır. Devam edilsin mi?" action="{% url 'superadmin_yazi_durum_guncelle' yazi.pk %}">
                                     {% csrf_token %}
                                     <input type="hidden" name="durum" value="reddedildi">
                                     <button class="sa-btn sa-btn--danger-outline sa-btn--sm" type="submit">Reddet</button>
-                                </form>
+                                </form>{% endif %}
                             </div>
                         </td>
                     </tr>
