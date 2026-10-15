@@ -1315,13 +1315,18 @@ a.sa-kpi:hover {
 .sa-chart canvas {
     display: none;
 }
+.sa-chart.is-hazir {
+    height: 300px;
+    min-height: 0;
+}
 .sa-chart.is-hazir canvas {
     display: block;
 }
 .sa-chart.is-hazir .sa-chart__yedek {
     display: none;
 }
-.sa-chart.is-yukleniyor::before {
+/* JS calisiyorsa grafik hazir olana kadar iskelet; JS yoksa tablo hemen gorunur */
+.sa-js .sa-chart:not(.is-hazir):not(.is-hata)::before {
     content: "";
     position: absolute;
     inset: 0;
@@ -1330,7 +1335,7 @@ a.sa-kpi:hover {
     background-size: 200% 100%;
     animation: sa-iskelet 1.2s ease-in-out infinite;
 }
-.sa-chart.is-yukleniyor .sa-chart__yedek {
+.sa-js .sa-chart:not(.is-hazir):not(.is-hata) .sa-chart__yedek {
     visibility: hidden;
 }
 .sa-chart__yedek {
