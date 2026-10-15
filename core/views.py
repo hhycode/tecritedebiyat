@@ -746,6 +746,9 @@ def superadmin_icerik_model_sil(request, model_key, pk):
     return render(request, "superadmin/content_model_confirm_delete.html", context)
 
 
+KULLANICI_FORM_TAM_GENISLIK = {"is_active", "is_staff", "is_superuser"}
+
+
 @superadmin_required
 def superadmin_kullanicilar(request):
     context = build_superadmin_context(request)
@@ -779,6 +782,7 @@ def superadmin_kullanici_yeni(request):
             "form_title": "Yeni kullanıcı",
             "submit_label": "Kaydet ve şifre belirle",
             "back_url": reverse("superadmin_kullanicilar"),
+            "full_width_fields": KULLANICI_FORM_TAM_GENISLIK,
         }
     )
     return render(request, "superadmin/user_form.html", context)
@@ -810,6 +814,7 @@ def superadmin_kullanici_duzenle(request, pk):
             "form_title": f"{kullanici.username} düzenle",
             "submit_label": "Değişiklikleri Kaydet",
             "back_url": reverse("superadmin_kullanicilar"),
+            "full_width_fields": KULLANICI_FORM_TAM_GENISLIK,
         }
     )
     return render(request, "superadmin/user_form.html", context)

@@ -6,10 +6,6 @@
     max-width: 640px;
 }
 
-.sa-field {
-    margin-bottom: 18px;
-}
-
 .sa-formula-preview {
     margin-bottom: 24px;
     padding: 18px 20px;
@@ -87,17 +83,7 @@
 
         <form method="post">
             {% csrf_token %}
-            {% if form.non_field_errors %}
-            <div class="alert alert-warning rounded-4 border-0 mb-4">{{ form.non_field_errors }}</div>
-            {% endif %}
-            {% for field in form %}
-            <div class="sa-field">
-                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                {{ field }}
-                {% if field.help_text %}<span class="sa-help">{{ field.help_text }}</span>{% endif %}
-                {% if field.errors %}<p class="sa-errors">{{ field.errors|striptags }}</p>{% endif %}
-            </div>
-            {% endfor %}
+            {% include "superadmin/_components/form_fields.html" with form=form tek_sutun=True %}
             <div class="sa-form-actions">
                 <a class="sa-btn sa-btn--secondary" href="{% url 'superadmin_dashboard' %}">Vazgeç</a>
                 <button class="sa-btn sa-btn--primary" type="submit">{{ submit_label }}</button>

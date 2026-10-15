@@ -1,0 +1,4 @@
+{% comment %}Flash mesajlari: seviyeye gore renk (basari yesil, hata kirmizi, uyari sari, bilgi mavi).{% endcomment %}
+{% for message in messages %}
+<div class="alert sa-alert {% if message.level_tag == 'success' %}alert-success{% elif message.level_tag == 'error' %}alert-danger{% elif message.level_tag == 'info' %}alert-info{% else %}alert-warning{% endif %} mb-3" role="{% if message.level_tag == 'error' %}alert{% else %}status{% endif %}">{{ message }}</div>
+{% endfor %}

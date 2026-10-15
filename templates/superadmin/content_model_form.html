@@ -27,29 +27,7 @@
     <div class="sa-panel-card__body">
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
-            {% if form.non_field_errors %}
-            <div class="alert alert-warning rounded-4 border-0 mb-4">{{ form.non_field_errors }}</div>
-            {% endif %}
-            <div class="sa-form-grid">
-                {% for hidden in form.hidden_fields %}
-                    {{ hidden }}
-                {% endfor %}
-                {% for field in form.visible_fields %}
-                <div class="sa-field {% if field.name in full_width_fields or field.widget_type == 'textarea' or field.field.widget.allow_multiple_selected %}full{% endif %}">
-                    {% if field.widget_type == 'checkbox' %}
-                    <div class="sa-checkbox-row">
-                        {{ field }}
-                        <label for="{{ field.id_for_label }}" class="mb-0">{{ field.label }}</label>
-                    </div>
-                    {% else %}
-                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                    {{ field }}
-                    {% endif %}
-                    {% if field.help_text %}<span class="sa-help">{{ field.help_text }}</span>{% endif %}
-                    {% if field.errors %}<p class="sa-errors">{{ field.errors|striptags }}</p>{% endif %}
-                </div>
-                {% endfor %}
-            </div>
+            {% include "superadmin/_components/form_fields.html" with form=form full_width_fields=full_width_fields %}
             <div class="sa-form-actions">
                 <div class="d-flex gap-2 flex-wrap">
                     <a class="sa-btn sa-btn--secondary" href="{{ back_url }}">Vazgeç</a>

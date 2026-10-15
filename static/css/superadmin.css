@@ -288,6 +288,9 @@ body {
 .sa-form-grid .full {
     grid-column: 1 / -1;
 }
+.sa-form-grid--single {
+    grid-template-columns: 1fr;
+}
 .sa-field label {
     display: block;
     margin-bottom: 8px;
@@ -333,6 +336,17 @@ body {
     color: #991b1b;
     font-size: .88rem;
     font-weight: 600;
+}
+.sa-field--error input,
+.sa-field--error textarea,
+.sa-field--error select {
+    border-color: var(--sa-danger);
+}
+
+/* Mesajlar */
+.sa-alert {
+    border: 0;
+    border-radius: var(--sa-radius-sm);
 }
 .sa-checkbox-row {
     display: flex;

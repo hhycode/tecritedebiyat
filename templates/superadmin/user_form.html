@@ -25,29 +25,7 @@
     <div class="sa-panel-card__body">
         <form method="post">
             {% csrf_token %}
-            {% if form.non_field_errors %}
-            <div class="alert alert-warning rounded-4 border-0 mb-4">{{ form.non_field_errors }}</div>
-            {% endif %}
-            <div class="sa-form-grid">
-                {% for hidden in form.hidden_fields %}
-                    {{ hidden }}
-                {% endfor %}
-                {% for field in form.visible_fields %}
-                <div class="sa-field {% if field.widget_type == 'checkbox' %}full{% endif %}">
-                    {% if field.widget_type == 'checkbox' %}
-                    <div class="sa-checkbox-row">
-                        {{ field }}
-                        <label for="{{ field.id_for_label }}" class="mb-0">{{ field.label }}</label>
-                    </div>
-                    {% else %}
-                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                    {{ field }}
-                    {% endif %}
-                    {% if field.help_text %}<span class="sa-help">{{ field.help_text }}</span>{% endif %}
-                    {% if field.errors %}<p class="sa-errors">{{ field.errors|striptags }}</p>{% endif %}
-                </div>
-                {% endfor %}
-            </div>
+            {% include "superadmin/_components/form_fields.html" with form=form full_width_fields=full_width_fields %}
             <div class="sa-form-actions">
                 <a class="sa-btn sa-btn--secondary" href="{{ back_url }}">Vazgeç</a>
                 <button class="sa-btn sa-btn--primary" type="submit">{{ submit_label }}</button>
