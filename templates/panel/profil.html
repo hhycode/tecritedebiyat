@@ -1,0 +1,67 @@
+{% extends "panel/base.html" %}
+
+{% block baslik %}Profilim{% endblock %}
+
+{% block ust %}
+{% include "panel/_sayfa_basligi.html" with baslik="Profilim" aciklama="Okurlar sizi bu bilgilerle tanır: fotoğrafınız, biyografiniz ve bağlantılarınız yazar sayfasında ve yazılarınızın altında görünür." %}
+{% include "panel/_hesap_sekmeleri.html" %}
+{% endblock %}
+
+{% block icerik %}
+<form method="post" enctype="multipart/form-data" class="yp-form" data-gonderim>
+    {% csrf_token %}
+    {% if user_form.non_field_errors or profile_form.non_field_errors %}
+    <div class="alert sa-alert alert-danger" role="alert">{% for hata in user_form.non_field_errors %}<div>{{ hata }}</div>{% endfor %}{% for hata in profile_form.non_field_errors %}<div>{{ hata }}</div>{% endfor %}</div>
+    {% endif %}
+    <div class="yp-profile">
+        <aside class="yp-card yp-profile__card" data-gorsel>
+            <span data-onizleme class="yp-avatar yp-avatar--xl{% if not profil.fotograf %} yp-avatar--harf{% endif %}" aria-hidden="true">{% if profil.fotograf %}<img src="{{ profil.fotograf.url }}" alt="">{% else %}{{ profil.ad_soyad|slice:":1"|upper }}{% endif %}</span>
+            <h2 class="yp-profile__name">{{ profil.ad_soyad }}</h2>
+            <span class="yp-profile__user">@{{ request.user.get_username }}</span>
+
+            <div class="yp-upload__buttons">
+                <input class="yp-file" type="file" name="{{ profile_form.fotograf.html_name }}" id="{{ profile_form.fotograf.id_for_label }}" accept="image/*">
+                <label class="sa-btn sa-btn--secondary sa-btn--sm mb-0" for="{{ profile_form.fotograf.id_for_label }}"><i class="ph ph-camera" aria-hidden="true"></i>{% if profil.fotograf %}Fotoğrafı değiştir{% else %}Fotoğraf ekle{% endif %}</label>
+            </div>
+            <span class="yp-upload__name" data-dosya-adi></span>
+            {% if profil.fotograf %}
+            <label class="yp-clear"><input type="checkbox" name="{{ profile_form.fotograf.html_name }}-clear" data-kaldir>Fotoğrafı kaldır</label>
+            {% endif %}
+            <span class="sa-help">Kare bir fotoğraf en iyi sonucu verir. En fazla 5 MB.</span>
+            {% for hata in profile_form.fotograf.errors %}<p class="sa-errors">{{ hata }}</p>{% endfor %}
+        </aside>
+
+        <div class="yp-card">
+            <div class="yp-card__body">
+                <section class="yp-section" aria-labelledby="yp-b-kisisel">
+                    <h2 class="yp-section__title" id="yp-b-kisisel">Kişisel bilgiler</h2>
+                    <div class="sa-form-grid">
+                        {% include "panel/_alan.html" with field=user_form.first_name etiket="Ad" %}
+                        {% include "panel/_alan.html" with field=user_form.last_name etiket="Soyad" %}
+                        {% include "panel/_alan.html" with field=user_form.username etiket="Kullanıcı adı" yardim="Giriş yaparken kullanırsınız." %}
+                        {% include "panel/_alan.html" with field=user_form.email etiket="E-posta" yardim="Şifre sıfırlama bağlantısı bu adrese gönderilir." %}
+                    </div>
+                </section>
+
+                <section class="yp-section" aria-labelledby="yp-b-bio">
+                    <h2 class="yp-section__title" id="yp-b-bio">Biyografi</h2>
+                    {% include "panel/_alan.html" with field=profile_form.biyografi etiket="Kendinizi birkaç cümleyle tanıtın" sayac="0" yardim="Yazar sayfasında ve yazılarınızın altında görünür." %}
+                </section>
+
+                <section class="yp-section" aria-labelledby="yp-b-bag">
+                    <h2 class="yp-section__title" id="yp-b-bag">Bağlantılar</h2>
+                    <div class="sa-form-grid">
+                        {% include "panel/_alan.html" with field=profile_form.instagram etiket="Instagram" %}
+                        {% include "panel/_alan.html" with field=profile_form.x_hesabi etiket="X (Twitter)" %}
+                        {% include "panel/_alan.html" with field=profile_form.websitesi etiket="Web siteniz" tam=True yardim="Tam adresi yazın, ör. https://ornek.com" %}
+                    </div>
+                </section>
+
+                <div class="yp-actions">
+                    <button class="sa-btn sa-btn--primary sa-btn--lg" type="submit" data-yukleniyor="Kaydediliyor…"><i class="ph ph-check" aria-hidden="true"></i><span data-metin>Profili kaydet</span></button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}

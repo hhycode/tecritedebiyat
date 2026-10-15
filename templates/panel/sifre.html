@@ -1,0 +1,34 @@
+{% extends "panel/base.html" %}
+
+{% block baslik %}Şifre ve güvenlik{% endblock %}
+
+{% block ust %}
+{% include "panel/_sayfa_basligi.html" with baslik="Şifre ve güvenlik" aciklama="Hesabınızı korumak için başka sitelerde kullanmadığınız bir şifre seçin." %}
+{% include "panel/_hesap_sekmeleri.html" %}
+{% endblock %}
+
+{% block icerik %}
+<form method="post" class="yp-card yp-form" style="max-width: 640px;" data-gonderim>
+    {% csrf_token %}
+    <div class="yp-card__body">
+        <h2 class="yp-section__title">Şifre değiştir</h2>
+        <div class="sa-form-grid sa-form-grid--single">
+            {% for field in form %}
+            <div class="sa-field{% if field.errors %} sa-field--error{% endif %}">
+                <label for="{{ field.id_for_label }}">{% if field.name == "old_password" %}Mevcut şifreniz{% elif field.name == "new_password1" %}Yeni şifre{% else %}Yeni şifre (tekrar){% endif %}</label>
+                <div class="yp-password">
+                    {{ field }}
+                    <button type="button" data-sifre-goster aria-label="Şifreyi göster" aria-pressed="false"><i class="ph ph-eye" aria-hidden="true"></i></button>
+                </div>
+                {% if field.name == "new_password1" %}<div class="yp-help-list">{{ field.help_text|safe }}</div>{% endif %}
+                {% for hata in field.errors %}<p class="sa-errors">{{ hata }}</p>{% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+        <p class="sa-help mt-3 mb-0">Şifrenizi unuttuysanız çıkış yapıp giriş sayfasındaki “Şifremi unuttum” bağlantısını kullanabilirsiniz.</p>
+        <div class="yp-actions">
+            <button class="sa-btn sa-btn--primary sa-btn--lg" type="submit" data-yukleniyor="Güncelleniyor…"><i class="ph ph-lock-key" aria-hidden="true"></i><span data-metin>Şifreyi güncelle</span></button>
+        </div>
+    </div>
+</form>
+{% endblock %}

@@ -1082,32 +1082,6 @@ def superadmin_legacy_core_model_redirect(request, model_key, pk=None, action=No
     return redirect(LEGACY_CORE_HEDEFLER.get(model_key, "superadmin_dashboard"))
 
 
-def build_panel_stats(profil):
-    yazi_listesi = (
-        BlogYazisi.objects.select_related("kategori")
-        .prefetch_related("kategoriler")
-        .filter(yazar=profil)
-        .order_by("-yayin_tarihi", "-created_at")
-    )
-    kategori_dagilimi = list(
-        yazi_listesi.exclude(kategori__isnull=True)
-        .values("kategori__ad")
-        .annotate(sayi=Count("id"))
-        .order_by("-sayi", "kategori__ad")[:6]
-    )
-    return {
-        "toplam_yazi": yazi_listesi.count(),
-        "yayindaki_yazi": yazi_listesi.filter(durum=BlogYazisi.DurumSecenekleri.YAYINDA).count(),
-        "incelemedeki_yazi": yazi_listesi.filter(durum=BlogYazisi.DurumSecenekleri.INCELEMEDE).count(),
-        "kitap_sayisi": Kitap.objects.filter(Q(yazar=profil) | Q(ikinci_yazar=profil), yayinda=True).count(),
-        "taslak_yazi": yazi_listesi.filter(durum=BlogYazisi.DurumSecenekleri.TASLAK).count(),
-        "son_yazilar": yazi_listesi[:5],
-        "tum_yazilar": yazi_listesi[:20],
-        "kategori_dagilimi": kategori_dagilimi,
-        "toplam_kategori_yazi": sum(item["sayi"] for item in kategori_dagilimi) or 1,
-    }
-
-
 def anasayfa(request):
     sliderlar = Slider.objects.filter(aktif=True).order_by("sira")
     hero_slider = sliderlar.first()
@@ -2124,6 +2098,7 @@ def yazar_paneli(request):
 def yazar_panel_profil(request):
     profil = get_or_create_user_profile(request.user)
     if request.method == "POST":
+        eski_fotograf = profil.fotograf.name if profil.fotograf else ""
         user_form = PanelUserForm(request.POST, instance=request.user)
         profile_form = PanelProfileForm(request.POST, request.FILES, instance=profil)
         if user_form.is_valid() and profile_form.is_valid():
@@ -2132,21 +2107,23 @@ def yazar_panel_profil(request):
             ad_soyad = " ".join(parca for parca in [user.first_name.strip(), user.last_name.strip()] if parca)
             profil_nesnesi.ad_soyad = ad_soyad or user.username
             profil_nesnesi.save()
-            messages.success(request, "Profil bilgilerin güncellendi.")
+            # Kaldirilan ya da degistirilen eski fotograf diskte yetim kalmasin
+            yeni_fotograf = profil_nesnesi.fotograf.name if profil_nesnesi.fotograf else ""
+            if eski_fotograf and eski_fotograf != yeni_fotograf:
+                profil_nesnesi.fotograf.storage.delete(eski_fotograf)
+            messages.success(request, "Profil bilgileriniz güncellendi.")
             return redirect("yazar_panel_profil")
+        messages.error(request, "Profiliniz kaydedilmedi. Lütfen işaretli alanları düzeltin.")
+        profil.refresh_from_db()
+        request.user.refresh_from_db()
     else:
         user_form = PanelUserForm(instance=request.user)
         profile_form = PanelProfileForm(instance=profil)
 
     return render(
         request,
-        "admin/panel_profil.html",
-        {
-            "profil": profil,
-            "user_form": user_form,
-            "profile_form": profile_form,
-            "stats": build_panel_stats(profil),
-        },
+        "panel/profil.html",
+        panel_baglami(request, profil, "profil", user_form=user_form, profile_form=profile_form),
     )
 
 
@@ -2158,20 +2135,13 @@ def yazar_panel_sifre(request):
         if form.is_valid():
             user = form.save()
             update_session_auth_hash(request, user)
-            messages.success(request, "Şifren başarıyla güncellendi.")
+            messages.success(request, "Şifreniz güncellendi.")
             return redirect("yazar_panel_sifre")
+        messages.error(request, "Şifreniz değiştirilmedi. Lütfen işaretli alanları düzeltin.")
     else:
         form = PanelPasswordForm(request.user)
 
-    return render(
-        request,
-        "admin/panel_sifre.html",
-        {
-            "profil": profil,
-            "form": form,
-            "stats": build_panel_stats(profil),
-        },
-    )
+    return render(request, "panel/sifre.html", panel_baglami(request, profil, "guvenlik", form=form))
 
 
 def yazar_yazi_formu(request, profil, yazi=None):

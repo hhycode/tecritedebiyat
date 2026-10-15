@@ -1,0 +1,4 @@
+<nav class="yp-tabs yp-segment" aria-label="Hesap ayarları">
+    <a href="{% url 'yazar_panel_profil' %}"{% if panel_menu == "profil" %} aria-current="page"{% endif %}><i class="ph ph-user-circle" aria-hidden="true"></i>Profil</a>
+    <a href="{% url 'yazar_panel_sifre' %}"{% if panel_menu == "guvenlik" %} aria-current="page"{% endif %}><i class="ph ph-lock-key" aria-hidden="true"></i>Şifre ve güvenlik</a>
+</nav>

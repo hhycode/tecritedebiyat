@@ -253,10 +253,10 @@ class PanelProfileForm(forms.ModelForm):
         model = YazarProfil
         fields = ["biyografi", "fotograf", "instagram", "x_hesabi", "websitesi"]
         widgets = {
-            "biyografi": forms.Textarea(attrs={"placeholder": "Kısa biyografin", "rows": 6}),
-            "instagram": forms.URLInput(attrs={"placeholder": "Instagram bağlantısı"}),
-            "x_hesabi": forms.URLInput(attrs={"placeholder": "X bağlantısı"}),
-            "websitesi": forms.URLInput(attrs={"placeholder": "Website bağlantısı"}),
+            "biyografi": forms.Textarea(attrs={"placeholder": "Kendinizden kısaca bahsedin", "rows": 6}),
+            "instagram": forms.URLInput(attrs={"placeholder": "https://instagram.com/kullaniciadiniz"}),
+            "x_hesabi": forms.URLInput(attrs={"placeholder": "https://x.com/kullaniciadiniz"}),
+            "websitesi": forms.URLInput(attrs={"placeholder": "https://"}),
         }
 
     def clean_fotograf(self):

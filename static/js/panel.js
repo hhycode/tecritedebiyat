@@ -60,15 +60,9 @@
                     var img = document.createElement("img");
                     img.src = e.target.result;
                     img.alt = "";
-                    if (onizleme.classList.contains("yp-avatar")) {
-                        onizleme.replaceWith(img);
-                        img.className = onizleme.className.replace("yp-avatar--harf", "");
-                        img.setAttribute("data-onizleme", "");
-                        onizleme = img;
-                    } else {
-                        onizleme.innerHTML = "";
-                        onizleme.appendChild(img);
-                    }
+                    onizleme.innerHTML = "";
+                    onizleme.appendChild(img);
+                    onizleme.classList.remove("yp-avatar--harf");
                 };
                 okuyucu.readAsDataURL(dosya);
             }
@@ -78,7 +72,7 @@
                 if (!kaldir.checked) return;
                 girdi.value = "";
                 if (ad) ad.textContent = ilkAd;
-                if (onizleme && !onizleme.classList.contains("yp-avatar")) onizleme.innerHTML = ilk;
+                if (onizleme) onizleme.innerHTML = ilk;
             });
         }
     });
