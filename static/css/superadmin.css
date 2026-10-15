@@ -1625,3 +1625,19 @@ a.sa-feed__item:hover {
         grid-template-columns: 1fr;
     }
 }
+
+/* Eski sayfalardaki Bootstrap baslik boyutlarini panel tipografisine uydur */
+a.sa-card .h3 {
+    font-size: 1.02rem;
+    font-weight: 600;
+    letter-spacing: -.01em;
+}
+.sa-panel-card__header .h4,
+.sa-panel-card__header h3 {
+    font-size: 1rem;
+    font-weight: 600;
+}
+.card.sa-card .h5 {
+    font-size: .98rem;
+    font-weight: 600;
+}
