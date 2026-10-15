@@ -1,164 +1,262 @@
 {% extends "superadmin/base.html" %}
+{% load panel %}
 
-{% block sayfa_ust_etiket %}Süper Admin{% endblock %}
-{% block sayfa_aciklamasi %}Bekleyen işler, mesajlar ve temel içerik işlemleri.{% endblock %}
-{% block sayfa_aksiyonlari %}<span class="sa-pill">{{ admin_notification_count }} bildirim</span>{% endblock %}
+{% block sayfa_ust_etiket %}{% now "j F Y, l" %}{% endblock %}
+{% block sayfa_aciklamasi %}Hoş geldin {{ request.user.first_name|default:request.user.get_username }}. Sitenin genel durumu, bekleyen işler ve son hareketler.{% endblock %}
+{% block sayfa_aksiyonlari %}
+<a class="sa-btn sa-btn--secondary" href="{% url 'superadmin_icerik_model_yeni' 'kitap' %}"><i class="ph ph-books" aria-hidden="true"></i>Yeni kitap</a>
+<a class="sa-btn sa-btn--primary" href="{% url 'superadmin_icerik_model_yeni' 'blogyazisi' %}"><i class="ph ph-plus" aria-hidden="true"></i>Yeni yazı</a>
+{% endblock %}
 
 {% block superadmin_content %}
+{% with o=panel.ozet %}
 
-<div class="row g-3 mb-3">
-    <div class="col-6 col-xl-3">
-        <div class="card sa-card h-100">
-            <div class="card-body p-3 sa-metric">
-                <div>
-                    <div class="sa-metric__label">Bekleyen Yazı</div>
-                    <div class="sa-metric__value">{{ admin_pending_post_count }}</div>
-                </div>
-                <a class="sa-btn sa-btn--secondary sa-btn--sm" href="{% url 'superadmin_yazilar' %}">Aç</a>
-            </div>
+{# ---------- Ozet kartlari ---------- #}
+<section class="sa-kpis" aria-label="Özet">
+    {% if o %}
+    <a class="sa-kpi" href="{% url 'superadmin_yazilar' %}">
+        <div class="sa-kpi__head"><span class="sa-kpi__label">Toplam yazı</span><span class="sa-kpi__icon"><i class="ph ph-article" aria-hidden="true"></i></span></div>
+        <div class="sa-kpi__value">{{ o.yazi.toplam }}</div>
+        <div class="sa-kpi__foot">
+            {% include "superadmin/_components/degisim.html" with d=o.yazi_degisim %}
+            <span>son 30 günde {{ o.yazi.yeni }} yeni</span>
+        </div>
+    </a>
+    <a class="sa-kpi" href="{% url 'superadmin_yazilar' %}?durum=yayinda">
+        <div class="sa-kpi__head"><span class="sa-kpi__label">Yayında / taslak</span><span class="sa-kpi__icon"><i class="ph ph-broadcast" aria-hidden="true"></i></span></div>
+        <div class="sa-kpi__value">{{ o.yazi.yayinda }}<span class="sa-kpi__value-sub"> / {{ o.yazi.taslak }}</span></div>
+        <div class="sa-kpi__foot sa-kpi__foot--stack">
+            <div class="sa-meter" role="img" aria-label="Yazıların yüzde {% widthratio o.yazi.yayinda o.yazi.toplam|default:1 100 %}'i yayında"><span style="width: {% widthratio o.yazi.yayinda o.yazi.toplam|default:1 100 %}%"></span></div>
+            <span>{% if o.yazi.taslak %}{{ o.yazi.taslak }} yazı yayında değil{% else %}Tüm yazılar yayında{% endif %}</span>
+        </div>
+    </a>
+    <a class="sa-kpi" href="{% url 'superadmin_yazarlar' %}">
+        <div class="sa-kpi__head"><span class="sa-kpi__label">Yazarlar</span><span class="sa-kpi__icon"><i class="ph ph-pen-nib" aria-hidden="true"></i></span></div>
+        <div class="sa-kpi__value">{{ o.yazar.toplam }}</div>
+        <div class="sa-kpi__foot">
+            {% if o.yazar.yeni %}<span class="sa-delta sa-delta--artis"><i class="ph ph-arrow-up-right" aria-hidden="true"></i>{{ o.yazar.yeni }}</span>{% endif %}
+            <span>{% if o.yazar.yeni %}son 30 günde katıldı{% else %}son 30 günde yeni yazar yok{% endif %}</span>
+        </div>
+    </a>
+    <a class="sa-kpi{% if o.bekleyen_toplam %} sa-kpi--dikkat{% endif %}" href="#bekleyen-isler">
+        <div class="sa-kpi__head"><span class="sa-kpi__label">Bekleyen işler</span><span class="sa-kpi__icon"><i class="ph ph-hourglass-medium" aria-hidden="true"></i></span></div>
+        <div class="sa-kpi__value">{{ o.bekleyen_toplam }}</div>
+        <div class="sa-kpi__foot">
+            {% if o.bekleyen_toplam %}<span>{{ o.yazi.incelemede }} yazı · {{ o.okunmamis_mesaj }} mesaj · {{ o.yazar.onay_bekleyen }} yazar</span>
+            {% else %}<span class="sa-kpi__ok"><i class="ph ph-check-circle" aria-hidden="true"></i>Her şey güncel</span>{% endif %}
+        </div>
+    </a>
+    <div class="sa-kpi">
+        <div class="sa-kpi__head"><span class="sa-kpi__label">Son 30 günde yeni içerik</span><span class="sa-kpi__icon"><i class="ph ph-sparkle" aria-hidden="true"></i></span></div>
+        <div class="sa-kpi__value">{{ o.yeni_icerik }}</div>
+        <div class="sa-kpi__foot sa-kpi__foot--stack">
+            <span class="d-flex align-items-center gap-2">{% include "superadmin/_components/degisim.html" with d=o.yeni_icerik_degisim %}<span>önceki 30 güne göre</span></span>
+            <span>{{ o.yeni_icerik_dagilim.yazi }} yazı · {{ o.yeni_icerik_dagilim.kitap }} kitap · {{ o.yeni_icerik_dagilim.alinti }} alıntı</span>
         </div>
     </div>
-    <div class="col-6 col-xl-3">
-        <div class="card sa-card h-100">
-            <div class="card-body p-3 sa-metric">
-                <div>
-                    <div class="sa-metric__label">Okunmamış Mesaj</div>
-                    <div class="sa-metric__value">{{ admin_unread_contact_count }}</div>
-                </div>
-                <a class="sa-btn sa-btn--secondary sa-btn--sm" href="{% url 'superadmin_iletisim' %}">Aç</a>
-            </div>
-        </div>
-    </div>
-    <div class="col-6 col-xl-3">
-        <div class="card sa-card h-100">
-            <div class="card-body p-3 sa-metric">
-                <div>
-                    <div class="sa-metric__label">Toplam Yazı</div>
-                    <div class="sa-metric__value">{{ admin_total_posts }}</div>
-                </div>
-                <a class="sa-btn sa-btn--secondary sa-btn--sm" href="{% url 'superadmin_yazilar' %}">Liste</a>
-            </div>
-        </div>
-    </div>
-    <div class="col-6 col-xl-3">
-        <div class="card sa-card h-100">
-            <div class="card-body p-3 sa-metric">
-                <div>
-                    <div class="sa-metric__label">Toplam Kitap</div>
-                    <div class="sa-metric__value">{{ admin_total_books }}</div>
-                </div>
-                <a class="sa-btn sa-btn--secondary sa-btn--sm" href="{% url 'superadmin_kitaplar' %}">Liste</a>
-            </div>
-        </div>
-    </div>
-</div>
+    {% else %}
+    <div class="sa-card sa-kpis__hata">{% include "superadmin/_components/bolum_hatasi.html" with ad="Özet kartları" %}</div>
+    {% endif %}
+</section>
 
-<div class="row g-3 mb-3">
-    <div class="col-6 col-xl-3">
-        <div class="card sa-card h-100">
-            <div class="card-body p-3 sa-metric">
-                <div>
-                    <div class="sa-metric__label">Toplam Yazar</div>
-                    <div class="sa-metric__value">{{ admin_total_authors }}</div>
-                </div>
-                <a class="sa-btn sa-btn--secondary sa-btn--sm" href="{% url 'superadmin_yazarlar' %}">Liste</a>
+<div class="sa-dash">
+    {# ---------- Yayin grafigi ---------- #}
+    <section class="sa-card sa-panel sa-dash__wide" aria-labelledby="grafik-baslik">
+        <header class="sa-panel__head">
+            <div>
+                <h2 class="sa-panel__title" id="grafik-baslik">Yayınlanan içerik</h2>
+                <p class="sa-panel__sub" data-grafik-ozet>{% if panel.grafik %}Son 12 ayda {{ panel.grafik.ay.toplam }} içerik{% endif %}</p>
             </div>
-        </div>
-    </div>
-</div>
-
-<div class="card sa-card mb-3">
-    <div class="card-body p-3">
-        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
-            <h3 class="sa-section-title">Hızlı İşlemler</h3>
-            <div class="sa-action-grid flex-grow-1">
-                <a class="sa-action primary" href="{% url 'superadmin_icerik_model_yeni' 'blogyazisi' %}">Yeni Yazı</a>
-                <a class="sa-action" href="{% url 'superadmin_icerik_model_yeni' 'kitap' %}">Yeni Kitap</a>
+            {% if panel.grafik %}
+            <div class="sa-segment" role="tablist" aria-label="Dönem">
+                <button type="button" role="tab" aria-selected="true" data-donem="ay">12 ay</button>
+                <button type="button" role="tab" aria-selected="false" data-donem="gun">30 gün</button>
             </div>
-        </div>
-    </div>
-</div>
-
-<div class="row g-3">
-    <div class="col-12 col-xl-6">
-        <div class="card sa-card h-100">
-            <div class="card-body p-3">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h3 class="sa-section-title">Onaya Sunulan Yazılar</h3>
-                    <a class="sa-btn sa-btn--secondary sa-btn--sm" href="{% url 'superadmin_yazilar' %}">Tümü</a>
-                </div>
-                <div class="d-flex flex-column gap-2">
-                    {% for yazi in admin_pending_posts %}
-                    <div class="sa-list-item">
-                        <div class="d-flex justify-content-between align-items-start gap-3">
-                            <div>
-                                <strong class="d-block">{{ yazi.baslik }}</strong>
-                                <div class="sa-muted small">{{ yazi.yazar.ad_soyad }}{% if yazi.kategori %} - {{ yazi.kategori.ad }}{% endif %}</div>
-                            </div>
-                            <div class="d-flex gap-2 flex-wrap justify-content-end">
-                                <form method="post" action="{% url 'superadmin_yazi_durum_guncelle' yazi.pk %}">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="durum" value="yayinda">
-                                    <button class="sa-btn sa-btn--primary sa-btn--sm" type="submit">Yayına Al</button>
-                                </form>
-                                <form method="post" data-onay="Bu yazı reddedilecek. Yayındaysa siteden kaldırılır. Devam edilsin mi?" action="{% url 'superadmin_yazi_durum_guncelle' yazi.pk %}">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="durum" value="reddedildi">
-                                    <button class="sa-btn sa-btn--danger-outline sa-btn--sm" type="submit">Reddet</button>
-                                </form>
-                            </div>
-                        </div>
+            {% endif %}
+        </header>
+        <div class="sa-panel__body">
+            {% if panel.grafik %}
+                {% if panel.grafik.ay.toplam %}
+                <div class="sa-chart" data-grafik="yayin">
+                    <canvas aria-label="Aylara göre yayınlanan içerik grafiği" role="img"></canvas>
+                    <div class="sa-chart__yedek">
+                        <table class="table table-sm">
+                            <thead><tr><th>Ay</th>{% for s in panel.grafik.ay.seriler %}<th class="text-end">{{ s.ad }}</th>{% endfor %}</tr></thead>
+                            <tbody>
+                                {% for satir in panel.grafik.ay.satirlar %}
+                                <tr><td>{{ satir.etiket }}</td>{% for v in satir.degerler %}<td class="text-end">{{ v }}</td>{% endfor %}</tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
-                    {% empty %}
-                    <div class="sa-list-item sa-muted">Bekleyen yazı yok.</div>
-                    {% endfor %}
                 </div>
-            </div>
+                {% else %}
+                {% include "superadmin/_components/bos_durum.html" with ikon="ph-chart-bar" baslik="Henüz yayın yok" metin="Son 12 ayda yayınlanan içerik bulunmuyor." %}
+                {% endif %}
+            {% else %}
+            {% include "superadmin/_components/bolum_hatasi.html" with ad="Yayın grafiği" %}
+            {% endif %}
         </div>
-    </div>
+    </section>
 
-    <div class="col-12 col-xl-6">
-        <div class="card sa-card h-100">
-            <div class="card-body p-3">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h3 class="sa-section-title">İletişim Mesajları</h3>
-                    <a class="sa-btn sa-btn--secondary sa-btn--sm" href="{% url 'superadmin_iletisim' %}">Tümü</a>
-                </div>
-                <div class="d-flex flex-column gap-2">
-                    {% for mesaj in admin_unread_contacts %}
-                    <div class="sa-list-item">
-                        <strong class="d-block">{{ mesaj.ad }} {{ mesaj.soyad }}</strong>
-                        <div class="sa-muted small mb-1">{{ mesaj.get_amac_display }} - {{ mesaj.email }}</div>
-                        <div class="small">{{ mesaj.mesaj|truncatechars:120 }}</div>
+    {# ---------- Kategori dagilimi ---------- #}
+    <section class="sa-card sa-panel sa-dash__narrow" aria-labelledby="kategori-baslik">
+        <header class="sa-panel__head">
+            <div>
+                <h2 class="sa-panel__title" id="kategori-baslik">Kategori dağılımı</h2>
+                <p class="sa-panel__sub">Yayındaki yazılar</p>
+            </div>
+            <a class="sa-link" href="{% url 'superadmin_icerik_model_liste' 'blogkategori' %}">Kategoriler</a>
+        </header>
+        <div class="sa-panel__body">
+            {% if panel.kategoriler %}
+            <ul class="sa-bars" data-grafik="kategori">
+                {% for k in panel.kategoriler %}
+                <li>
+                    <div class="sa-bars__row"><span>{{ k.ad }}</span><strong>{{ k.n }}</strong></div>
+                    <div class="sa-bars__track"><span style="width: {{ k.oran }}%"></span></div>
+                </li>
+                {% endfor %}
+            </ul>
+            {% elif panel.kategoriler is None %}
+            {% include "superadmin/_components/bolum_hatasi.html" with ad="Kategori dağılımı" %}
+            {% else %}
+            {% include "superadmin/_components/bos_durum.html" with ikon="ph-folders" baslik="Kategorili yazı yok" metin="Yazılara kategori atandığında burada görünür." %}
+            {% endif %}
+        </div>
+    </section>
+
+    {# ---------- Bekleyen isler ---------- #}
+    <section class="sa-card sa-panel sa-dash__half" id="bekleyen-isler" aria-labelledby="bekleyen-baslik">
+        <header class="sa-panel__head">
+            <div>
+                <h2 class="sa-panel__title" id="bekleyen-baslik">Bekleyen işler</h2>
+                <p class="sa-panel__sub">Onay ve yanıt bekleyenler</p>
+            </div>
+        </header>
+        <div class="sa-panel__body sa-panel__body--flush">
+            {% if panel.bekleyen %}
+            <ul class="sa-tasks">
+                {% for g in panel.bekleyen.gruplar %}
+                <li>
+                    <a class="sa-task{% if g.sayi %} sa-task--var{% endif %}" href="{{ g.url }}">
+                        <span class="sa-task__icon"><i class="ph {{ g.ikon }}" aria-hidden="true"></i></span>
+                        <span class="sa-task__name">{{ g.ad }}</span>
+                        <span class="sa-task__count">{{ g.sayi }}</span>
+                        <i class="ph ph-caret-right sa-task__go" aria-hidden="true"></i>
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+            {% if panel.bekleyen.yazilar or panel.bekleyen.mesajlar %}
+            <div class="sa-feed sa-feed--compact">
+                {% for i in panel.bekleyen.yazilar %}
+                <a class="sa-feed__item" href="{{ i.url }}"><i class="ph ph-article" aria-hidden="true"></i><div><strong>{{ i.baslik }}</strong><span>{{ i.alt }} · {{ i.zaman|once }}</span></div></a>
+                {% endfor %}
+                {% for i in panel.bekleyen.mesajlar %}
+                <a class="sa-feed__item" href="{{ i.url }}"><i class="ph ph-envelope-simple" aria-hidden="true"></i><div><strong>{{ i.baslik }}</strong><span>{{ i.alt }} · {{ i.zaman|once }}</span></div></a>
+                {% endfor %}
+            </div>
+            {% elif not panel.ozet.bekleyen_toplam %}
+            {% include "superadmin/_components/bos_durum.html" with ikon="ph-check-circle" baslik="Bekleyen iş yok" metin="Onay bekleyen yazı, okunmamış mesaj ya da onay bekleyen yazar bulunmuyor." %}
+            {% endif %}
+            {% else %}
+            {% include "superadmin/_components/bolum_hatasi.html" with ad="Bekleyen işler" %}
+            {% endif %}
+        </div>
+    </section>
+
+    {# ---------- Son aktiviteler ---------- #}
+    <section class="sa-card sa-panel sa-dash__half" aria-labelledby="aktivite-baslik">
+        <header class="sa-panel__head">
+            <div>
+                <h2 class="sa-panel__title" id="aktivite-baslik">Son aktiviteler</h2>
+                <p class="sa-panel__sub">Eklenen ve düzenlenen içerikler</p>
+            </div>
+        </header>
+        <div class="sa-panel__body sa-panel__body--flush">
+            {% if panel.aktiviteler %}
+            <ol class="sa-feed">
+                {% for a in panel.aktiviteler %}
+                <li class="sa-feed__item">
+                    <i class="ph {{ a.ikon }}" aria-hidden="true"></i>
+                    <div>
+                        <strong>{{ a.metin }}</strong>
+                        <span>{% if a.kisi %}{{ a.kisi }} · {% endif %}{{ a.detay }}</span>
                     </div>
-                    {% empty %}
-                    <div class="sa-list-item sa-muted">Okunmamış mesaj yok.</div>
-                    {% endfor %}
-                </div>
-            </div>
+                    <time datetime="{{ a.zaman|date:'c' }}" title="{{ a.zaman|date:'j F Y H:i' }}">{{ a.zaman|once }}</time>
+                </li>
+                {% endfor %}
+            </ol>
+            {% elif panel.aktiviteler is None %}
+            {% include "superadmin/_components/bolum_hatasi.html" with ad="Son aktiviteler" %}
+            {% else %}
+            {% include "superadmin/_components/bos_durum.html" with ikon="ph-clock-counter-clockwise" baslik="Henüz aktivite yok" metin="İçerik eklendikçe burada listelenir." %}
+            {% endif %}
         </div>
-    </div>
-</div>
+    </section>
 
-<div class="card sa-card mt-3">
-    <div class="card-body p-3">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h3 class="sa-section-title">Son Hareketler</h3>
-        </div>
-        <div class="row g-2">
-            {% for log in admin_recent_logs|slice:":6" %}
-            <div class="col-12 col-lg-6">
-                <div class="sa-list-item h-100">
-                    <strong class="d-block">{{ log.object_repr }}</strong>
-                    <div class="sa-muted small">{{ log.user }} - {{ log.action_time|date:"d M Y H:i" }}</div>
-                </div>
+    {# ---------- En cok okunanlar ---------- #}
+    <section class="sa-card sa-panel sa-dash__third" aria-labelledby="okunan-baslik">
+        <header class="sa-panel__head">
+            <div>
+                <h2 class="sa-panel__title" id="okunan-baslik">En çok okunanlar</h2>
+                <p class="sa-panel__sub">15 Ekim 2026'dan itibaren</p>
             </div>
-            {% empty %}
-            <div class="col-12">
-                <div class="sa-list-item sa-muted">Henüz hareket kaydı yok.</div>
-            </div>
-            {% endfor %}
+        </header>
+        <div class="sa-panel__body sa-panel__body--flush">
+            {% if panel.okunanlar %}
+            <ol class="sa-rank">
+                {% for y in panel.okunanlar %}
+                <li><a href="{{ y.url }}"><span class="sa-rank__no">{{ forloop.counter }}</span><span class="sa-rank__text"><strong>{{ y.baslik }}</strong><span>{{ y.yazar }}</span></span><span class="sa-rank__val">{{ y.okunma }}</span></a></li>
+                {% endfor %}
+            </ol>
+            {% elif panel.okunanlar is None %}
+            {% include "superadmin/_components/bolum_hatasi.html" with ad="En çok okunanlar" %}
+            {% else %}
+            {% include "superadmin/_components/bos_durum.html" with ikon="ph-eye" baslik="Henüz okunma verisi yok" metin="Okunma sayımı 15 Ekim 2026'da başladı; ziyaretler geldikçe liste oluşur." %}
+            {% endif %}
         </div>
-    </div>
+    </section>
+
+    {# ---------- Uretken yazarlar ---------- #}
+    <section class="sa-card sa-panel sa-dash__third" aria-labelledby="yazar-baslik">
+        <header class="sa-panel__head">
+            <div>
+                <h2 class="sa-panel__title" id="yazar-baslik">En üretken yazarlar</h2>
+                <p class="sa-panel__sub">Yayındaki yazı sayısı</p>
+            </div>
+            <a class="sa-link" href="{% url 'superadmin_yazarlar' %}">Tümü</a>
+        </header>
+        <div class="sa-panel__body sa-panel__body--flush">
+            {% if panel.yazarlar %}
+            <ol class="sa-rank">
+                {% for y in panel.yazarlar %}
+                <li><a href="{% url 'superadmin_icerik_model_duzenle' 'yazarprofil' y.pk %}"><span class="sa-avatar sa-avatar--soft">{{ y.ad_soyad|slice:":1"|upper }}</span><span class="sa-rank__text"><strong>{{ y.ad_soyad }}</strong></span><span class="sa-rank__val">{{ y.n }}</span></a></li>
+                {% endfor %}
+            </ol>
+            {% elif panel.yazarlar is None %}
+            {% include "superadmin/_components/bolum_hatasi.html" with ad="En üretken yazarlar" %}
+            {% else %}
+            {% include "superadmin/_components/bos_durum.html" with ikon="ph-pen-nib" baslik="Yayında yazı yok" metin="" %}
+            {% endif %}
+        </div>
+    </section>
+
+    {# ---------- Hizli islemler ---------- #}
+    <section class="sa-card sa-panel sa-dash__third" aria-labelledby="hizli-baslik">
+        <header class="sa-panel__head">
+            <div><h2 class="sa-panel__title" id="hizli-baslik">Hızlı işlemler</h2></div>
+        </header>
+        <div class="sa-panel__body">
+            <div class="sa-quick">
+                <a href="{% url 'superadmin_icerik_model_yeni' 'blogyazisi' %}"><i class="ph ph-note-pencil" aria-hidden="true"></i>Yeni yazı</a>
+                <a href="{% url 'superadmin_icerik_model_yeni' 'yazarprofil' %}"><i class="ph ph-user-plus" aria-hidden="true"></i>Yeni yazar</a>
+                <a href="{% url 'superadmin_icerik_model_yeni' 'kitap' %}"><i class="ph ph-book-open" aria-hidden="true"></i>Yeni kitap</a>
+                <a href="{% url 'superadmin_iletisim' %}"><i class="ph ph-envelope-simple" aria-hidden="true"></i>Mesajlar{% if panel.ozet.okunmamis_mesaj %} <span class="sa-badge">{{ panel.ozet.okunmamis_mesaj }}</span>{% endif %}</a>
+            </div>
+        </div>
+    </section>
 </div>
+{% endwith %}
 {% endblock %}

@@ -1,0 +1,5 @@
+{% comment %}Onceki doneme gore degisim rozeti. d: {'yuzde': 12, 'yon': 'artis'|'azalis'|'sabit'|'yeni'}{% endcomment %}
+{% if d.yon == "artis" %}<span class="sa-delta sa-delta--artis" title="Önceki 30 güne göre artış"><i class="ph ph-arrow-up-right" aria-hidden="true"></i>%{{ d.yuzde }}</span>
+{% elif d.yon == "azalis" %}<span class="sa-delta sa-delta--azalis" title="Önceki 30 güne göre azalış"><i class="ph ph-arrow-down-right" aria-hidden="true"></i>%{{ d.yuzde }}</span>
+{% elif d.yon == "yeni" %}<span class="sa-delta sa-delta--artis" title="Önceki 30 günde kayıt yoktu"><i class="ph ph-arrow-up-right" aria-hidden="true"></i>Yeni</span>
+{% else %}<span class="sa-delta" title="Önceki 30 günle aynı"><i class="ph ph-minus" aria-hidden="true"></i>%0</span>{% endif %}

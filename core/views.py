@@ -24,6 +24,7 @@ import os
 import math
 from urllib.parse import urlencode
 
+from .dashboard import dashboard_verisi
 from .giris_korumasi import giris_kilitli_mi
 from .forms import (
     ContactForm,
@@ -323,44 +324,29 @@ def aktif_menu(request):
 
 
 def build_superadmin_context(request):
-    pending_posts = list(
-        BlogYazisi.objects.select_related("yazar", "kategori")
-        .prefetch_related("kategoriler")
-        .filter(durum=BlogYazisi.DurumSecenekleri.INCELEMEDE)
-        .order_by("-created_at")[:6]
-    )
-    unread_contacts = list(
-        IletisimBasvurusu.objects.filter(incelendi=False).order_by("-created_at")[:6]
-    )
-    recent_logs = list(
-        LogEntry.objects.select_related("content_type", "user").order_by("-action_time")[:8]
-    )
+    """Tum admin sayfalarinda gereken baglam: menu durumu ve menu rozetleri."""
+    pending_post_count = BlogYazisi.objects.filter(durum=BlogYazisi.DurumSecenekleri.INCELEMEDE).count()
+    unread_contact_count = IletisimBasvurusu.objects.filter(incelendi=False).count()
+    return {
+        "profil": request.superadmin_profil,
+        "aktif_menu": aktif_menu(request),
+        "admin_pending_post_count": pending_post_count,
+        "admin_unread_contact_count": unread_contact_count,
+        "admin_notification_count": pending_post_count + unread_contact_count,
+    }
+
+
+def django_admin_modulleri():
+    """Icerik Yonetimi sayfasindaki "Sistem (Django Admin)" kartlari."""
     model_groups = [
-        (
-            "Kimlik Doğrulama ve Yetkilendirme",
-            [
-                ("Gruplar", "auth", "group"),
-                ("Kullanıcılar", "auth", "user"),
-            ],
-        ),
-        (
-            "Yönetici Arayüzü",
-            [
-                ("Temalar", "admin_interface", "theme"),
-            ],
-        ),
+        ("Kimlik Doğrulama ve Yetkilendirme", [("Gruplar", "auth", "group"), ("Kullanıcılar", "auth", "user")]),
+        ("Yönetici Arayüzü", [("Temalar", "admin_interface", "theme")]),
     ]
     admin_modules = []
     for group_name, items in model_groups:
         models = []
         for label, app_label, model_name in items:
-            if app_label == "core" and model_name in CONTENT_MODEL_CONFIG:
-                admin_url = reverse("superadmin_icerik_model_liste", args=[model_name])
-                add_url = reverse("superadmin_icerik_model_yeni", args=[model_name])
-            elif app_label == "core" and model_name == "iletisimbasvurusu":
-                admin_url = reverse("superadmin_iletisim")
-                add_url = ""
-            elif app_label == "auth" and model_name == "user":
+            if app_label == "auth" and model_name == "user":
                 admin_url = reverse("superadmin_kullanicilar")
                 add_url = reverse("superadmin_kullanici_yeni")
             else:
@@ -372,38 +358,15 @@ def build_superadmin_context(request):
                     add_url = reverse(f"admin:{app_label}_{model_name}_add")
                 except NoReverseMatch:
                     add_url = ""
-            models.append(
-                {
-                    "name": label,
-                    "model_name": model_name,
-                    "admin_url": admin_url,
-                    "add_url": add_url,
-                }
-            )
+            models.append({"name": label, "model_name": model_name, "admin_url": admin_url, "add_url": add_url})
         admin_modules.append({"name": group_name, "models": models})
-    pending_post_count = BlogYazisi.objects.filter(durum=BlogYazisi.DurumSecenekleri.INCELEMEDE).count()
-    unread_contact_count = IletisimBasvurusu.objects.filter(incelendi=False).count()
-    return {
-        "profil": request.superadmin_profil,
-        "aktif_menu": aktif_menu(request),
-        "app_list": admin_modules,
-        "admin_pending_posts": pending_posts,
-        "admin_unread_contacts": unread_contacts,
-        "admin_recent_logs": recent_logs,
-        "admin_pending_post_count": pending_post_count,
-        "admin_unread_contact_count": unread_contact_count,
-        "admin_notification_count": pending_post_count + unread_contact_count,
-        "admin_total_books": Kitap.objects.count(),
-        "admin_total_quotes": Alinti.objects.count(),
-        "admin_total_authors": YazarProfil.objects.count(),
-        "admin_total_posts": BlogYazisi.objects.count(),
-    }
+    return admin_modules
 
 
 @superadmin_required
 def superadmin_dashboard(request):
     context = build_superadmin_context(request)
-    context["page_title"] = "Kontrol Paneli"
+    context.update({"page_title": "Kontrol Paneli", "panel": dashboard_verisi()})
     return render(request, "superadmin/dashboard.html", context)
 
 
@@ -730,7 +693,7 @@ def superadmin_kitap_maliyeti_istatistik_sifirla(request):
 @superadmin_required
 def superadmin_icerik_yonetimi(request):
     context = build_superadmin_context(request)
-    context.update({"page_title": "İçerik Yönetimi"})
+    context.update({"page_title": "İçerik Yönetimi", "app_list": django_admin_modulleri()})
     return render(request, "superadmin/content_management.html", context)
 
 

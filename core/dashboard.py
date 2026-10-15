@@ -173,6 +173,11 @@ def yayin_grafigi():
         sonuc["ay"]["seriler"].append({"ad": ad, "veri": [aylik.get(a, 0) for a in aylar]})
     for donem in sonuc.values():
         donem["toplam"] = sum(sum(s["veri"]) for s in donem["seriler"])
+        # Grafik yuklenemezse gosterilen tablo icin satirlar
+        donem["satirlar"] = [
+            {"etiket": etiket, "degerler": [s["veri"][i] for s in donem["seriler"]]}
+            for i, etiket in enumerate(donem["etiketler"])
+        ]
     return sonuc
 
 
@@ -188,7 +193,8 @@ def kategori_dagilimi(ilk=7):
     if len(satirlar) > ilk:
         diger = sum(n for _, n in satirlar[ilk:])
         satirlar = satirlar[:ilk] + [("Diğer", diger)]
-    return {"etiketler": [a for a, _ in satirlar], "veri": [n for _, n in satirlar]}
+    en_buyuk = max((n for _, n in satirlar), default=0)
+    return [{"ad": ad, "n": n, "oran": round(n * 100 / en_buyuk) if en_buyuk else 0} for ad, n in satirlar]
 
 
 def en_cok_okunanlar(adet=5):

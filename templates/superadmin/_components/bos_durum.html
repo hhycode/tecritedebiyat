@@ -1,0 +1,6 @@
+{% comment %}Bos veri gorunumu. ikon, baslik, metin{% endcomment %}
+<div class="sa-empty">
+    <i class="ph {{ ikon|default:'ph-tray' }}" aria-hidden="true"></i>
+    <strong>{{ baslik }}</strong>
+    {% if metin %}<span>{{ metin }}</span>{% endif %}
+</div>
