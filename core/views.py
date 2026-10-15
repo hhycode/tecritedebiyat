@@ -462,12 +462,15 @@ def superadmin_iletisim_sil(request, pk):
     context.update(
         {
             "page_title": "İletişim Başvurusunu Sil",
-            "item_title": f"{basvuru.ad} {basvuru.soyad}",
-            "cancel_url": reverse("superadmin_iletisim_detay", args=[basvuru.pk]),
+            "onay_ust_etiket": "İletişim Başvurusu",
             "confirm_message": "Bu iletişim başvurusunu kalıcı olarak silmek üzeresin. Bu işlem geri alınamaz.",
+            "onay_detaylari": [("Kişi", f"{basvuru.ad} {basvuru.soyad}"), ("E-posta", basvuru.email), ("Tarih", basvuru.created_at.strftime("%d.%m.%Y %H:%M"))],
+            "onay_buton": "Kalıcı Olarak Sil",
+            "cancel_url": reverse("superadmin_iletisim_detay", args=[basvuru.pk]),
+            "geri_url": reverse("superadmin_iletisim"),
         }
     )
-    return render(request, "superadmin/contact_confirm_delete.html", context)
+    return render(request, "superadmin/confirm.html", context)
 
 
 @superadmin_required
@@ -563,15 +566,17 @@ def superadmin_kitap_maliyeti_istatistik_sifirla(request):
     context.update(
         {
             "page_title": "Kullanım İstatistiğini Sıfırla",
-            "item_title": "Kullanım İstatistiğini Sıfırla",
-            "cancel_url": reverse("superadmin_kitap_maliyeti_ayarlari"),
+            "onay_ust_etiket": "Kitap Maliyeti Ayarları",
             "confirm_message": (
                 "Kitap maliyeti hesaplama aracının toplam kullanım sayısını ve tür dağılımını "
                 "kalıcı olarak sıfırlamak üzeresin. Bu işlem geri alınamaz."
             ),
+            "onay_detaylari": [("Kayıtlı hesaplama", KitapMaliyetiHesaplamaKaydi.objects.count())],
+            "onay_buton": "Evet, Sıfırla",
+            "cancel_url": reverse("superadmin_kitap_maliyeti_ayarlari"),
         }
     )
-    return render(request, "superadmin/kitap_maliyeti_istatistik_sifirla.html", context)
+    return render(request, "superadmin/confirm.html", context)
 
 
 @superadmin_required
@@ -735,15 +740,15 @@ def superadmin_icerik_model_sil(request, model_key, pk):
     context.update(
         {
             "page_title": f"{config['singular'].capitalize()} sil",
-            "content_config": config,
-            "model_key": model_key,
-            "object": nesne,
-            "back_url": back_url,
-            "confirm_title": f"{config['singular'].capitalize()} sil",
-            "confirm_message": f"'{nesne}' kaydını kalıcı olarak silmek üzeresin. Bu işlem geri alınamaz.",
+            "onay_ust_etiket": "İçerik Yönetimi",
+            "confirm_message": f"'{nesne}' kaydını kalıcı olarak silmek üzeresin. Bu işlem geri alınamaz. Silmeden önce içeriğin başka alanlarda kullanılmadığından emin ol.",
+            "onay_detaylari": [("İçerik türü", config["title"]), ("Kayıt", str(nesne)), ("Kimlik", f"#{nesne.pk}")],
+            "onay_buton": "Kalıcı Olarak Sil",
+            "cancel_url": reverse("superadmin_icerik_model_duzenle", args=[model_key, nesne.pk]),
+            "geri_url": back_url,
         }
     )
-    return render(request, "superadmin/content_model_confirm_delete.html", context)
+    return render(request, "superadmin/confirm.html", context)
 
 
 KULLANICI_FORM_TAM_GENISLIK = {"is_active", "is_staff", "is_superuser"}

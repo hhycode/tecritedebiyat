@@ -1,0 +1,32 @@
+{% extends "superadmin/base.html" %}
+{% comment %}
+Geri alinamaz islemler icin ortak onay sayfasi (silme, sifirlama).
+Baglam: onay_ust_etiket, page_title, confirm_message, onay_detaylari [(etiket, deger)],
+onay_buton, cancel_url, geri_url, geri_etiketi.
+{% endcomment %}
+
+{% block sayfa_ust_etiket %}{{ onay_ust_etiket }}{% endblock %}
+{% block sayfa_aksiyonlari %}{% if geri_url %}<a class="sa-btn sa-btn--secondary" href="{{ geri_url }}">{{ geri_etiketi|default:"Listeye Dön" }}</a>{% endif %}{% endblock %}
+
+{% block superadmin_content %}
+<div class="card sa-card sa-confirm">
+    <div class="card-body p-4 p-lg-5">
+        <div class="alert sa-alert alert-danger mb-4" role="alert">{{ confirm_message }}</div>
+
+        {% if onay_detaylari %}
+        <dl class="row mb-4">
+            {% for etiket, deger in onay_detaylari %}
+            <dt class="col-sm-3">{{ etiket }}</dt>
+            <dd class="col-sm-9">{{ deger }}</dd>
+            {% endfor %}
+        </dl>
+        {% endif %}
+
+        <form method="post" class="sa-form-actions mt-0">
+            {% csrf_token %}
+            <a class="sa-btn sa-btn--secondary" href="{{ cancel_url }}">Vazgeç</a>
+            <button class="sa-btn sa-btn--danger" type="submit">{{ onay_buton }}</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

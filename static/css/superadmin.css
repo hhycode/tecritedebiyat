@@ -236,6 +236,11 @@ body {
     display: none;
 }
 
+/* Onay sayfasi */
+.sa-confirm {
+    max-width: 760px;
+}
+
 /* Durum etiketi */
 .sa-pill {
     display: inline-flex;
