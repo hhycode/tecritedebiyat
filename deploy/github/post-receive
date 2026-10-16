@@ -1,0 +1,15 @@
+#!/bin/bash
+# Sunucudaki depo kancasi (~/yayinevim/.git/hooks/post-receive).
+# Siteye gelen her guncellemeyi GitHub'daki gizli depoya da gonderir. Arka planda calisir;
+# GitHub'a ulasilamasa bile sitenin guncellenmesini engellemez. Kayit: backups/github-gonderim.log
+KOK=/home/hhycode/yayinevim
+(
+    unset GIT_DIR GIT_WORK_TREE GIT_QUARANTINE_PATH
+    cd "$KOK" || exit 0
+    if git push -q github master >/dev/null 2>"$KOK/backups/.github-hata"; then
+        echo "$(date '+%F %T') gonderildi $(git rev-parse --short HEAD)" >> "$KOK/backups/github-gonderim.log"
+    else
+        echo "$(date '+%F %T') HATA: $(tr '\n' ' ' < "$KOK/backups/.github-hata")" >> "$KOK/backups/github-gonderim.log"
+    fi
+) </dev/null >/dev/null 2>&1 &
+exit 0

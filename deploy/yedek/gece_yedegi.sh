@@ -1,5 +1,5 @@
 #!/bin/bash
-# Gece yedegi (yedek-al.timer ile her gece 03:30).
+# Gece yedegi (yedek-al.timer ile her gece 03:30). Sonunda kodu GitHub'a da gonderir.
 # Veritabani SQLite'in kendi yedekleme yontemiyle alinir (site calisirken de tutarli kalir),
 # media klasoru arsivlenir. Son 14 gece saklanir; eskiler silinir.
 # Klasor: ~/yayinevim/backups/gece/YYYYMMDD/{db.sqlite3, media.tar.gz}
@@ -40,5 +40,13 @@ mv "$GECICI" "$D"
 
 # En yeni SAKLA gece kalir
 ls -1d "$HEDEF"/20[0-9]* 2>/dev/null | sort | head -n -"$SAKLA" | xargs -r rm -rf
+
+# Kodun GitHub'daki gizli kopyasini da guncel tut (sunucuda dogrudan yapilan degisiklikler icin);
+# basarisiz olsa da yedegi bozmaz
+if git -C "$KOK" push -q github master 2>/dev/null; then
+    echo "github: guncel ($(git -C "$KOK" rev-parse --short HEAD))"
+else
+    echo "github: gonderilemedi (yedek etkilenmedi)"
+fi
 
 echo "yedek hazir: $D ($(du -sh "$D" | cut -f1)); sunucuda saklanan gece sayisi: $(ls -1d "$HEDEF"/20[0-9]* | wc -l)"

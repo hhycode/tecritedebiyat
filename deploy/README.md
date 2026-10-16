@@ -12,3 +12,10 @@ Bu klasordeki dosyalar sunucuya elle kurulur; uygulama bunlari okumaz.
 
 ## gunicorn.service
 - ExecStart'a `--timeout 120` (buyuk yuklemelerin islenmesi icin)
+
+## GitHub (gizli kopya: github.com/hhycode/tecritedebiyat)
+Sunucuda `github` uzak deposu ve yalnizca bu depoya yazabilen deploy key (`~/.ssh/github_tecrit`,
+`~/.ssh/config` icinde `Host github-tecrit`) tanimli.
+    install -m 755 deploy/github/post-receive .git/hooks/post-receive
+Her guncelleme gelince ve her gece yedekten sonra kod GitHub'a gonderilir.
+Kayit: `backups/github-gonderim.log`
