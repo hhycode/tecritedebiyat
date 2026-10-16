@@ -9,6 +9,12 @@ Bu klasordeki dosyalar sunucuya elle kurulur; uygulama bunlari okumaz.
 ## nginx (www.tecritedebiyat.com sunucu blogu)
 - `client_max_body_size 210M;`  (video siniri 200 MB + form verisi; core/medya.py ile uyumlu tutun)
 - `location /media/ { ... add_header X-Content-Type-Options nosniff always; }`
+- Statik metin dosyalari icin sikistirma (yalnizca www blogunda; HTML zaten varsayilan olarak sikistirilir):
+
+      gzip_vary on;
+      gzip_comp_level 6;
+      gzip_min_length 1024;
+      gzip_types text/css application/javascript text/javascript application/json application/manifest+json image/svg+xml text/plain text/xml application/xml;
 
 ## gunicorn.service
 - ExecStart'a `--timeout 120` (buyuk yuklemelerin islenmesi icin)
