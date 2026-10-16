@@ -1,0 +1,66 @@
+/* Yazi editoru (CKEditor 5) - yazar paneli ve yonetim paneli formlari.
+   Renkler panelin degiskenlerine (superadmin.css --sa-*) baglanir; acik/koyu temaya uyar. */
+.ck.ck-editor {
+    --ck-border-radius: 10px;
+    --ck-font-face: var(--sa-font, system-ui, sans-serif);
+    --ck-color-base-background: var(--sa-surface, #fff);
+    --ck-color-base-foreground: var(--sa-surface-2, #f4f4f5);
+    --ck-color-base-border: var(--sa-border, #e4e4e7);
+    --ck-color-text: var(--sa-text, #18181b);
+    --ck-color-toolbar-background: var(--sa-surface-2, #f4f4f5);
+    --ck-color-toolbar-border: var(--sa-border, #e4e4e7);
+    --ck-color-button-default-hover-background: var(--sa-surface-3, #e9e9ec);
+    --ck-color-button-default-active-background: var(--sa-surface-3, #e9e9ec);
+    --ck-color-button-on-background: var(--sa-surface-3, #e9e9ec);
+    --ck-color-button-on-hover-background: var(--sa-border-strong, #d4d4d8);
+    --ck-color-button-on-color: var(--sa-text, #18181b);
+    --ck-color-dropdown-panel-background: var(--sa-surface, #fff);
+    --ck-color-dropdown-panel-border: var(--sa-border, #e4e4e7);
+    --ck-color-panel-background: var(--sa-surface, #fff);
+    --ck-color-panel-border: var(--sa-border, #e4e4e7);
+    --ck-color-input-background: var(--sa-surface, #fff);
+    --ck-color-input-border: var(--sa-border-strong, #d4d4d8);
+    --ck-color-input-text: var(--sa-text, #18181b);
+    --ck-color-list-background: var(--sa-surface, #fff);
+    --ck-color-list-button-hover-background: var(--sa-surface-2, #f4f4f5);
+    --ck-color-list-button-on-background: var(--sa-surface-3, #e9e9ec);
+    --ck-color-list-button-on-text: var(--sa-text, #18181b);
+    --ck-color-focus-border: var(--sa-border-strong, #a1a1aa);
+    --ck-color-shadow-inner: transparent;
+    --ck-focus-ring: 1px solid var(--sa-border-strong, #a1a1aa);
+    width: 100%;
+}
+/* Acilir menuler govdeye eklenir; ayni degiskenler orada da gecerli olsun */
+.ck.ck-body-wrapper {
+    --ck-color-base-background: var(--sa-surface, #fff);
+    --ck-color-text: var(--sa-text, #18181b);
+    --ck-color-dropdown-panel-background: var(--sa-surface, #fff);
+    --ck-color-panel-background: var(--sa-surface, #fff);
+    --ck-color-input-background: var(--sa-surface, #fff);
+    --ck-color-input-text: var(--sa-text, #18181b);
+    --ck-color-list-background: var(--sa-surface, #fff);
+    --ck-color-tooltip-background: var(--sa-text, #18181b);
+    --ck-color-tooltip-text: var(--sa-surface, #fff);
+}
+
+/* Yazma alani: rahat bir yukseklik, siirlerin okunabilecegi satir araligi */
+.ck-editor__editable_inline {
+    min-height: 420px;
+    max-height: 70vh;
+    padding: 0 1.2em !important;
+    font-size: 1rem;
+    line-height: 1.7;
+}
+.ck-editor__editable_inline p {
+    margin: 0 0 1em;
+}
+.ck-source-editing-area textarea {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: .85rem;
+}
+@media (max-width: 767.98px) {
+    .ck-editor__editable_inline {
+        min-height: 300px;
+        max-height: 60vh;
+    }
+}

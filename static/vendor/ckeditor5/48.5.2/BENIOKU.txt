@@ -1,0 +1,3 @@
+CKEditor 5 v48.5.2 (npm: ckeditor5@48.5.2, sha512 dogrulandi), GPL-2.0-or-later lisansiyla
+kendi sunucumuzdan sunulur (licenseKey: 'GPL'). Kaynak: https://github.com/ckeditor/ckeditor5
+Yalnizca tarayici dosyalari alindi: dist/browser/ckeditor5.umd.js, ckeditor5.css, dist/translations/tr.umd.js

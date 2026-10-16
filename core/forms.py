@@ -315,16 +315,21 @@ class PanelBlogYazisiForm(forms.ModelForm):
         }
 
     class Media:
+        # CKEditor 5 (GPL) kendi sunucumuzdan; surum klasoru adres degistigi icin onbellek sorunu olmaz
+        css = {"all": ("vendor/ckeditor5/48.5.2/ckeditor5.css", "css/yazi-editoru.css")}
         js = (
-            "https://cdn.ckeditor.com/4.22.1/full-all/ckeditor.js",
-            # Mutlak yol: static() sorgu dizgesini kodlayip (%3Fv%3D2) dosyayi 404'e dusurmesin
-            settings.STATIC_URL + "js/admin-blog-ckeditor.js?v=2",
+            "vendor/ckeditor5/48.5.2/ckeditor5.umd.js",
+            "vendor/ckeditor5/48.5.2/translations/tr.umd.js",
+            "js/yazi-editoru.js",
         )
 
     def __init__(self, *args, is_superadmin=False, panel_gorunumu=False, **kwargs):
         super().__init__(*args, **kwargs)
         turkce_etiketleri_uygula(self)
         self.is_superadmin = is_superadmin
+        if is_superadmin:
+            # Kaynak kod (HTML) gorunumu yalnizca yoneticilere
+            self.fields["icerik"].widget.attrs["data-kaynak-kodu"] = "1"
         # Icerik editorde (CKEditor) yazilir; tarayicinin gizli alana "required" uyarisi gonderimi
         # sessizce engellemesin diye zorunluluk sunucuda (clean_icerik) denetlenir.
         self.fields["icerik"].required = False
