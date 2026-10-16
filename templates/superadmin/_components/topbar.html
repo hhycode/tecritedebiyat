@@ -31,7 +31,7 @@
                 <a role="menuitem" href="{% url 'superadmin_kullanici_sifre' request.user.pk %}"><i class="ph ph-key" aria-hidden="true"></i>Şifremi değiştir</a>
                 <a role="menuitem" href="{% url 'yazar_paneli' %}"><i class="ph ph-pen" aria-hidden="true"></i>Yazar paneli</a>
                 <a role="menuitem" href="{% url 'anasayfa' %}" target="_blank" rel="noopener"><i class="ph ph-arrow-square-out" aria-hidden="true"></i>Siteyi görüntüle</a>
-                <a role="menuitem" class="sa-user__logout" href="{% url 'cikis' %}"><i class="ph ph-sign-out" aria-hidden="true"></i>Çıkış yap</a>
+                <form method="post" action="{% url 'cikis' %}" class="sa-user__logout-form">{% csrf_token %}<button type="submit" role="menuitem" class="sa-user__logout"><i class="ph ph-sign-out" aria-hidden="true"></i>Çıkış yap</button></form>
             </div>
         </details>
     </div>

@@ -2249,8 +2249,14 @@ def sifre_sifirla(request, uidb64, token):
 
 
 def cikis(request):
-    logout(request)
-    return redirect("anasayfa")
+    """Cikis yalnizca POST ile (CSRF korumali). Baglanti ya da baska bir sitedeki gizli bir
+    resim/istek kullaniciyi istemeden oturumdan cikaramaz; GET onay sayfasini gosterir."""
+    if request.method == "POST":
+        logout(request)
+        return redirect("anasayfa")
+    if not request.user.is_authenticated:
+        return redirect("anasayfa")
+    return render(request, "cikis.html", seo_context("Çıkış Yap", "Tecrit Edebiyat hesabından çıkış."))
 
 
 # Yazar panelinde durum filtresi -> veritabani durumlari. "duzeltme" editorun geri cevirdigi yazilardir.

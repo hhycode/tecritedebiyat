@@ -1911,3 +1911,17 @@ body.custom-menu-open .custom-menu-toggle * {
         min-height: 650px;
     }
 }
+
+/* Ust bardaki Cikis Yap bir form dugmesi (POST); baglanti gibi yerlesir */
+.tecrit-cikis-form {
+    display: inline-flex;
+    margin: 0;
+}
+.tecrit-cikis-form button.btn,
+.cikis-form button.btn {
+    font: inherit;
+    cursor: pointer;
+}
+.cikis-form {
+    margin-bottom: 2.4rem;
+}

@@ -562,7 +562,8 @@ html.sa-menu-dar .sa-sidebar__collapse i {
     color: var(--sa-muted);
     font-size: .8rem;
 }
-.sa-user__menu a {
+.sa-user__menu a,
+.sa-user__menu button {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -571,12 +572,26 @@ html.sa-menu-dar .sa-sidebar__collapse i {
     color: var(--sa-text);
     text-decoration: none;
 }
-.sa-user__menu a i {
+.sa-user__menu a i,
+.sa-user__menu button i {
     color: var(--sa-muted);
     font-size: 1.05rem;
 }
-.sa-user__menu a:hover {
+.sa-user__menu a:hover,
+.sa-user__menu button:hover {
     background: var(--sa-surface-2);
+}
+/* Cikis bir form dugmesi (POST); menudeki baglantilarla ayni gorunur */
+.sa-user__logout-form {
+    margin: 0;
+}
+.sa-user__menu button {
+    width: 100%;
+    border: 0;
+    background: none;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
 }
 .sa-user__logout {
     margin-top: 4px;

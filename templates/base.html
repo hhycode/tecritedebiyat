@@ -79,7 +79,7 @@
     <link rel="stylesheet" type="text/css" href="{% static 'css/loaders/loader.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/plugins.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/custom.css' %}?v=7">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/custom.css' %}?v=8">
 
     <meta name="theme-color" media="(prefers-color-scheme: light)" content="#FAF7F6">
     <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#161616">
@@ -163,10 +163,13 @@
         <i class="ph-bold ph-sign-in"></i>
     </a>
     {% else %}
-    <a class="btn btn-anim btn-default btn-mobile-icon btn-outline slide-right-up" href="{% url 'cikis' %}">
-        <span class="btn-caption">Çıkış Yap</span>
-        <i class="ph-bold ph-sign-out"></i>
-    </a>
+    <form method="post" action="{% url 'cikis' %}" class="tecrit-cikis-form">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-anim btn-default btn-mobile-icon btn-outline slide-right-up">
+            <span class="btn-caption">Çıkış Yap</span>
+            <i class="ph-bold ph-sign-out"></i>
+        </button>
+    </form>
     {% endif %}
 </div>
 
