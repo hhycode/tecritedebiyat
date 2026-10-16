@@ -35,7 +35,13 @@
                             {% endif %}
                         </td>
                         <td>
-                            <a class="sa-btn sa-btn--primary sa-btn--sm mb-2" href="{% url 'superadmin_iletisim_detay' basvuru.pk %}">İncele</a>
+                            <a class="sa-btn sa-btn--primary sa-btn--sm mb-2" href="{% url 'superadmin_iletisim_detay' basvuru.pk %}">Aç</a>
+                            {% if not basvuru.incelendi %}
+                            <form method="post" action="{% url 'superadmin_iletisim_durum_guncelle' basvuru.pk %}" class="d-inline">
+                                {% csrf_token %}<input type="hidden" name="incelendi" value="1">
+                                <button class="sa-btn sa-btn--secondary sa-btn--sm mb-2" type="submit">İncelendi</button>
+                            </form>
+                            {% endif %}
                             <a class="sa-btn sa-btn--danger-outline sa-btn--sm mb-2" href="{% url 'superadmin_iletisim_sil' basvuru.pk %}">Sil</a>
                         </td>
                     </tr>

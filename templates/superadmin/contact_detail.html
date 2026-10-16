@@ -5,6 +5,17 @@
 {% block sayfa_aciklamasi %}{{ basvuru.get_amac_display }} · {{ basvuru.created_at|date:"d.m.Y H:i" }}{% endblock %}
 {% block sayfa_aksiyonlari %}
 {% if basvuru.incelendi %}<span class="sa-pill sa-pill--success">İncelendi</span>{% else %}<span class="sa-pill sa-pill--warning">Bekliyor</span>{% endif %}
+<form method="post" action="{% url 'superadmin_iletisim_durum_guncelle' basvuru.pk %}" class="d-inline">
+    {% csrf_token %}
+    <input type="hidden" name="sonra" value="detay">
+    {% if basvuru.incelendi %}
+    <input type="hidden" name="incelendi" value="0">
+    <button class="sa-btn sa-btn--secondary" type="submit">Bekliyor olarak işaretle</button>
+    {% else %}
+    <input type="hidden" name="incelendi" value="1">
+    <button class="sa-btn sa-btn--primary" type="submit">İncelendi olarak işaretle</button>
+    {% endif %}
+</form>
 <a class="sa-btn sa-btn--danger-outline" href="{% url 'superadmin_iletisim_sil' basvuru.pk %}">Sil</a>
 <a class="sa-btn sa-btn--secondary" href="{% url 'superadmin_iletisim' %}">Listeye Dön</a>
 {% endblock %}

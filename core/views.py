@@ -757,10 +757,8 @@ def superadmin_iletisim(request):
 
 @superadmin_required
 def superadmin_iletisim_detay(request, pk):
+    # Acmak "incelendi" saymaz: durum yalnizca dugmeyle degisir (yanlislikla acilan mesaj kaybolmasin)
     basvuru = get_object_or_404(IletisimBasvurusu, pk=pk)
-    if not basvuru.incelendi:
-        basvuru.incelendi = True
-        basvuru.save(update_fields=["incelendi"])
     context = build_superadmin_context(request)
     context.update(
         {
@@ -807,7 +805,9 @@ def superadmin_iletisim_durum_guncelle(request, pk):
         basvuru.incelendi = request.POST.get("incelendi") == "1"
         basvuru.save(update_fields=["incelendi"])
         islem_kaydet(request, basvuru, CHANGE, "Okundu olarak işaretlendi" if basvuru.incelendi else "Okunmadı olarak işaretlendi")
-        messages.success(request, "Başvuru durumu güncellendi.")
+        messages.success(request, "Başvuru incelendi olarak işaretlendi." if basvuru.incelendi else "Başvuru yeniden bekleyenlere alındı.")
+        if request.POST.get("sonra") == "detay":
+            return redirect("superadmin_iletisim_detay", pk=basvuru.pk)
     return redirect("superadmin_iletisim")
 
 
